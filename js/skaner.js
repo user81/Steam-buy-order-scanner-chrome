@@ -101,8 +101,8 @@ function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, it
     let realPrice = "Nan";
     var priceWithoutFee = null;
 
-    if (priceJSON.sell_order_graph.length != 0) {
-        var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.sell_order_graph[0][0]}`));
+    if (priceJSON.lowest_sell_order.length != 0) {
+        var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.lowest_sell_order/100}`));
         var nAmount = inputValue;
 
         if (inputValue > 0 && nAmount == parseInt(nAmount)) {
@@ -115,9 +115,9 @@ function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, it
 
         realPrice = getNumber(priceWithoutFee);
         console.log(priceWithoutFee);
-        actualProfit = (realPrice - priceJSON.buy_order_graph[0][0]).toFixed(2);
+        actualProfit = (realPrice - priceJSON.highest_buy_order/100).toFixed(2);
         myProfit = (realPrice - MyBuyOrderPrice).toFixed(2);
-        coefPrice = (priceJSON.buy_order_graph[0][0] * coefficient).toFixed(2);
+        coefPrice = ((priceJSON.highest_buy_order/100) * coefficient).toFixed(2);
         //
         MycoefPrice = (MyBuyOrderPrice * coefficient).toFixed(2);
     }
@@ -172,21 +172,21 @@ function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, it
     display: flex; 
     width: 100%; 
     margin-top: 6px;`;
-    currentOrder.style.cssText = `background-color: ${Color(priceJSON.buy_order_graph, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice)}`;
-    divOrderTable.style.cssText = `${style} background-color: ${Color(priceJSON.buy_order_graph, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice)}`;
+    currentOrder.style.cssText = `background-color: ${Color(priceJSON.highest_buy_order/100, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice)}`;
+    divOrderTable.style.cssText = `${style} background-color: ${Color(priceJSON.highest_buy_order/100, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice)}`;
 
 }
 
-function Color(JSONbuy_order_graph, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice) {
-    if (JSONbuy_order_graph.length != 0) {
+function Color(JSONbuy_order, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice) {
+    if (JSONbuy_order.length != 0) {
         if (actualProfit == "Nan" || myProfit == "Nan" || coefPrice == "Nan" || MycoefPrice == "Nan") {
             return '#000732;'; //blue неизвестно
         }
-        if (JSONbuy_order_graph[0][0] == MyBuyOrderPrice && actualProfit >= coefPrice) {
+        if (JSONbuy_order == MyBuyOrderPrice && actualProfit >= coefPrice) {
             return '#136f00;'; //green всё хорошо
-        } else if (JSONbuy_order_graph[0][0] != MyBuyOrderPrice && actualProfit >= coefPrice) {
+        } else if (JSONbuy_order != MyBuyOrderPrice && actualProfit >= coefPrice) {
             return '#9c9b00;'; //yelow необходимо поменять цену
-        } else if (JSONbuy_order_graph[0][0] != MyBuyOrderPrice && myProfit >= MycoefPrice) {
+        } else if (JSONbuy_order != MyBuyOrderPrice && myProfit >= MycoefPrice) {
             return '#44007c;'; //violet моя цена актуальна
         } else {
             return '#6f0012;'; //red необходимо поменять

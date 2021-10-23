@@ -50,8 +50,8 @@ function InterVal(priceJSON, coefficient = 0.35, quantity = 1) {
     let coefPrice = "Nan";
     let realPrice = "Nan";
     var priceWithoutFee = null;
-    if (priceJSON.sell_order_graph.length != 0 && priceJSON.buy_order_graph.length != 0) {
-        var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.sell_order_graph[0][0]}`));
+    if (priceJSON.lowest_sell_order.length != 0 && priceJSON.highest_buy_order.length != 0) {
+        var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.lowest_sell_order/100}`));
         var nAmount = inputValue;
         if (inputValue > 0 && nAmount == parseInt(nAmount)) {
             var feeInfo = CalculateFeeAmount(nAmount, g_rgWalletInfo['wallet_publisher_fee_percent_default']);
@@ -61,8 +61,8 @@ function InterVal(priceJSON, coefficient = 0.35, quantity = 1) {
         }
 
         realPrice = getNumber(priceWithoutFee);
-        actualProfit = (realPrice - priceJSON.buy_order_graph[0][0]).toFixed(2);
-        coefPrice = (priceJSON.buy_order_graph[0][0] * coefficient).toFixed(2);
+        actualProfit = (realPrice - priceJSON.highest_buy_order/100).toFixed(2);
+        coefPrice = ((priceJSON.highest_buy_order/100) * coefficient).toFixed(2);
     }
     let realPriceString = `${chrome.i18n.getMessage("priceWithoutCommissionDescription")} ${realPrice}`;
     let actualProfitString = `${chrome.i18n.getMessage("profitAtTheMomentDescription")} ${actualProfit}`;
@@ -89,7 +89,7 @@ function InterVal(priceJSON, coefficient = 0.35, quantity = 1) {
             if (elementOrderPrice.value === '') {
                 setTimeout(function tick() {
                     if (elementOrderPrice && count > 0) {
-                        elementOrderPrice.value = (priceJSON.buy_order_graph[0][0] + 0.01).toFixed(2);
+                        elementOrderPrice.value = (priceJSON.highest_buy_order/100 + 0.01).toFixed(2);
                         document.getElementById("quick_order_qt").value = quantity;
                         return;
                     }
@@ -107,7 +107,7 @@ function InterVal(priceJSON, coefficient = 0.35, quantity = 1) {
         let buyPrice;
         let buyQuantity;
         let buyorderAccept;
-        let muprice = (priceJSON.buy_order_graph[0][0] + 0.01).toFixed(2);
+        let muprice = (priceJSON.highest_buy_order/100 + 0.01).toFixed(2);
         setTimeout(function () {
 
             let buyInputBlock = document.getElementsByClassName("market_buy_commodity_input_block")[0];

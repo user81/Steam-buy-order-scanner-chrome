@@ -100,6 +100,7 @@ async function marketSearch() {
             await waitTime((+errorPauseSET + Math.floor(Math.random() * 5)) * 60000);
             return RereadTheAmountItems(numberOfRepetitions = 10);
         }
+        console.log(marketItems.length);
         if (marketItems.length > 0) {
             for (let index = 0; index < marketItems.length; index++) {
                 if (StopScan) return;
@@ -108,7 +109,7 @@ async function marketSearch() {
                 let orderCount = +marketItems[index].getElementsByClassName('market_listing_num_listings_qty')[0].innerText.replace( /[^+\d]/g, '');
                 var appId = marketItems[index].firstElementChild.dataset.appid;
                 var aId = marketItems[index].firstElementChild.id;
-                var hashName = marketItems[index].firstElementChild.dataset.hashName;
+                var hashName = encodeURIComponent(marketItems[index].firstElementChild.dataset.hashName);
                 let minPriceVal = (document.getElementById("minPriceVal").value === undefined || document.getElementById("minPriceVal").value === null || document.getElementById("minPriceVal").value === '') ? 0 : document.getElementById("minPriceVal").value;
                 let minCountVal = (document.getElementById("minCountVal").value === undefined || document.getElementById("minCountVal").value === null || document.getElementById("minCountVal").value === '') ? 0 : document.getElementById("minCountVal").value;
                 let minProfitVal = (document.getElementById("minProfitVal").value === undefined || document.getElementById("minProfitVal").value === null || document.getElementById("minProfitVal").value === '') ? -Infinity : document.getElementById("minProfitVal").value;
@@ -126,6 +127,7 @@ async function marketSearch() {
                 }
                 if (onlyProfitable && pricesProfit.coefPrice >= pricesProfit.actualProfit ) {
                     document.getElementById(aId).style.display = "none";
+                    console.log(onlyProfitable, pricesProfit.coefPrice );
                 }
                 displayProfitable(pricesProfit, aId, priceJSON,  priceHistory); 
             }
@@ -146,8 +148,8 @@ function InterVal(priceJSON, coefficient = 0.35) {
     ProfitableList.coefPrice = "Nan";
     ProfitableList.realPrice = "Nan";
     var priceWithoutFee = null;
-    if (priceJSON.sell_order_graph.length != 0 && priceJSON.buy_order_graph.length != 0) {
-        var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.sell_order_graph[0][0]}`));
+    if (priceJSON.lowest_sell_order.length != 0 && priceJSON.highest_buy_order.length != 0) {
+        var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.lowest_sell_order/100}`));
         var nAmount = inputValue;
         if (inputValue > 0 && nAmount == parseInt(nAmount)) {
             var feeInfo = CalculateFeeAmount(nAmount, g_rgWalletInfo['wallet_publisher_fee_percent_default']);
@@ -155,8 +157,8 @@ function InterVal(priceJSON, coefficient = 0.35) {
             priceWithoutFee = v_currencyformat(nAmount, GetCurrencyCode(g_rgWalletInfo['wallet_currency']));
         }
         ProfitableList.realPrice = getNumber(priceWithoutFee);
-        ProfitableList.actualProfit = (ProfitableList.realPrice - priceJSON.buy_order_graph[0][0]).toFixed(2);
-        ProfitableList.coefPrice = (priceJSON.buy_order_graph[0][0] * coefficient).toFixed(2);
+        ProfitableList.actualProfit = (ProfitableList.realPrice - (priceJSON.highest_buy_order/100)).toFixed(2);
+        ProfitableList.coefPrice = ((priceJSON.highest_buy_order/100) * coefficient).toFixed(2);
     }
     return ProfitableList;
 }
@@ -196,6 +198,6 @@ function displayProfitable(ProfitableList, aId, priceJSON, historySell) {
 }
 function setSearchSolor(ProfitableList){
     if (+ProfitableList.actualProfit > +ProfitableList.coefPrice) return "#09553c";
-    if (+ProfitableList.actualProfit > 0 && +ProfitableList.actualProfit < +ProfitableList.coefPrice) return "#61632b";
-    if (+ProfitableList.actualProfit <= 0 ) return "#602F38";
+    if (+ProfitableList.actualProfit > 0.1 && +ProfitableList.actualProfit <= +ProfitableList.coefPrice) return "#61632b";
+    if (+ProfitableList.actualProfit <= 0.1 ) return "#602F38";
 }

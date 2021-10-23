@@ -20,22 +20,20 @@
 
 .market_search_input_container {
     position: relative;
-    display: ruby !important;
+    display: inline-block !important;
 }
 
 /*запустить сканирование*/
 #runSearchScan{
     background-color: #8ac33e !important;
     float: right !important;
-    width: 200px;
-    margin-top: 10px;
+    width: 80px;
 }
 #reloadScan{
     background-color: #8ac33e !important;
     float: right !important;
     width: 40px;
     text-align: center;
-    margin-top: 10px;
     font-size: 20px;
     font-style: inherit;
 }
@@ -146,6 +144,6 @@ market_listing_row {
 /* картика товара справа */
 .market_listing_item_img{
     /* float: right !important; */
-    margin-left: 30%;
+    margin-left: 30% !important;
 }
 
