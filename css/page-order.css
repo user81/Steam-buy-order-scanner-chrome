@@ -1,0 +1,148 @@
+img {
+	max-width: 100%!important;
+	padding: 0 5%;
+}
+
+
+/*
+стиль таблиц при сканировании
+*/
+
+div [id^="priceTable"] { 
+    float: right; 
+	margin: 0px;
+	padding: 0px;
+}
+
+
+header_notification_envelope > img {
+	width:11px!important;
+	height: 8px!important;
+}
+
+.header_notification_btn.has_notifications {
+    height: 24px;
+}
+
+div#global_header div.logo {
+	max-height: 50px;
+     padding-top: 0px!important; 
+}
+
+.market_listing_largeimage {
+	max-width: 18%!important;
+}
+
+.market_listing_largeimage {
+	width: 100px!important;
+	height: 100px!important;
+}
+
+.market_commodity_explanation {
+	margin: 30px 18px;
+	display: none!important;
+}
+
+.item_desc_content {
+	min-height: 0px!important;
+}
+
+#mainContents {
+	padding: 0;
+	text-align: left;
+	display: inline!important;
+}
+
+ellipsis {
+	display: none!important;
+}
+
+.item_desc_description {
+	color: #b4b4b4;
+	font-size: 14px;
+	margin: left 18px;
+}
+
+.hover_item_name {
+	font-size: 14px;
+}
+
+.market_header_bg {
+	display: none!important;
+}
+
+#market_activity_block {
+	display: none!important;
+}
+
+div#global_header .content {
+	height: 49px!important;
+}
+
+#global_header .supernav_container {
+	margin: -31px!important;
+}
+
+.market_listing_nav {
+	padding-top: 6px!important;
+}
+
+#largeiteminfo_game_icon {
+	display: none!important;
+}
+
+.ellipsis {
+	display: none!important;
+}
+
+.item_desc_game_info {
+	position: absolute!important;
+	padding-left: 78px!important;
+}
+
+.market_commodity_orders_block {
+    display: inline-table!important;
+}
+
+#market_commodity_order_spread{
+    margin-top: -37px!important;
+}
+
+
+#largeiteminfo {
+    overflow: visible;
+    max-width: 100%!important; 
+}
+
+#largeiteminfo_item_type{
+	margin-left: 120px;
+}
+
+#market_commodity_order_spread {
+    display: contents;
+}
+
+.market_commodity_order_block {
+    display: flex;
+}
+
+.responsive_header .responsive_header_logo img {
+    width: 50px!important;
+	height: 20px!important;
+}
+
+span .market_listing_price.market_listing_price_with_fee {
+	color: #E10505;
+	}
+	span .market_listing_price.market_listing_price_without_fee {
+	display: block;
+	color: #08B032;
+	}
+	div #market_buyorder_info_details {
+		display: block !important;
+	}
+
+	.market_commodity_orders_table {
+		margin: 10px auto;
+		display: inline-flex !important;
+	}

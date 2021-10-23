@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="../css/popup.css">
+  <link rel="stylesheet" href="../css/simle.css">
+  <title>Popup</title>
+</head>
+
+<body>
+  <a href="#scanIntervalInfo" class="info-details">?</a>
+  <p data-localize="__MSG_scanSetings__">Scan setings</p>
+
+  <div id="scanIntervalInfo" class="overlay">
+    <div class="popup">
+        <p data-localize="__MSG_aboutProgramTitle__">About program</p>
+        <a class="close" href="#">x</a>
+        <div class="content" data-localize="__MSG_aboutProgramDescription__">
+            <p>The program has 4 colors: green - current price yellow - the price needs to be updated violet - it is not enough to change the price, because unprofitable red - you need to change the price. </p>
+        </div>
+    </div>
+  </div>
+  <div class="line">
+
+    <div>
+      <a href="#selectLangPopup" class="select_lang info-details">?</a>
+      <label for="selectLang" data-localize="__MSG_selectLangTable__">Сhoose language</label>
+      <select class="selectLang" id="selectLang" name="selectLang">
+        <option value="russian">ru</option>
+        <option value="english">en</option>
+      </select>
+    </div>
+    <div id="selectLangPopup" class="overlay light">
+      <a class="cancel" href="#"></a>
+      <div class="popup-info">
+        <div class="content">
+          <p><b data-localize="__MSG_selectLangTableInfo__">Select the language for displaying the table prices.</b></p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <a href="#scanIntervalPopup" class="scanInterval info-details">?</a>
+      <label for="scanInterval" data-localize="__MSG_scanInterval__">Scan interval(ms)</label>
+      <input type="text" class="input-value" id="scanInterval" name="scanInterval">
+    </div>
+    <div id="scanIntervalPopup" class="overlay light">
+      <a class="cancel" href="#"></a>
+      <div class="popup-info">
+        <div class="content">
+          <p><b data-localize="__MSG_scanIntervalInfo__">Interval between requests > 500 milliseconds.</b></p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <a href="#errorPausePopup" class="errorPause info-details">?</a>
+      <label for="errorPause" data-localize="__MSG_errorPause__">Pause between error (min)</label>
+      <input type="text" class="input-value" id="errorPause" name="errorPause">
+    </div>
+    <div id="errorPausePopup" class="overlay light">
+      <a class="cancel" href="#"></a>
+      <div class="popup-info">
+        <div class="content">
+          <p><b data-localize="__MSG_errorPauseInfo__">Pause between errors in minutes.</b></p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <a href="#coefficientPopup" class="coefficient info-details">?</a>
+      <label for="coefficient" data-localize="__MSG_purchasePercentage__">Percentage of purchase</label>
+      <input type="text" class="input-value" id="coefficient" name="coefficient">
+    </div>
+    <div id="coefficientPopup" class="overlay light">
+      <a class="cancel" href="#"></a>
+      <div class="popup-info">
+        <div class="content">
+          <p><b data-localize="__MSG_purchasePercentageInfo__">(Order value)*(coefficient)</b></p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <a href="#quantityPopup" class="quantity info-details">?</a>
+      <label for="quantity" data-localize="__MSG_quantityOfItems__">Quantity of items in Steam</label>
+      <input type="number" class="input-value" id="quantity" name="quantity">
+    </div>
+    <div id="quantityPopup" class="overlay light">
+      <a class="cancel" href="#"></a>
+      <div class="popup-info">
+        <div class="content">
+          <p><b data-localize="__MSG_quantityOfItemsInfo__">Quantity of items which you want to sell in Steam Community Market</b></p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <a href="#runPopup" class="run info-details">?</a>
+      <label for="run" data-localize="__MSG_runScan__">Run Scan</label>
+      <input type="checkbox" class="input-value" id="run" name="run">
+    </div>
+    <div id="runPopup" class="overlay light">
+      <a class="cancel" href="#"></a>
+      <div class="popup-info">
+        <div class="content">
+          <p><b data-localize="__MSG_runScanInfo__">Scanning will run in the background.</b></p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <br>
+  <p data-localize="__MSG_historyTitle__">History</p>
+
+  <div class="line">
+
+    <!-- История сделать локализацию -->
+    <div>
+      <a href="#quantityItemsInHistoryPopup" class="info-details">?</a>
+      <label for="quantityItemsInHistory" data-localize="__MSG_sizeOfHistory__">Quantity of items in History</label>
+      <input type="number" class="input-value" id="quantityItemsInHistory" name="quantityItemsInHistory">
+    </div>
+    <div id="quantityItemsInHistoryPopup" class="overlay light">
+      <a class="cancel" href="#"></a>
+      <div class="popup-info">
+        <div class="content">
+          <p><b data-localize="__MSG_sizeOfHistoryInfo__">Quantity of items in History</b></p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- История конец -->
+
+    <div class="submit-button">
+      <button id="save" data-localize="__MSG_buttonSave__">Save settings</button>
+    </div>
+    
+  </div>
+
+  <br>
+  <div class="solial-list">
+    <div class="swg-icon-block">
+      <div class="swg-steam">
+        <a  href="https://steamcommunity.com/groups/order_scanner" target="_blank"></a>
+      </div>
+    </div>
+    <div class="swg-icon-block">
+      <text>
+        <div class="swg-discord">
+          <a  href="https://discord.gg/XHEDpcy" target="_blank"></a>
+        </div>
+      </text>
+
+    </div>
+    <div class="swg-icon-block">
+      <div class="swg-donate">
+        <a  href="https://steamcommunity.com/sharedfiles/filedetails/?id=2598908969" target="_blank"></a>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="../js/popup-scripts/options.js"></script>
+  <script src="../js/localize/localize.js"></script>
+</body>
+
+
+</html>

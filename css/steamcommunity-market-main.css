@@ -1,0 +1,25 @@
+/*
+стиль таблиц при сканировании
+*/
+
+div [id^="priceTable"] { 
+    float: right; 
+	margin: 0px;
+	padding: 0px;
+}
+
+.market_commodity_orders_table {
+    margin: 10px auto;
+    display: inline-flex !important;
+}
+
+/*
+стиль истории
+*/
+#divMarketListingTableHeader{
+    height: 38px;
+}
+
+#sreach-filter, #displayNoneListingCanceledCreated {
+    margin-left: 50px;
+}

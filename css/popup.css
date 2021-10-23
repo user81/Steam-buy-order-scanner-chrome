@@ -1,0 +1,122 @@
+body {
+  font-family:  sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 13px; 
+  background-color: rgb(0, 58, 50);
+  margin: 0px !important;
+  width: 250px;
+  border: 3px solid rgb(3, 140, 121);
+  padding: 10px 10px 10px 10px;
+  line-height: 175%;
+  color: white;
+  overflow: hidden;
+}
+
+p {
+  display: inline;
+  margin: 0px;
+  padding: 0px;
+}
+a{
+  width: 100%;
+  height: 100%;
+}
+button{
+  color: white;
+  border-radius: 20%;
+  background-color: rgb(58, 70, 82);
+}
+
+.selectLang, .floatright{
+  float: right;
+}
+.selectLang{
+  width: 57px;
+}
+
+.input-value{
+  width: 50px;
+  height: 15px;
+  float: right;
+  overflow: hidden;
+  background-color: rgb(3, 140, 121);
+  color: white;
+}
+
+.line::before {
+  content: '';
+  width: 50%;
+  background-color: rgb(3, 140, 121);
+  height: 3px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.info-details{
+  color: #fff;
+  padding-left: 4px;
+  padding-right: 4px;
+  border-radius: 50%;
+  background-color: rgb(3, 140, 121);
+  border: 1px solid rgb(3, 140, 121);
+}
+
+.submit-button{
+  margin-top: 4px;
+  margin-bottom: 7px;
+}
+
+.solial-list{
+  display: flex;
+  justify-content: center;
+}
+
+.swg-icon-block{
+  margin-right:15px;
+  margin-left:15px;
+  padding: 1px;
+}
+
+.swg-steam, .swg-discord, .swg-donate{
+  background-repeat: no-repeat, repeat;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-content: center;
+  filter: grayscale(100%) sepia(100%) hue-rotate(360deg) saturate(0%) contrast(1000%) invert(100%);
+  -webkit-filter: grayscale(100%) sepia(100%) hue-rotate(360deg) saturate(0%) contrast(1000%) invert(100%);
+  -moz-filter: grayscale(100%) sepia(100%) hue-rotate(360deg) saturate(0%) contrast(1000%) invert(100%);
+
+}
+
+.swg-steam:hover, .swg-steam:focus, .swg-discord:hover, .swg-discord:focus , .swg-donate:hover, .swg-donate:focus{
+  
+  filter: invert(35%) sepia(65%) saturate(2878%) hue-rotate(
+    146deg) brightness(113%) contrast(97%);
+}
+
+.swg-steam{
+  display: flex;
+  background-image: url('../images/svg/steam-symbol.svg');
+
+}
+
+.swg-discord{
+  display: flex;
+  background-image: url('../images/svg/discord.svg');
+}
+
+.swg-donate{
+  display: flex;
+  background-image: url('../images/svg/donate-solid.svg');
+}
+
+
+
+
+
+
+
+
+

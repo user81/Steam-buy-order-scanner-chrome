@@ -1,0 +1,106 @@
+{
+    "applicationTitle": {
+        "message": "Steam buy order scanner",
+        "description": "Name of the extension"
+    },
+    "applicationDescription": {
+        "message": "Steam buy order scanner is browser extension which to keep your Steam Market buy orders profitable. Allows you to determine whether it is worth updating the order or not.",
+        "description": "The title of the application, displayed in the web store."
+    },
+    "aboutProgramTitle": {
+        "message": "About program",
+        "description": "Program description title."
+    },
+    "aboutProgramDescription": {
+        "message": "The program has 4 colors:green - current price yellow - the price needs to be updated violet - it is not enough to change the price, because unprofitable red - you need to change the price.",
+        "description": "list of program features."
+    },
+    "scanSetings": {
+        "message": "Scan setings",
+        "description": "List of settings for scanning orders."
+    },
+    "selectLangTable": {
+        "message": "Сhoose language",
+        "description": "Select the language for the for the request to the server."
+    },
+    "selectLangTableInfo": {
+        "message": "Select the language for displaying the table prices.",
+        "description": "Language that will display tables of buy and sell prices."
+    },
+    "scanInterval": {
+        "message": "Scan interval(ms)",
+        "description": "Interval between requests to get the price of a product in milliseconds."
+    },
+    "scanIntervalInfo": {
+        "message": "The interval between price scan requests must be> 500 milliseconds.",
+        "description": "The interval between price scan requests."
+    },
+    "errorPause": {
+        "message": "Pause between error (min)",
+        "description": "Pause between error if didn’t get to make a request."
+    },
+    "errorPauseInfo": {
+        "message": "Pause between errors in minutes.",
+        "description": "If the request cannot be completed, the delay increases."
+    },
+    "purchasePercentage": {
+        "message": "Percentage of purchase",
+        "description": "Percentage of product purchase."
+    },
+    "purchasePercentageInfo": {
+        "message": "Percentage of product purchase.",
+        "description": "Percentage of product purchase."
+    },
+    "quantityOfItems": {
+        "message": "Quantity of items in Steam",
+        "description": "Quantity of items which you want to sell in Steam Community Market"
+    },
+    "quantityOfItemsInfo": {
+        "message": "Quantity of items which you want to sell in Steam Community Market.",
+        "description": "A pop-up window that displays a tooltip describing the number of items."
+    },
+    "runScan": {
+        "message": "Run Scan",
+        "description": "Description of the scan start."
+    },
+    "runScanInfo": {
+        "message": "Scanning will run in the background.",
+        "description": "Pop-up window that displays a hint to start scanning."
+    },
+    "historyTitle": {
+        "message": "History",
+        "description": "History title."
+    },   
+    "sizeOfHistory": {
+        "message": "Number of records history",
+        "description": "Title descriptions number of records in history."
+    },
+    "sizeOfHistoryInfo": {
+        "message": "The number of records in history should be no more than 500.",
+        "description": "Pop-up window that displays a hint for the size of the story."
+    },
+    "buttonSave": {
+        "message": "Save settings",
+        "description": "Save settings for scanning a buy order."
+    },
+    "priceWithoutCommissionDescription": {
+        "message": "Price without commission:",
+        "description": "Description prices without commission of the order displayed when scanning."
+    },
+    "profitAtTheMomentDescription": {
+        "message": "Profit now:",
+        "description": "Description of the profit currently displayed when scanning an order."
+    },
+    "coefficientPriceAtTheMomentDescription": {
+        "message": "Required profit:",
+        "description": "Description of the minimum profit currently displayed when scanning an order."
+    },
+    "myProfitDescription": {
+        "message": "My profit:",
+        "description": "Description of the my profit when scanning an order."
+    },
+    "myCoefficientPriceDescription": {
+        "message": "My required profit:",
+        "description": "Description of the my minimum profit when scanning an order."
+    }
+}

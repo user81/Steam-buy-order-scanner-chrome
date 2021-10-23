@@ -1,0 +1,151 @@
+/* positions */
+#sideBar {
+    float: none !important;
+    width: auto !important;
+}
+/* size sitebar */
+.market_search_sidebar_contents {
+    width: auto !important;
+    padding: 12px 15px 15px 15px;
+    background: rgba(0, 0, 0, 0.4) none repeat scroll 0 0;
+}
+#sideBar > div {
+    width: auto !important;
+    margin-top: 0;
+    margin-bottom: 0 !important;
+}
+.market_search_advanced_button > .btn_details_arrow {
+    right: auto !important;
+}
+
+.market_search_input_container {
+    position: relative;
+    display: ruby !important;
+}
+
+/*запустить сканирование*/
+#runSearchScan{
+    background-color: #8ac33e !important;
+    float: right !important;
+    width: 200px;
+    margin-top: 10px;
+}
+#reloadScan{
+    background-color: #8ac33e !important;
+    float: right !important;
+    width: 40px;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 20px;
+    font-style: inherit;
+}
+
+#minPriceVal, #minCountVal, #minSellVal, #minProfitVal{
+    width: 80px;
+    margin-right: 20px;
+    margin-left: 5px;
+    background-color: #324965;
+}
+
+
+/*item block*/
+
+.market_listing_their_price > .market_table_value .normal_price, .market_listing_their_price > .market_table_value {
+    color: white;
+    display: block;
+}
+
+.market_listing_num_listings_qty {
+    display: block !important;
+    margin: 5px!important;
+}
+
+
+
+.market_listing_item_name {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#sideBar > div {
+    margin-top: 0;
+    margin-bottom: 0 !important;
+}
+
+.market_page_left {
+    padding-top: 2em;
+    max-width: none !important;
+}
+
+th:first-child, th:first-child + th{
+    display: none;
+}
+
+.entry-content div:first-child, .entry-content div:first-child + div {
+    display:none;
+ }
+
+/* таблица цен */
+.market_commodity_orders_table {
+    display: inline-flex !important;
+    font-size: 12px;
+}
+
+.market_commodity_orders_table th {
+    margin: 0;
+    text-align: center;
+    min-width: none !important;
+    font-size: 12px !important;
+    font-weight: normal;
+}
+
+.market_commodity_orders_table td {
+    min-width:min-content !important;
+    text-align: center;
+}
+
+.market_listing_their_price > .market_table_value .normal_price, .market_listing_their_price > .market_table_value {
+    color: white;
+    display: block !important;
+}
+
+/* блок товара размер */
+market_listing_row {
+    height: 160px !important;
+}
+
+/*размер колонок*/
+#popularItemsRows .market_listing_price_listings_block, #searchResults .market_listing_price_listings_block {
+    min-width: 270px !important;
+    float: right;
+}
+
+
+#popularItemsRows .market_listing_price_listings_block .market_listing_num_listings, #searchResults .market_listing_price_listings_block .market_listing_num_listings {
+    float: left;
+    min-width: 10em !important;
+}
+
+.market_home_listing_table .market_listing_right_cell {
+    border-left: 1px solid transparent;
+    min-width: 10em !important;
+}
+
+/* блок таблицы цен */
+.market_listing_row > body {
+    margin: 0 auto;
+    position: absolute !important;
+    margin-top: -15px;
+}
+/* название товара справа */
+.market_listing_item_name_block {
+    max-width: 270px !important;
+    /* float: right !important; */
+    margin-left: 33%;
+}
+/* картика товара справа */
+.market_listing_item_img{
+    /* float: right !important; */
+    margin-left: 30%;
+}
+
