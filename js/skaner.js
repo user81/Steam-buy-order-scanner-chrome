@@ -101,7 +101,7 @@ function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, it
     let realPrice = "Nan";
     var priceWithoutFee = null;
 
-    if (priceJSON.lowest_sell_order.length != 0) {
+    if (priceJSON.lowest_sell_order !== null) {
         var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.lowest_sell_order/100}`));
         var nAmount = inputValue;
 

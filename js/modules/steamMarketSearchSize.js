@@ -17,12 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 changeSearchSize();
-function changeSearchSize() {
+function changeSearchSize(pageSize = 0) {
+	if (pageSize >0) pageSize--;
 	let script;
 	script = document.createElement('script');
 	script.text = `
     g_oSearchResults.m_cPageSize = 100; 
-    g_oSearchResults.GoToPage(0, true); 
+    g_oSearchResults.GoToPage(${pageSize}, true); 
         `;
 	(document.head || document.documentElement).prepend(script);
 }

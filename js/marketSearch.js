@@ -89,7 +89,17 @@ function displaySearchRunScan() {
     }
 }
 let StopScan = false;
-document.getElementById("reloadScan").addEventListener( "click" , () => {changeSearchSize(); StopScan = true;});
+
+function ordersReload(){
+    let pageSize = 0;
+    if (window.location.href.split('#', )[1]!== undefined) {
+        pageSize = window.location.href.split('#', )[1].split('_', )[0].replace(/\D/g, '');
+    }
+    console.log(pageSize);
+    changeSearchSize(pageSize);
+    StopScan = true;
+}
+document.getElementById("reloadScan").addEventListener( "click" , () => {ordersReload();} );
 document.getElementById("runSearchScan").addEventListener( "click" , () => {marketSearch(); StopScan = false;});
 
 async function marketSearch() {
@@ -133,9 +143,10 @@ async function marketSearch() {
             }
             return;
         }
+        ordersReload();
+        await waitTime(5000 + scanIntervalSET + Math.floor(Math.random() * 50));
         marketItems = Array.from(document.getElementsByClassName("market_listing_row_link"));
         console.log(5000 + scanIntervalSET + Math.floor(Math.random() * 50));
-        await waitTime(5000 + scanIntervalSET + Math.floor(Math.random() * 50));
         return RereadTheAmountItems(numberOfRepetitions - 1);
     }
     RereadTheAmountItems(numberOfRepetitions);
@@ -148,7 +159,7 @@ function InterVal(priceJSON, coefficient = 0.35) {
     ProfitableList.coefPrice = "Nan";
     ProfitableList.realPrice = "Nan";
     var priceWithoutFee = null;
-    if (priceJSON.lowest_sell_order.length != 0 && priceJSON.highest_buy_order.length != 0) {
+    if (priceJSON.lowest_sell_order !== null && priceJSON.highest_buy_order !== null) {
         var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.lowest_sell_order/100}`));
         var nAmount = inputValue;
         if (inputValue > 0 && nAmount == parseInt(nAmount)) {
