@@ -27,7 +27,7 @@
   
   "content_scripts": [
     {
-      "js": ["js/modules/HttpRequest.js", "js/modules/global_last.js", "js/modules/economy_common_last.js", "js/skaner.js" , "js/modules/history.js"],
+      "js": ["js/modules/HttpRequest.js", "js/modules/global_last.js", "js/modules/economy_common_last.js", "js/modules/injectionScript.js", "js/modules/injectionFunctions.js", "js/skaner.js" , "js/modules/history.js"],
       "css": ["css/steamcommunity-market-main.css"],
       "matches": [ "*://steamcommunity.com/market*" ],
       "exclude_matches": [ "*://steamcommunity.com/market/listings*", "*://steamcommunity.com/market/search*"],
@@ -53,7 +53,7 @@
   }  
 
   ], 
-  "web_accessible_resources": ["js/modules/global_last.js", "js/modules/economy_common_last.js", "js/modules/activation.js", "js/modules/history.js", "js/modules/steamMarketSearchSize.js", "js/modules/itemPriceHistory.js"], 
+  "web_accessible_resources": ["js/modules/global_last.js", "js/modules/economy_common_last.js", "js/modules/activation.js", "js/modules/history.js", "js/modules/steamMarketSearchSize.js", "js/modules/itemPriceHistory.js", "js/modules/injectionScript.js", "js/modules/injectionFunctions.js"], 
 
   "default_locale": "en",
   "permissions": ["*://steamcommunity.com/*", "storage", "tabs"]

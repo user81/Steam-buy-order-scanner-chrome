@@ -25,6 +25,8 @@ var g_rgWalletInfo = {
     wallet_publisher_fee_percent_default: 0.10,
     wallet_currency: 1
 };
+let sessionId;
+
 chrome.storage.local.get([
     "scanIntervalSET",
     "errorPauseSET",
@@ -35,6 +37,8 @@ chrome.storage.local.get([
 	
 ], function (data) {
     console.log(data.run);
+    sessionId=SessionIdVal();
+    console.log(sessionId);
     if (data.run) {
         startScan(data.coefficient, data.selectLang, 5, data.scanIntervalSET, data.errorPauseSET);
     }
@@ -77,22 +81,25 @@ async function startScan(coefficient = 0.35, selectLang = "russian", CountReques
 
     if (orderListJson.length > 0 && orderListJson.length === arrMyPriceLink.length) {
         for (let orderKey = 0; orderKey < orderListJson.length; orderKey++) {
-            var appId = orderListJson[orderKey].appid;
-            var buyOrderId = orderListJson[orderKey].buy_orderid;
-            var hashName = orderListJson[orderKey].hash_name;
+            var appId = orderListJson[orderKey].appid; //753 id game
+            var buyOrderId = orderListJson[orderKey].buy_orderid; // id заказа
+            var hashName = orderListJson[orderKey].hash_name; //   489630-Lord Commissar (Foil Trading Card) 
+            var walletCurrency = orderListJson[orderKey].wallet_currency; // 1
+            var itemQuantity = orderListJson[orderKey].quantity; // количество 7 сколько было
+            var itemQuantityRemaining = orderListJson[orderKey].quantity_remaining; // количество 5 сколько стало
 
             var orderHref = arrMyPriceLink[orderKey][1];
             var orderPrice = arrMyPriceLink[orderKey][0];
             let sourceCode = await globalThis.httpErrorPause(orderHref, CountRequesrs, scanIntervalSET, errorPauseSET);
             let item_id = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
             let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
-            InterVal(priceJSON, +buyOrderId, orderPrice, coefficient, item_id);
+            InterVal(priceJSON, +buyOrderId, orderPrice, coefficient, item_id, appId, hashName, itemQuantity, itemQuantityRemaining);
             await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
         }
     }
 }
 
-function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, item_id) {
+function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, item_id, appId, hashName, itemQuantity, itemQuantityRemaining) {
     let currentOrder = document.querySelector(' [id ="mybuyorder_' + buyOrderId + '"]');
     let actualProfit = "Nan";
     let myProfit = "Nan";
@@ -131,33 +138,62 @@ function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, it
     let divOrderTable = document.createElement('div');// блок
     let divPriceTable = document.createElement('div'); // таблица цен
     let divString =  document.createElement('div'); //блок где встраиваются стоки
+    let divMyString =  document.createElement('div');
     let pRealPriceString = document.createElement('p');
     let pActualProfitString = document.createElement('p');
     let pCoefPriceString = document.createElement('p');
     let pMyProfitString = document.createElement('p');
     let pMycoefPriceString = document.createElement('p');
+    let buttonCancelBuyOrder = document.createElement('button'); //кнопка отменить ордер
+    let divCancelBuyOrderString =  document.createElement('div');//блок строк задания цен
+    let inputItemPrice =  document.createElement('input');
+    let inputItemQuality =  document.createElement('input');
+    let buttonCreateBuyOrder = document.createElement('button'); //кнопка покупки
+    inputItemPrice.type = "number";
+    inputItemQuality.type = "number";
+    inputItemPrice.step = "0.01";
     divOrderTable.id = `orderTable`;
     divPriceTable.id = `priceTable${item_id}`;
+    buttonCancelBuyOrder.id = `cancelBuyOrder_${buyOrderId}`;
+    inputItemPrice.id = `myItemPrice${item_id}`;
+    inputItemQuality.id = `myItemQuality${item_id}`;
+    buttonCreateBuyOrder.id = `createBuyOrder${item_id}`;
     pRealPriceString.innerText = realPriceString;
     pActualProfitString.innerText = actualProfitString;
     pCoefPriceString.innerText = coefPriceString;
     pMyProfitString.innerText = myProfitString;
     pMycoefPriceString.innerText = MycoefPriceString;
-    
+    buttonCancelBuyOrder.innerText = "Cancel Order";
+    buttonCreateBuyOrder.innerText = "Create Order";
+    buttonCancelBuyOrder.setAttribute("buyOrderId", buyOrderId);
+    buttonCreateBuyOrder.setAttribute("appId", appId);
+    buttonCreateBuyOrder.setAttribute("hashName", hashName);
+    buttonCreateBuyOrder.setAttribute("item_id", item_id);
+
+    buttonCancelBuyOrder.onclick = cancelBuyOrder;
+    divCancelBuyOrderString.onclick = createBuyOrder;
     divString.append(pRealPriceString);
     divString.append(pActualProfitString);
     divString.append(pCoefPriceString);
-    divString.append(pMyProfitString);
-    divString.append(pMycoefPriceString);
+    divMyString.append(pMyProfitString);
+    divMyString.append(pMycoefPriceString);
+    divCancelBuyOrderString.append(inputItemPrice);
+    divCancelBuyOrderString.append(inputItemQuality);
+    divCancelBuyOrderString.append(buttonCancelBuyOrder);
+    divCancelBuyOrderString.append(buttonCreateBuyOrder);
     divOrderTable.append(divPriceTable);
     divOrderTable.append(divString);
+    divOrderTable.append(divMyString);
+    divOrderTable.append(divCancelBuyOrderString);
     currentOrder.append(divOrderTable);
 
-    let classesBuyOrders = [ 'my_listing_section', 'market_listing_row' ];
+    let classesBuyOrders = [ 'my_listing_section', 'market_listing_row', 'min_size_table' ];
+    let classesInput = [ 'create_buy_input' ];
     divPriceTable.classList.add(...classesBuyOrders);
-    divString.classList.add(...classesBuyOrders);
-    divOrderTable.classList.add(...classesBuyOrders);
-
+    /* divString.classList.add(...classesBuyOrders); */
+    /* divOrderTable.classList.add(...classesBuyOrders); */
+    inputItemPrice.classList.add(...classesInput);
+    inputItemQuality.classList.add(...classesInput);
     const OrderTable = priceJSON.sell_order_table + priceJSON.buy_order_table;
     const parser = new DOMParser();
     const parsed = parser.parseFromString(OrderTable, `text/html`);
@@ -193,3 +229,46 @@ function Color(JSONbuy_order, MyBuyOrderPrice, actualProfit, myProfit, coefPrice
         }
     } return '#000732;';
 }
+
+function cancelBuyOrder() {
+    buttonHtmlAttribute = "buyOrderId";
+    let orderId = this.getAttribute(buttonHtmlAttribute);
+    if(orderId !==null && sessionId !==null) {
+        let params = `sessionid=${sessionId}&buy_orderid=${orderId}`;
+        let url = "https://steamcommunity.com/market/cancelbuyorder/";
+        globalThis.httpPostErrorPause(url, params);
+    }
+    else {
+        console.log("Error");
+    }
+    
+}
+
+function createBuyOrder() {
+    let appid = this.getElementsByTagName("button")[1].getAttribute("appid");
+    let hashname = this.getElementsByTagName("button")[1].getAttribute("hashname");
+    let item_id = this.getElementsByTagName("button")[1].getAttribute("item_id");
+    console.log(item_id);
+    let inputPrice = document.getElementById(`myItemPrice${item_id}`).value;
+    let itemCount =document.getElementById(`myItemQuality${item_id}`).value;
+    
+    if(appid !== null && hashname !== null && item_id !== null) {
+        let params = `sessionid=${sessionId}&currency=1&appid=${appid}&market_hash_name=${hashname}&price_total=${Math.round(inputPrice * 100 * itemCount)}&quantity=${itemCount}&billing_state=&save_my_address=0`;
+        let url = "https://steamcommunity.com/market/createbuyorder/";
+        globalThis.httpPostErrorPause(url, params);
+    }
+    else {
+        console.log("Error");
+    }
+    
+}
+
+{/* <button id="createBuyOrder29145036" appid="753" hashname="326670-Elf Waywatcher (Foil)" item_id="29145036">Create Order</button> */}
+
+{/* <button id="createBuyOrder175996624" appid="753" hashname="489630-Lord Commissar (Foil Trading Card)" item_id="175996624">Create Order</button> */}
+/* sessionid: g_SessionID,
+currency: g_rgWalletInfo['wallet_currency'],
+subtotal: g_nSubTotal,
+fee: g_nFee,
+total: g_nTotal,
+quantity: 1 */

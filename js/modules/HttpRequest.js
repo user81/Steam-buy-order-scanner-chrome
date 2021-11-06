@@ -45,16 +45,65 @@ globalThis.httpErrorPause = async function(url, attempts = 8, scanIntervalSET = 
         xhr.send();
     });
 
-    return await httpGetRequest.catch(async function () {
+    return await httpGetRequest.catch(/* async function () {
         if (attempts <= 0) {
             await waitTime( (+errorPauseSET  + Math.floor(Math.random() * 5)) * 60000);
             return httpErrorPause(url, attempts = 8);
         }
         await waitTime( 5000 + scanIntervalSET + Math.floor(Math.random() * 50));
         return httpErrorPause(url, attempts - 1);
-    });
+    } */ delayRequestGet(url, attempts, scanIntervalSET, errorPauseSET));
 };
+
+async function delayRequestGet(url, attempts = 8, scanIntervalSET = 6000, errorPauseSET = 5) {
+    if (attempts <= 0) {
+        await waitTime( (+errorPauseSET  + Math.floor(Math.random() * 5)) * 60000);
+        return httpErrorPause(url, attempts = 8);
+    }
+    await waitTime( 5000 + scanIntervalSET + Math.floor(Math.random() * 50));
+    return httpErrorPause(url, attempts - 1);
+}
+
+globalThis.httpPostErrorPause = async function(httpUrl, httpParams, attempts = 8, scanIntervalSET = 6000, errorPauseSET = 5) {
+
+    let httpPostRequest = new Promise(function (resolve, reject) {
+        var xhrCancelBuyOrder = new XMLHttpRequest();
+        xhrCancelBuyOrder.open('POST', httpUrl, true);
+        xhrCancelBuyOrder.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xhrCancelBuyOrder.onreadystatechange = function () { };
+        xhrCancelBuyOrder.onerror = function () {
+            reject(new Error("Network Error"));
+        };
+        xhrCancelBuyOrder.send(httpParams);
+    });
+    return await httpPostRequest.catch(
+        delayRequestPost(httpUrl, httpParams, attempts, scanIntervalSET, errorPauseSET));
+};
+
+async function delayRequestPost(httpUrl, httpParams, attempts = 8, scanIntervalSET = 6000, errorPauseSET = 5) {
+    if (attempts <= 0) {
+        await waitTime( (+errorPauseSET  + Math.floor(Math.random() * 5)) * 60000);
+        return httpPostErrorPause(httpUrl, httpParams, attempts = 8);
+    }
+    await waitTime( 5000 + scanIntervalSET + Math.floor(Math.random() * 50));
+    return httpPostErrorPause(httpUrl, httpParams, attempts - 1);
+}
+
 
 async function waitTime(ms) { return new Promise(resolve => setTimeout(resolve,ms)); }
 
 
+/* var http = new XMLHttpRequest();
+var url = 'get_data.php';
+var params = 'orem=ipsum&name=binny';
+http.open('POST', url, true);
+
+//Send the proper header information along with the request
+http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+http.onreadystatechange = function() {//Call a function when the state changes.
+    if(http.readyState == 4 && http.status == 200) {
+        alert(http.responseText);
+    }
+}
+http.send(params); */

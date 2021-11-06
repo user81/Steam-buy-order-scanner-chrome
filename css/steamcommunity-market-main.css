@@ -3,7 +3,7 @@
 */
 
 div [id^="priceTable"] { 
-    float: right; 
+    float: left; 
 	margin: 0px;
 	padding: 0px;
 }
@@ -13,6 +13,39 @@ div [id^="priceTable"] {
     display: inline-flex !important;
 }
 
+.create_buy_input {
+    width: 80px;
+    display: block;
+    margin: 5px;
+    background-color: #324965;
+}
+
+/* таблица цен */
+.market_commodity_orders_table {
+    display: inline-flex !important;
+    font-size: 12px;
+}
+
+.market_commodity_orders_table th {
+    margin: 0;
+    text-align: center;
+    min-width: none !important;
+    font-size: 12px !important;
+    font-weight: normal;
+}
+
+.market_commodity_orders_table td {
+    min-width:min-content !important;
+    text-align: center;
+}
+
+th:first-child, th:first-child + th{
+    display: none;
+}
+.min_size_table{
+    margin-top: -15px !important;
+    margin-bottom: -15px !important;
+}
 /*
 стиль истории
 */
