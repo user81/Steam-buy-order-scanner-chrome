@@ -45,14 +45,7 @@ globalThis.httpErrorPause = async function(url, attempts = 8, scanIntervalSET = 
         xhr.send();
     });
 
-    return await httpGetRequest.catch(/* async function () {
-        if (attempts <= 0) {
-            await waitTime( (+errorPauseSET  + Math.floor(Math.random() * 5)) * 60000);
-            return httpErrorPause(url, attempts = 8);
-        }
-        await waitTime( 5000 + scanIntervalSET + Math.floor(Math.random() * 50));
-        return httpErrorPause(url, attempts - 1);
-    } */ delayRequestGet(url, attempts, scanIntervalSET, errorPauseSET));
+    return await httpGetRequest.catch(delayRequestGet(url, attempts, scanIntervalSET, errorPauseSET));
 };
 
 async function delayRequestGet(url, attempts = 8, scanIntervalSET = 6000, errorPauseSET = 5) {
@@ -65,29 +58,21 @@ async function delayRequestGet(url, attempts = 8, scanIntervalSET = 6000, errorP
 }
 
 globalThis.httpPostErrorPause = async function(httpUrl, httpParams, attempts = 8, scanIntervalSET = 6000, errorPauseSET = 5) {
-
-    let httpPostRequest = new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
         var xhrCancelBuyOrder = new XMLHttpRequest();
         xhrCancelBuyOrder.open('POST', httpUrl, true);
         xhrCancelBuyOrder.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        xhrCancelBuyOrder.onreadystatechange = function () { };
+        xhrCancelBuyOrder.onreadystatechange = function () {
+            if(xhrCancelBuyOrder.readyState == 4 && xhrCancelBuyOrder.status == 200) {
+                return resolve(this.responseText);
+            } 
+        };
         xhrCancelBuyOrder.onerror = function () {
             reject(new Error("Network Error"));
         };
         xhrCancelBuyOrder.send(httpParams);
     });
-    return await httpPostRequest.catch(
-        delayRequestPost(httpUrl, httpParams, attempts, scanIntervalSET, errorPauseSET));
 };
-
-async function delayRequestPost(httpUrl, httpParams, attempts = 8, scanIntervalSET = 6000, errorPauseSET = 5) {
-    if (attempts <= 0) {
-        await waitTime( (+errorPauseSET  + Math.floor(Math.random() * 5)) * 60000);
-        return httpPostErrorPause(httpUrl, httpParams, attempts = 8);
-    }
-    await waitTime( 5000 + scanIntervalSET + Math.floor(Math.random() * 50));
-    return httpPostErrorPause(httpUrl, httpParams, attempts - 1);
-}
 
 
 async function waitTime(ms) { return new Promise(resolve => setTimeout(resolve,ms)); }
