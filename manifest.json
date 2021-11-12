@@ -27,33 +27,33 @@
   
   "content_scripts": [
     {
-      "js": ["js/modules/HttpRequest.js", "js/modules/global_last.js", "js/modules/economy_common_last.js", "js/modules/injectionScript.js", "js/skaner.js" , "js/modules/history.js"],
+      "js": ["js/modules/purify.min.js", "js/modules/injectionScript.js", "js/modules/HttpRequest.js", "js/modules/global_last.js", "js/modules/economy_common_last.js", "js/skaner.js" , "js/modules/history.js"],
       "css": ["css/steamcommunity-market-main.css"],
       "matches": [ "*://steamcommunity.com/market*" ],
       "exclude_matches": [ "*://steamcommunity.com/market/listings*", "*://steamcommunity.com/market/search*"],
       "run_at": "document_idle"
     },
     {
-      "js": ["js/modules/injectionScript.js", "js/modules/HttpRequest.js", "js/profitPage.js", "js/modules/global_last.js", "js/modules/economy_common_last.js"],
+      "js": ["js/modules/purify.min.js", "js/modules/injectionScript.js", "js/modules/HttpRequest.js", "js/modules/global_last.js", "js/modules/economy_common_last.js", "js/profitPage.js"],
       "css": ["css/page-order.css"],
       "matches": [ "*://steamcommunity.com/market/listings/*" ],
       "run_at": "document_idle"
   },
   {
-    "js": ["js/modules/HttpRequest.js", "js/gamePage.js", "js/modules/global_last.js", "js/modules/economy_common_last.js", "js/modules/injectionScript.js"],
+    "js": ["js/modules/purify.min.js", "js/modules/injectionScript.js", "js/modules/HttpRequest.js", "js/modules/global_last.js", "js/modules/economy_common_last.js", "js/gamePage.js"],
     "css": ["css/page-order.css"],
     "matches": [ "*://store.steampowered.com/app/*" ],
     "run_at": "document_idle"
   },
   {
-    "js": ["js/modules/injectionScript.js", "js/modules/HttpRequest.js", "js/modules/global_last.js", "js/modules/economy_common_last.js", "js/modules/itemPriceHistory.js", "js/marketSearch.js"],
+    "js": ["js/modules/purify.min.js", "js/modules/injectionScript.js", "js/modules/HttpRequest.js", "js/modules/global_last.js", "js/modules/economy_common_last.js", "js/modules/itemPriceHistory.js", "js/marketSearch.js"],
     "css": ["css/market-search.css"],
     "matches": [ "*://steamcommunity.com/market/search*" ],
     "run_at": "document_idle"
   }  
 
   ], 
-  "web_accessible_resources": ["js/modules/global_last.js", "js/modules/economy_common_last.js", "js/modules/activation.js", "js/modules/history.js", "js/modules/steamMarketSearchSize.js", "js/modules/itemPriceHistory.js", "js/modules/injectionScript.js"], 
+  "web_accessible_resources": ["js/modules/injectionScript.js"], 
 
   "default_locale": "en",
   "permissions": ["*://steamcommunity.com/*", "storage", "tabs"]
