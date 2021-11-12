@@ -1,0 +1,22 @@
+{
+  "name": "steam-buy-order-scanner-chrome",
+  "version": "1.0.0",
+  "description": "extension",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/user81/Steam-buy-order-scanner-chrome.git"
+  },
+  "author": "uer81",
+  "license": " GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/user81/Steam-buy-order-scanner-chrome/issues"
+  },
+  "homepage": "https://github.com/user81/Steam-buy-order-scanner-chrome#readme",
+  "dependencies": {
+    "dompurify": "^2.3.3"
+  }
+}
