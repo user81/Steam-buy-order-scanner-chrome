@@ -165,8 +165,8 @@ function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, it
     pCoefPriceString.innerText = coefPriceString;
     pMyProfitString.innerText = myProfitString;
     pMycoefPriceString.innerText = MycoefPriceString;
-    buttonCancelBuyOrder.innerText = "Cancel Order";
-    buttonCreateBuyOrder.innerText = "Create Order";
+    buttonCancelBuyOrder.innerText = "⦸ Order";
+    buttonCreateBuyOrder.innerText = "⨭ Order";
     inputItemPrice.value = myNextPrice.myNextPrice;
     inputItemQuality.value = quantity;
     buttonCancelBuyOrder.setAttribute("item_id", item_id);
@@ -226,13 +226,13 @@ function Color(JSONbuy_order, MyBuyOrderPrice, actualProfit, myProfit, coefPrice
             return '#000732;'; //blue неизвестно
         }
         if (JSONbuy_order == MyBuyOrderPrice && actualProfit >= coefPrice) {
-            return '#136f00;'; //green всё хорошо
+            return '#1c563d;'; //green всё хорошо
         } else if (JSONbuy_order != MyBuyOrderPrice && actualProfit >= coefPrice) {
-            return '#9c9b00;'; //yelow необходимо поменять цену
+            return '#767631;'; //yelow необходимо поменять цену
         } else if (JSONbuy_order != MyBuyOrderPrice && myProfit >= MycoefPrice) {
-            return '#44007c;'; //violet моя цена актуальна
+            return '#554b5e;'; //violet моя цена актуальна
         } else {
-            return '#6f0012;'; //red необходимо поменять
+            return '#60373e;'; //red необходимо поменять
         }
     } return '#000732;';
 }
@@ -299,14 +299,13 @@ async function createBuyOrder() {
     if(appid !== null && hashname !== null && item_id !== null) {
         let params = `sessionid=${sessionId}&currency=1&appid=${appid}&market_hash_name=${hashname}&price_total=${Math.round(inputPrice * 100 * itemCount)}&quantity=${itemCount}&billing_state=&save_my_address=0`;
         let url = "https://steamcommunity.com/market/createbuyorder/";
-        let myListings = {message : "ERROR"};
         let serverResponse = JSON.parse(await globalThis.httpPostErrorPause(url, params));
         console.log(serverResponse.success , +serverResponse.success, typeof serverResponse.success);
         let htmlResponce = document.getElementById(`responceServerRequest_${item_id}`);
         if (+serverResponse.success == 1) {
             document.getElementById(`cancelBuyOrder_${item_id}`).setAttribute("buyOrderId", +serverResponse.buy_orderid);
         }
-        htmlResponce.textContent = (+serverResponse.success == 29) ? myListings.message : 
+        htmlResponce.textContent = (+serverResponse.success == 29) ? serverResponse.message : 
         (+serverResponse.success == 1) ? "Price updated" : "Eroor"; // message: "У вас уже есть заказ на этот предмет. Вы должны либо ." success: 29{buy_orderid: "4562009753" success: 1}
     }
 }

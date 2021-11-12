@@ -1,3 +1,4 @@
+changeSearchSize();
 var g_rgWalletInfo = {
     wallet_fee: 1,
     wallet_fee_base: 0,

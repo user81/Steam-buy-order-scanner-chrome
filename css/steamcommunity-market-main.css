@@ -1,11 +1,53 @@
+body {
+    color: #FAFAFA !important;
+}
+
+/* стиль кнопок */
+
+button {
+    padding: 5px 10px;
+    margin: 5px;
+    background: none;
+    border: none;
+    position: relative;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 3px;
+    cursor: pointer;
+    color: #FAFAFA;
+}
+
+button:after, button:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    border: 2px solid rgb(255, 255, 255);
+    transition: transform 0.2s;
+}
+
+button:after {
+    transform: translate(3px, 3px);
+}
+
+button:before {
+    transform: translate(-3px, -3px);
+}
+
+button:hover:after, button:hover:before {
+    transform: translate(0);
+}
+
 /*
 стиль таблиц при сканировании
 */
 
-div [id^="priceTable"] { 
-    float: left; 
-	margin: 0px;
-	padding: 0px;
+div [id^="priceTable"] {
+    float: left;
+    margin: 0px;
+    padding: 0px;
 }
 
 .market_commodity_orders_table {
@@ -21,6 +63,7 @@ div [id^="priceTable"] {
 }
 
 /* таблица цен */
+
 .market_commodity_orders_table {
     display: inline-flex !important;
     font-size: 12px;
@@ -35,21 +78,24 @@ div [id^="priceTable"] {
 }
 
 .market_commodity_orders_table td {
-    min-width:min-content !important;
+    min-width: min-content !important;
     text-align: center;
 }
 
-th:first-child, th:first-child + th{
+th:first-child, th:first-child+th {
     display: none;
 }
-.min_size_table{
+
+.min_size_table {
     margin-top: -15px !important;
     margin-bottom: -15px !important;
 }
+
 /*
 стиль истории
 */
-#divMarketListingTableHeader{
+
+#divMarketListingTableHeader {
     height: 38px;
 }
 

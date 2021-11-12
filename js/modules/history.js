@@ -17,59 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function showHistory(OrdersCount = 500) {
-	let script;
-	script = document.createElement('script');
-	script.text = `
-        var g_bBusyLoadingMarketHistory = false;
-        var g_oMyHistory = null;
-        function LoadMarketHistory()
-        {
-        	if ( g_bBusyLoadingMarketHistory )
-        	{
-        		return;
-        	}
-        
-        	g_bBusyLoadingMarketHistory = true;
-        	var elMyHistoryContents = $('tabContentsMyMarketHistory');
-        	new Ajax.Request( 'https://steamcommunity.com/market/myhistory', {
-        		method: 'get',
-        		parameters: {
-                    count:${OrdersCount}
-        		},
-        		onSuccess: function( transport ) {
-        			if ( transport.responseJSON )
-        			{
-        				var response = transport.responseJSON;
-                    
-        				elMyHistoryContents.innerHTML = response.results_html;
-                    
-        				MergeWithAssetArray( response.assets );
-        				eval( response.hovers );
-                    
-        				g_oMyHistory = new CAjaxPagingControls(
-        						{
-        							query: '',
-        							total_count: response.total_count,
-        							pagesize: response.pagesize,
-        							prefix: 'tabContentsMyMarketHistory',
-        							class_prefix: 'market'
-        						}, 'https://steamcommunity.com/market/myhistory/'
-        				);
-                            
-        				g_oMyHistory.SetResponseHandler( function( response ) {
-        					MergeWithAssetArray( response.assets );
-        					eval( response.hovers );
-        				});
-        			}
-        		},
-        		onComplete: function() { g_bBusyLoadingMarketHistory = false; }
-        	});
-        }
-        `;
-	(document.head || document.documentElement).appendChild(script);
-}
-
 let steamHistory = document.getElementById("tabMyMarketHistory");
 let steamHistorySreachBlock = document.getElementById("tabContentsMyMarketHistory");
 steamHistory.onclick = function () {
