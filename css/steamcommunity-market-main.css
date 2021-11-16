@@ -2,9 +2,20 @@ body {
     color: #FAFAFA !important;
 }
 
+/* блок отмена маленький */
+.market_listing_edit_.button_orderss {
+    width: 80px !important;
+}
+.market_listing_buyorder_qty , .market_my_listing_sells {
+    width: 45px !important;
+}
+.market_listing_edit_buttons {
+    width: 90px !important;
+}
+
 /* стиль кнопок */
 
-button {
+.button_orders {
     padding: 5px 10px;
     margin: 5px;
     background: none;
@@ -17,7 +28,7 @@ button {
     color: #FAFAFA;
 }
 
-button:after, button:before {
+.button_orders:after, .button_orders:before {
     content: "";
     position: absolute;
     top: 0;
@@ -28,15 +39,15 @@ button:after, button:before {
     transition: transform 0.2s;
 }
 
-button:after {
+.button_orders:after {
     transform: translate(3px, 3px);
 }
 
-button:before {
+.button_orders:before {
     transform: translate(-3px, -3px);
 }
 
-button:hover:after, button:hover:before {
+.button_orders:hover:after, .button_orders:hover:before {
     transform: translate(0);
 }
 
@@ -60,6 +71,14 @@ div [id^="priceTable"] {
     display: block;
     margin: 5px;
     background-color: #324965;
+}
+
+/* заливка для span */
+.market_listing_my_profit, .market_listing_price{
+    display: inline-block !important;
+    background: #2c6464ad;
+    width: 100%;
+    text-align: center;
 }
 
 /* таблица цен */

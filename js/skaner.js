@@ -26,6 +26,16 @@ var g_rgWalletInfo = {
     wallet_currency: 1
 };
 let sessionId;
+var orderListJson;
+let buyOrderHeader = document.getElementsByClassName("market_listing_table_header")[1];
+//headersNames массив элементов
+let  headersNames =["Sells", "Pofit","Buy_tab", "Sell_tab", "Update",];
+for (const key in headersNames) {
+    var createHeader = document.createElement("span");
+    createHeader.className = `market_listing_right_cell market_listing_my_price market_my_listing_${headersNames[key].toLowerCase()}`;
+    createHeader.innerText = headersNames[key];
+    buyOrderHeader.append(createHeader);
+}
 
 chrome.storage.local.get([
     "scanIntervalSET",
@@ -58,16 +68,22 @@ chrome.storage.local.get([
  * @returns 
  */
 async function startScan(coefficient = 0.35, selectLang = "russian", CountRequesrs = 5, scanIntervalSET = 6000, errorPauseSET = 10000, quantity = 1) {
-    console.log(coefficient, selectLang, CountRequesrs, scanIntervalSET, errorPauseSET);
-    console.log(JSON.parse(await globalThis.httpErrorPause("https://steamcommunity.com/market/mylistings/?norender=1", CountRequesrs, scanIntervalSET, errorPauseSET)));
+    
     var arrMyPriceLink = [];
     let myListings = JSON.parse(await globalThis.httpErrorPause("https://steamcommunity.com/market/mylistings/?norender=1", CountRequesrs, scanIntervalSET, errorPauseSET));
-    var orderListJson = myListings.buy_orders;
+    orderListJson = myListings.buy_orders;
     let marketItems = document.getElementsByClassName("market_listing_row market_recent_listing_row");
     let orderList = [];
+    let blockNames = headersNames.reverse();
     for (let marketItem of marketItems) {
         if (marketItem.id.includes("mybuyorder_") && window.getComputedStyle(marketItem).display === "block") {
-            orderList.push(marketItem);
+            for (const key in blockNames) {
+            countBlock = marketItem.getElementsByClassName("market_listing_buyorder_qty")[0];
+            let myItemBlocksHTML = `<div class="market_listing_right_cell market_listing_my_price market_my_listing_${headersNames[key].toLowerCase()}"></div>`;
+            let cleanMyItemBlocksHTML = DOMPurify.sanitize(myItemBlocksHTML);
+            countBlock.insertAdjacentHTML('afterend', cleanMyItemBlocksHTML);
+            }
+        orderList.push(marketItem);
         }
     }
     if (orderList.length > 0) {
@@ -91,132 +107,132 @@ async function startScan(coefficient = 0.35, selectLang = "russian", CountReques
 
             var orderHref = arrMyPriceLink[orderKey][1];
             var orderPrice = arrMyPriceLink[orderKey][0];
+            await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
             let sourceCode = await globalThis.httpErrorPause(orderHref, CountRequesrs, scanIntervalSET, errorPauseSET);
             let item_id = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
+            await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
             let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
-            InterVal(priceJSON, +buyOrderId, orderPrice, coefficient, item_id, appId, hashName, itemQuantity, itemQuantityRemaining, quantity);
+            await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+            let priceHistory = await getItemHistory(appId, hashName, selectLang) ;
+            InterVal(priceJSON, +buyOrderId, orderPrice, coefficient, item_id, appId, hashName, itemQuantity, itemQuantityRemaining, quantity, orderKey, priceHistory);
             await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
         }
     }
 }
 
-function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, item_id, appId, hashName, itemQuantity, itemQuantityRemaining, quantity) {
+function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, item_id, appId, hashName, itemQuantity, itemQuantityRemaining, quantity, orderKey, priceHistory) {
     let currentOrder = document.querySelector(' [id ="mybuyorder_' + buyOrderId + '"]');
     let actualProfit = "Nan";
     let myProfit = "Nan";
     let coefPrice = "Nan";
     let MycoefPrice = "Nan";
     let realPrice = "Nan";
-    var priceWithoutFee = null;
+    let higestBuyOrder = 0;
+    let lowestSellOrder = 0;
+    let myNextPrice = 0;
 
-    if (priceJSON.lowest_sell_order !== null) {
-        var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.lowest_sell_order/100}`));
-        var nAmount = inputValue;
-
-        if (inputValue > 0 && nAmount == parseInt(nAmount)) {
-            var feeInfo = CalculateFeeAmount(nAmount, g_rgWalletInfo['wallet_publisher_fee_percent_default']);
-            nAmount = nAmount - feeInfo.fees;
-            //priceWithoutFee цена без комиссии
-            priceWithoutFee = v_currencyformat(nAmount, GetCurrencyCode(g_rgWalletInfo['wallet_currency']));
-        }
-
-        realPrice = getNumber(priceWithoutFee);
-        actualProfit = (realPrice - priceJSON.highest_buy_order/100).toFixed(2);
+    if (priceJSON.lowest_sell_order !== null && priceJSON.highest_buy_order !== null) {
+        higestBuyOrder = (priceJSON.highest_buy_order/100).toFixed(2);
+        lowestSellOrder = (priceJSON.lowest_sell_order/100).toFixed(2);
+        realPrice = getNumber(freePrice(lowestSellOrder));
+        actualProfit = (realPrice - higestBuyOrder).toFixed(2);
         myProfit = (realPrice - MyBuyOrderPrice).toFixed(2);
-        coefPrice = ((priceJSON.highest_buy_order/100) * coefficient).toFixed(2);
-        //
+        coefPrice = (higestBuyOrder * coefficient).toFixed(2);
         MycoefPrice = (MyBuyOrderPrice * coefficient).toFixed(2);
     }
-    var myNextPrice =  NextPrice(priceJSON.highest_buy_order);
+    
+    if(priceJSON.highest_buy_order !== null){
+        myNextPrice =  NextPrice(priceJSON.highest_buy_order);
+    }
 
-    let realPriceString = `${chrome.i18n.getMessage("priceWithoutCommissionDescription")} ${realPrice}`;
+/*     let realPriceString = `${chrome.i18n.getMessage("priceWithoutCommissionDescription")} ${realPrice}`;
     let actualProfitString = `${chrome.i18n.getMessage("profitAtTheMomentDescription")} ${actualProfit}`;
     let coefPriceString = `${chrome.i18n.getMessage("coefficientPriceAtTheMomentDescription")} ${coefPrice}`;
     let myProfitString = `${chrome.i18n.getMessage("myProfitDescription")} ${myProfit}`;
-    let MycoefPriceString = `${chrome.i18n.getMessage("myCoefficientPriceDescription")} ${MycoefPrice}`;
+    let MycoefPriceString = `${chrome.i18n.getMessage("myCoefficientPriceDescription")} ${MycoefPrice}`; */
+    console.log(priceJSON);
 
-    let divOrderTable = document.createElement('div');// блок
-    let divPriceTable = document.createElement('div'); // таблица цен
-    let divString =  document.createElement('div'); //блок где встраиваются стоки
-    let divMyString =  document.createElement('div');
-    let pRealPriceString = document.createElement('p');
-    let pActualProfitString = document.createElement('p');
-    let pCoefPriceString = document.createElement('p');
-    let pMyProfitString = document.createElement('p');
-    let pMycoefPriceString = document.createElement('p');
-    let buttonCancelBuyOrder = document.createElement('button'); //кнопка отменить ордер
-    let divCancelBuyOrderString =  document.createElement('div');//блок строк задания цен
-    let inputItemPrice =  document.createElement('input');
-    let inputItemQuality =  document.createElement('input');
-    let buttonCreateBuyOrder = document.createElement('button'); //кнопка покупки
-    let responceServerRequest = document.createElement('div'); 
-    inputItemPrice.type = "number";
-    inputItemQuality.type = "number";
-    inputItemPrice.step = "0.01";
-    divOrderTable.id = `orderTable`;
-    divPriceTable.id = `priceTable${item_id}`;
-    buttonCancelBuyOrder.id = `cancelBuyOrder_${item_id}`;
-    inputItemPrice.id = `myItemPrice${item_id}`;
-    inputItemQuality.id = `myItemQuality${item_id}`;
-    buttonCreateBuyOrder.id = `createBuyOrder${item_id}`;
-    responceServerRequest.id = `responceServerRequest_${item_id}`;
-    pRealPriceString.innerText = realPriceString;
-    pActualProfitString.innerText = actualProfitString;
-    pCoefPriceString.innerText = coefPriceString;
-    pMyProfitString.innerText = myProfitString;
-    pMycoefPriceString.innerText = MycoefPriceString;
-    buttonCancelBuyOrder.innerText = "⦸ Order";
-    buttonCreateBuyOrder.innerText = "⨭ Order";
-    inputItemPrice.value = myNextPrice.myNextPrice;
-    inputItemQuality.value = quantity;
-    buttonCancelBuyOrder.setAttribute("item_id", item_id);
-    buttonCancelBuyOrder.setAttribute("buyOrderId", buyOrderId);
-    buttonCreateBuyOrder.setAttribute("buyOrderId", buyOrderId);
-    buttonCreateBuyOrder.setAttribute("appId", appId);
-    buttonCreateBuyOrder.setAttribute("hashName", hashName);
-    buttonCreateBuyOrder.setAttribute("item_id", item_id);
+    //цены
+    let myListingPriceDom = currentOrder.getElementsByClassName('market_listing_price')[0]; // моя цена на покупку, наивысшая цена на покупку, цена на продажу 
+    let myListingPriceHTML =`
+    <br> <span class="market_listing_highest_buy_order">
+        ${priceJSON.price_prefix}${higestBuyOrder}${priceJSON.price_suffix}
+    </span>
+    <br> <span class="market_listing_lowest_sell_order">
+        ${priceJSON.price_prefix}${lowestSellOrder}${priceJSON.price_suffix}
+        (${priceJSON.price_prefix}${realPrice}${priceJSON.price_suffix})
+    </span>`;
+    myListingPriceDom.insertAdjacentHTML('afterend', DOMPurify.sanitize(myListingPriceHTML));
 
-    buttonCancelBuyOrder.onclick = cancelBuyOrder;
-    buttonCreateBuyOrder.onclick = createBuyOrder;
-    divString.append(pRealPriceString);
-    divString.append(pActualProfitString);
-    divString.append(pCoefPriceString);
-    divMyString.append(pMyProfitString);
-    divMyString.append(pMycoefPriceString);
-    divCancelBuyOrderString.append(inputItemPrice);
-    divCancelBuyOrderString.append(inputItemQuality);
-    divCancelBuyOrderString.append(buttonCancelBuyOrder);
-    divCancelBuyOrderString.append(buttonCreateBuyOrder);
-    divCancelBuyOrderString.append(responceServerRequest);
-    divOrderTable.append(divPriceTable);
-    divOrderTable.append(divString);
-    divOrderTable.append(divMyString);
-    divOrderTable.append(divCancelBuyOrderString);
-    currentOrder.append(divOrderTable);
+    //количество заказов
+    let myListingQualityDom = currentOrder.getElementsByClassName('market_listing_price')[1];
+    let myListingQualityHTML =`<br> <span class="market_listing_highest_buy_order">(${itemQuantity})</span>`;
+    myListingQualityDom.insertAdjacentHTML('afterend', DOMPurify.sanitize(myListingQualityHTML));
 
-    let classesBuyOrders = [ 'my_listing_section', 'market_listing_row', 'min_size_table' ];
-    let classesInput = [ 'create_buy_input' ];
-    divPriceTable.classList.add(...classesBuyOrders);
-    /* divString.classList.add(...classesBuyOrders); */
-    /* divOrderTable.classList.add(...classesBuyOrders); */
-    inputItemPrice.classList.add(...classesInput);
-    inputItemQuality.classList.add(...classesInput);
-    const OrderTable = priceJSON.sell_order_table + priceJSON.buy_order_table;
-    const parser = new DOMParser();
-    const parsed = parser.parseFromString(OrderTable, `text/html`);
-    const tags = parsed.getElementsByTagName(`body`);
-    for (const tag of tags) {
-        document.getElementById(`priceTable${item_id}`).prepend(tag);
-    }
-    let style = `
-    white-space: initial; 
-    float: left; 
-    padding: 2px; 
-    display: flex; 
-    width: 100%; 
-    margin-top: 6px;`;
+    //продажи 
+    let myListingSellsDom = currentOrder.getElementsByClassName('market_my_listing_sells')[0];
+    let myListingSellsHTML =`
+    <span class="market_table_value">
+        <span class="market_listing_highest_count_sells_1d">${priceHistory.countSell}</span>
+        <br> 
+        <span class="market_listing_highest_count_sells_7d">${priceHistory.countSellSevenDays}</span>
+    </span>
+    `;
+    myListingSellsDom.insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingSellsHTML));
+
+    //прибыль
+    let myListingPofityDom = currentOrder.getElementsByClassName('market_my_listing_pofit')[0];
+    let myListingPofityHTML = `
+    <span class="market_table_value">
+        <span class="market_listing_my_profit">
+        ${priceJSON.price_prefix}${myProfit}${priceJSON.price_suffix}
+        (${priceJSON.price_prefix}${MycoefPrice}${priceJSON.price_suffix})
+        </span>
+        <br>
+        <span class="market_listing_actual_profit">
+        ${priceJSON.price_prefix}${actualProfit}${priceJSON.price_suffix}
+        (${priceJSON.price_prefix}${coefPrice}${priceJSON.price_suffix})
+        </span>
+    </span>`;
+    myListingPofityDom.insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingPofityHTML));
+
+    //
+    let myListingSellTabDom = currentOrder.getElementsByClassName('market_my_listing_sell_tab')[0];
+    let myListingSellTabHTML = `<span class="market_table_value">${priceJSON.sell_order_table}</span>`;
+    myListingSellTabDom.insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingSellTabHTML));
+
+    //таблица покупок
+    let myListingBuyTabDom = currentOrder.getElementsByClassName('market_my_listing_buy_tab')[0];
+    let myListingBuyTabHTML = `<span class="market_table_value">${priceJSON.buy_order_table}</span>`;
+    myListingBuyTabDom.insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyTabHTML));
+
+    //market_my_listing_update
+    let myListingBuyUpdateDom = currentOrder.getElementsByClassName('market_my_listing_update')[0];
+    let myListingBuyUpdateHTML = `
+    <span class="market_table_value">
+            <input type="number" step="0.01" id="myItemPrice${item_id}" class="create_buy_input">
+            <input type="number" id="myItemQuality${item_id}" class="create_buy_input">
+            <button id="cancelBuyOrder_${item_id}" class = "button_orders"> ⦸ </button>
+            <button id="createBuyOrder${item_id}" class = "button_orders"> ⨭ </button>
+        <div id="responceServerRequest_${item_id}"></div>
+    </span>`;
+    myListingBuyUpdateDom.insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyUpdateHTML));
+    let buttonCancelBuy = document.getElementById(`cancelBuyOrder_${item_id}`);
+    let buttonCreateBuy = document.getElementById(`createBuyOrder${item_id}`);
+    let myItemPrice = document.getElementById(`myItemPrice${item_id}`);
+    let myItemQuality = document.getElementById(`myItemQuality${item_id}`);
+    myItemPrice.value = myNextPrice.myNextPrice;
+    myItemQuality.value = quantity;
+    buttonCancelBuy.setAttribute("item_id", item_id);
+    buttonCancelBuy.setAttribute("buyOrderId", buyOrderId);
+    buttonCreateBuy.setAttribute("buyOrderId", buyOrderId);
+    buttonCreateBuy.setAttribute("appId", appId);
+    buttonCreateBuy.setAttribute("hashName", hashName);
+    buttonCreateBuy.setAttribute("item_id", item_id);
+    buttonCancelBuy.onclick = cancelBuyOrder;
+    buttonCreateBuy.onclick = createBuyOrder;
+
     currentOrder.style.cssText = `background-color: ${Color(priceJSON.highest_buy_order/100, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice)}`;
-    divOrderTable.style.cssText = `${style} background-color: ${Color(priceJSON.highest_buy_order/100, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice)}`;
 
 }
 
@@ -235,6 +251,19 @@ function Color(JSONbuy_order, MyBuyOrderPrice, actualProfit, myProfit, coefPrice
             return '#60373e;'; //red необходимо поменять
         }
     } return '#000732;';
+}
+
+
+function freePrice(priceValue = 0) {
+    let inputValue = GetPriceValueAsInt(getNumber(`${priceValue}`));
+    let nAmount = inputValue;
+    if (inputValue > 0 && nAmount == parseInt(nAmount)) {
+        let feeInfo = CalculateFeeAmount(nAmount, g_rgWalletInfo['wallet_publisher_fee_percent_default']);
+        nAmount = nAmount - feeInfo.fees;
+        // цена без комиссии
+        return v_currencyformat(nAmount, GetCurrencyCode(g_rgWalletInfo['wallet_currency']));
+    }
+    return 0;
 }
 
 function NextPrice(lowestSellOrder) {
