@@ -112,7 +112,6 @@ async function startScan(coefficient = 0.35, selectLang = "russian", CountReques
             let item_id = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
             await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
             let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
-            await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
             let priceHistory = await getItemHistory(appId, hashName, selectLang) ;
             InterVal(priceJSON, +buyOrderId, orderPrice, coefficient, item_id, appId, hashName, itemQuantity, itemQuantityRemaining, quantity, orderKey, priceHistory);
             await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
@@ -225,7 +224,6 @@ function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, it
     myItemQuality.value = quantity;
     buttonCancelBuy.setAttribute("item_id", item_id);
     buttonCancelBuy.setAttribute("buyOrderId", buyOrderId);
-    buttonCreateBuy.setAttribute("buyOrderId", buyOrderId);
     buttonCreateBuy.setAttribute("appId", appId);
     buttonCreateBuy.setAttribute("hashName", hashName);
     buttonCreateBuy.setAttribute("item_id", item_id);
@@ -310,9 +308,8 @@ async function cancelBuyOrder() {
 
 async function createBuyOrder() {
     let appid = this.getAttribute("appid");
-    let hashname = this.getAttribute("hashname");
+    let hashname = encodeURIComponent(this.getAttribute("hashname"));
     let item_id = this.getAttribute("item_id");
-    let buttonHtmlAttribute = this.getAttribute("buyOrderId");
     let inputPriceDom = document.getElementById(`myItemPrice${item_id}`);
     let itemCountDom =document.getElementById(`myItemQuality${item_id}`);
     if (inputPriceDom.value.trim() == '' || itemCountDom.value.trim() == '' || itemCountDom.value.trim() <= 0) {

@@ -1,4 +1,5 @@
 async function getItemHistory(appId, hashName, selectLang) {
+    await new Promise(done => timer = setTimeout(() => done(), + 1000 + Math.floor(Math.random() * 500)));
     let historyPriceJSON = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/pricehistory/?country=${selectLang}&currency=1&appid=${appId}&market_hash_name=${hashName}`));
     let countSell = 0;
     let countSellSevenDays = 0;
@@ -15,7 +16,7 @@ async function getItemHistory(appId, hashName, selectLang) {
                 countSellSevenDays += +historyPriceJSON.prices[key][2];
             }
         }
-
+        
     return{countSell, countSellSevenDays};
 }
 
