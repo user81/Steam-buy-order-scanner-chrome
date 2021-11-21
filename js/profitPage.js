@@ -101,9 +101,13 @@ function InterVal(priceJSON, coefficient = 0.35, quantity = 1) {
             }
         }
     }
-
-
-    let buyButton = document.getElementsByClassName("market_commodity_buy_button")[0];
+    let buyButton;
+    if (document.getElementsByClassName("market_commodity_buy_button").length > 0) {
+        buyButton = document.getElementsByClassName("market_commodity_buy_button")[0];
+    }else{
+        buyButton = document.getElementsByClassName("market_noncommodity_buyorder_button")[0];
+    }
+    
     buyButton.addEventListener("click", function (event) {
         let buyPrice;
         let buyQuantity;

@@ -149,7 +149,7 @@ function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, it
     let coefPriceString = `${chrome.i18n.getMessage("coefficientPriceAtTheMomentDescription")} ${coefPrice}`;
     let myProfitString = `${chrome.i18n.getMessage("myProfitDescription")} ${myProfit}`;
     let MycoefPriceString = `${chrome.i18n.getMessage("myCoefficientPriceDescription")} ${MycoefPrice}`; */
-    console.log(priceJSON);
+   /*  console.log(priceJSON); */
 
     //цены
     let myListingPriceDom = currentOrder.getElementsByClassName('market_listing_price')[0]; // моя цена на покупку, наивысшая цена на покупку, цена на продажу 
@@ -299,10 +299,10 @@ async function cancelBuyOrder() {
     if(orderId !==null && sessionId !==null) {
         let params = `sessionid=${sessionId}&buy_orderid=${orderId}`;
         let url = "https://steamcommunity.com/market/cancelbuyorder/";
-        let serverResponse = JSON.parse(await globalThis.httpPostErrorPause(url, params));
+        let serverResponse = await globalThis.httpPostErrorPause(url, params);
         let htmlResponce = document.getElementById(`responceServerRequest_${item_id}`);
         console.log(+serverResponse.success,  serverResponse.success, typeof serverResponse.success, htmlResponce);
-        htmlResponce.textContent = (+serverResponse.success == 1) ?  "Done cancel" : "Error cancel"; /* {success: 1} */
+        htmlResponce.textContent = (serverResponse.success === 1) ?  "Done cancel" : "Error cancel"; /* {success: 1} */
     }   
 }
 
@@ -325,14 +325,14 @@ async function createBuyOrder() {
     if(appid !== null && hashname !== null && item_id !== null) {
         let params = `sessionid=${sessionId}&currency=1&appid=${appid}&market_hash_name=${hashname}&price_total=${Math.round(inputPrice * 100 * itemCount)}&quantity=${itemCount}&billing_state=&save_my_address=0`;
         let url = "https://steamcommunity.com/market/createbuyorder/";
-        let serverResponse = JSON.parse(await globalThis.httpPostErrorPause(url, params));
+        let serverResponse = await globalThis.httpPostErrorPause(url, params);
         console.log(serverResponse.success , +serverResponse.success, typeof serverResponse.success);
         let htmlResponce = document.getElementById(`responceServerRequest_${item_id}`);
         if (+serverResponse.success == 1) {
             document.getElementById(`cancelBuyOrder_${item_id}`).setAttribute("buyOrderId", +serverResponse.buy_orderid);
         }
-        htmlResponce.textContent = (+serverResponse.success == 29) ? serverResponse.message : 
-        (+serverResponse.success == 1) ? "Price updated" : "Eroor"; // message: "У вас уже есть заказ на этот предмет. Вы должны либо ." success: 29{buy_orderid: "4562009753" success: 1}
+        htmlResponce.textContent = (serverResponse.success === 29) ? serverResponse.message : 
+        (serverResponse.success === 1) ? "Price updated" : "Eroor"; // message: "У вас уже есть заказ на этот предмет. Вы должны либо ." success: 29{buy_orderid: "4562009753" success: 1}
     }
 }
 

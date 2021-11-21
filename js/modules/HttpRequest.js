@@ -26,7 +26,7 @@
  * @param {number} errorPauseSET пауза между ошибками (минуты)
  * @returns 
  */
-globalThis.httpErrorPause = async function(url, attempts = 8, scanIntervalSET = 6000, errorPauseSET = 5) {
+/* globalThis.httpErrorPause = async function(url, attempts = 8, scanIntervalSET = 6000, errorPauseSET = 5) {
     let httpGetRequest = new Promise(function (resolve, reject) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
@@ -46,7 +46,35 @@ globalThis.httpErrorPause = async function(url, attempts = 8, scanIntervalSET = 
     });
 
     return await httpGetRequest.catch(delayRequestGet(url, attempts, scanIntervalSET, errorPauseSET));
+}; */
+globalThis.httpErrorPause = async function(url, attempts = 8, scanIntervalSET = 6000, errorPauseSET = 5) {
+        return new Promise((resolve, reject) => {
+        let request = new Request(url,
+            {                   
+                method: 'GET',
+            });
+    
+        fetch(request).then((response) => {
+            if (response.status === 429) {
+                delayRequestGet(url, attempts, scanIntervalSET, errorPauseSET)
+            }
+            if (!response.ok) {
+                console.log(`Code: ${response.status} Text: ${response.statusText}`);
+                reject({ status: response.status, statusText: response.statusText });
+            }
+            return response.text();
+        }).then((nextResponseJSON) =>{ 
+            if (nextResponseJSON === null){
+                reject('Error!');
+            }
+            resolve(nextResponseJSON);
+        }).catch((error) => {
+            console.log(error);
+            reject(error);
+        });
+    });
 };
+
 
 async function delayRequestGet(url, attempts = 8, scanIntervalSET = 6000, errorPauseSET = 5) {
     if (attempts <= 0) {
@@ -57,7 +85,9 @@ async function delayRequestGet(url, attempts = 8, scanIntervalSET = 6000, errorP
     return httpErrorPause(url, attempts - 1);
 }
 
-globalThis.httpPostErrorPause = async function(httpUrl, httpParams, attempts = 8, scanIntervalSET = 6000, errorPauseSET = 5) {
+async function waitTime(ms) { return new Promise(resolve => setTimeout(resolve,ms)); }
+
+/* globalThis.httpPostErrorPause = async function(httpUrl, httpParams, attempts = 8, scanIntervalSET = 6000, errorPauseSET = 5) {
     return new Promise(function (resolve, reject) {
         var xhrCancelBuyOrder = new XMLHttpRequest();
         xhrCancelBuyOrder.open('POST', httpUrl, true);
@@ -72,6 +102,43 @@ globalThis.httpPostErrorPause = async function(httpUrl, httpParams, attempts = 8
         };
         xhrCancelBuyOrder.send(httpParams);
     });
-};
+}; */
 
-async function waitTime(ms) { return new Promise(resolve => setTimeout(resolve,ms)); }
+globalThis.httpPostErrorPause = async function(httpUrl, httpParams) {
+    return new Promise((resolve, reject) => {
+        let request = new Request(httpUrl,
+            {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                body: httpParams,
+            });
+    
+            let fetchRequest = (window.content !== undefined) ? window.content.fetch : fetch;
+    
+        fetchRequest(request).then((response) => {
+            if (!response.ok) {
+                console.log(`Code: ${response.status} Text: ${response.statusText}`);
+                reject({ status: response.status, statusText: response.statusText });
+            }
+            return response.json();
+        }).then((nextResponseJSON) => {
+            if (nextResponseJSON === null){
+                reject('Error!');
+            }
+            else if (nextResponseJSON.success === 1) {
+                resolve(nextResponseJSON);
+            }
+            else if (nextResponseJSON.success === 29) {
+                resolve(nextResponseJSON);
+            }
+            else {
+                reject(nextResponseJSON.message);
+            }
+        }).catch((error) => {
+            console.log(error);
+            reject(error);
+        });
+    });
+    }
+
+
