@@ -27,6 +27,7 @@ var g_rgWalletInfo = {
 };
 let sessionId;
 var orderListJson;
+let orderListArr;
 let buyOrderHeader = document.getElementsByClassName("market_listing_table_header")[1];
 //headersNames массив элементов
 let  headersNames =["Sells", "Pofit","Buy_tab", "Sell_tab", "Update",];
@@ -72,6 +73,7 @@ async function startScan(coefficient = 0.35, selectLang = "russian", CountReques
     var arrMyPriceLink = [];
     let myListings = JSON.parse(await globalThis.httpErrorPause("https://steamcommunity.com/market/mylistings/?norender=1", CountRequesrs, scanIntervalSET, errorPauseSET));
     orderListJson = myListings.buy_orders;
+    orderListArr = Object.entries(orderListJson); // массив значений товаров
     let marketItems = document.getElementsByClassName("market_listing_row market_recent_listing_row");
     let orderList = [];
     let blockNames = headersNames.reverse();
@@ -83,38 +85,39 @@ async function startScan(coefficient = 0.35, selectLang = "russian", CountReques
             let cleanMyItemBlocksHTML = DOMPurify.sanitize(myItemBlocksHTML);
             countBlock.insertAdjacentHTML('afterend', cleanMyItemBlocksHTML);
             }
-        orderList.push(marketItem);
+        let orderlink = marketItem.getElementsByClassName('market_listing_item_name_link')[0].href;
+        let orderprice = marketItem.getElementsByClassName('market_listing_price')[0].innerText.match(/([0-9]*\.[0-9]+|[0-9]+)/g);
+        let myBuyorderId = marketItem.id.split('_')[1]; // 4078635920
+        arrMyPriceLink.push([orderprice, orderlink, myBuyorderId]);
         }
     }
-    if (orderList.length > 0) {
-        for (let index = 0; index < orderList.length; index++) {
-            let orderlink = orderList[index].getElementsByClassName('market_listing_item_name_link')[0].href;
-            let orderprice = +orderList[index].getElementsByClassName('market_listing_price')[0].innerText.match(/([0-9]*\.[0-9]+|[0-9]+)/g);
-            arrMyPriceLink.push([orderprice, orderlink]);
-        }
-    } else {
-        return false;
-    }
 
-    if (orderListJson.length > 0 && orderListJson.length === arrMyPriceLink.length) {
-        for (let orderKey = 0; orderKey < orderListJson.length; orderKey++) {
-            var appId = orderListJson[orderKey].appid; //753 id game
-            var buyOrderId = orderListJson[orderKey].buy_orderid; // id заказа
-            var hashName = orderListJson[orderKey].hash_name; //   489630-Lord Commissar (Foil Trading Card) 
-            var walletCurrency = orderListJson[orderKey].wallet_currency; // 1
-            var itemQuantity = orderListJson[orderKey].quantity; // количество 7 сколько было
-            var itemQuantityRemaining = orderListJson[orderKey].quantity_remaining; // количество 5 сколько стало
+    if (orderListArr.length > 0 && orderListArr.length === arrMyPriceLink.length) {
+        for (let orderKey = 0; orderKey < orderListArr.length; orderKey++) {
+    
+            let myBuyorder = arrMyPriceLink[orderKey][2];
+            let orderHref = arrMyPriceLink[orderKey][1];
+            let orderPrice = arrMyPriceLink[orderKey][0];
 
-            var orderHref = arrMyPriceLink[orderKey][1];
-            var orderPrice = arrMyPriceLink[orderKey][0];
-            await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
-            let sourceCode = await globalThis.httpErrorPause(orderHref, CountRequesrs, scanIntervalSET, errorPauseSET);
-            let item_id = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
-            await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
-            let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
-            let priceHistory = await getItemHistory(appId, hashName, selectLang) ;
-            InterVal(priceJSON, +buyOrderId, orderPrice, coefficient, item_id, appId, hashName, itemQuantity, itemQuantityRemaining, quantity, orderKey, priceHistory);
-            await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+            let itemDetals = orderListArr.filter(item => item[1].buy_orderid === myBuyorder)[0]; //1 ключ 2 содержимое
+            if (itemDetals.length === 2) {
+                var appId = itemDetals[1].appid; //753 id game
+                var buyOrderId = itemDetals[1].buy_orderid; // id заказа
+                var hashName = itemDetals[1].hash_name; //   489630-Lord Commissar (Foil Trading Card) 
+                var walletCurrency = itemDetals[1].wallet_currency; // 1
+                var itemQuantity = itemDetals[1].quantity; // количество 7 сколько было
+                var itemQuantityRemaining = itemDetals[1].quantity_remaining; // количество 5 сколько стало
+    
+                await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+                let sourceCode = await globalThis.httpErrorPause(orderHref, CountRequesrs, scanIntervalSET, errorPauseSET);
+                let item_id = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
+                orderListArr[itemDetals[0]][1].item_id = item_id;
+                await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+                let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
+                let priceHistory = await getItemHistory(appId, hashName, selectLang) ;
+                InterVal(priceJSON, +buyOrderId, orderPrice, coefficient, item_id, appId, hashName, itemQuantity, itemQuantityRemaining, quantity, orderKey, priceHistory);
+                await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+            }
         }
     }
 }
@@ -212,26 +215,19 @@ function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, it
             <input type="number" step="0.01" id="myItemPrice${item_id}" class="create_buy_input">
             <input type="number" id="myItemQuality${item_id}" class="create_buy_input">
             <button id="cancelBuyOrder_${item_id}" class = "button_orders"> ⦸ </button>
-            <button id="createBuyOrder${item_id}" class = "button_orders"> ⨭ </button>
+            <button id="createBuyOrder_${item_id}" class = "button_orders"> ⨭ </button>
         <div id="responceServerRequest_${item_id}"></div>
     </span>`;
     myListingBuyUpdateDom.insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyUpdateHTML));
     let buttonCancelBuy = document.getElementById(`cancelBuyOrder_${item_id}`);
-    let buttonCreateBuy = document.getElementById(`createBuyOrder${item_id}`);
+    let buttonCreateBuy = document.getElementById(`createBuyOrder_${item_id}`);
     let myItemPrice = document.getElementById(`myItemPrice${item_id}`);
     let myItemQuality = document.getElementById(`myItemQuality${item_id}`);
     myItemPrice.value = myNextPrice.myNextPrice;
     myItemQuality.value = quantity;
-    buttonCancelBuy.setAttribute("item_id", item_id);
-    buttonCancelBuy.setAttribute("buyOrderId", buyOrderId);
-    buttonCreateBuy.setAttribute("appId", appId);
-    buttonCreateBuy.setAttribute("hashName", hashName);
-    buttonCreateBuy.setAttribute("item_id", item_id);
     buttonCancelBuy.onclick = cancelBuyOrder;
     buttonCreateBuy.onclick = createBuyOrder;
-
     currentOrder.style.cssText = `background-color: ${Color(priceJSON.highest_buy_order/100, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice)}`;
-
 }
 
 function Color(JSONbuy_order, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice) {
@@ -250,7 +246,6 @@ function Color(JSONbuy_order, MyBuyOrderPrice, actualProfit, myProfit, coefPrice
         }
     } return '#000732;';
 }
-
 
 function freePrice(priceValue = 0) {
     let inputValue = GetPriceValueAsInt(getNumber(`${priceValue}`));
@@ -271,13 +266,11 @@ function NextPrice(lowestSellOrder) {
         return {nextPriceWithoutFee, myNextPrice};
     }
     var inputValue = GetPriceValueAsInt(getNumber(`${lowestSellOrder/100}`));
-
     var nAmount = inputValue;
     if (inputValue > 0 && nAmount == parseInt(nAmount)) {
         var feeInfo = CalculateFeeAmount(nAmount, g_rgWalletInfo['wallet_publisher_fee_percent_default']);
         nAmount = nAmount - feeInfo.fees; // без комиссии
         priceWithoutFee = getNumber(v_currencyformat(nAmount, GetCurrencyCode(g_rgWalletInfo['wallet_currency'])));
-
         var nextPriceWithoutFee = priceWithoutFee; //nextPriceWithoutFee прибыль которая длжна меняться
         while (nextPriceWithoutFee == priceWithoutFee) {
             ++inputValue;
@@ -286,53 +279,57 @@ function NextPrice(lowestSellOrder) {
             nextNAmount = nextNAmount - nextFeeInfo.fees;
             nextPriceWithoutFee = getNumber(v_currencyformat(nextNAmount, GetCurrencyCode(g_rgWalletInfo['wallet_currency'])));
             myNextPrice = getNumber(v_currencyformat(inputValue, GetCurrencyCode(g_rgWalletInfo['wallet_currency'])));
-            
         }
     }
-
     return {nextPriceWithoutFee, myNextPrice};
 }
 
 async function cancelBuyOrder() {
-    let orderId = this.getAttribute("buyOrderId");
-    let item_id = this.getAttribute("item_id");
-    if(orderId !==null && sessionId !==null) {
-        let params = `sessionid=${sessionId}&buy_orderid=${orderId}`;
-        let url = "https://steamcommunity.com/market/cancelbuyorder/";
-        let serverResponse = await globalThis.httpPostErrorPause(url, params);
-        let htmlResponce = document.getElementById(`responceServerRequest_${item_id}`);
-        console.log(+serverResponse.success,  serverResponse.success, typeof serverResponse.success, htmlResponce);
-        htmlResponce.textContent = (serverResponse.success === 1) ?  "Done cancel" : "Error cancel"; /* {success: 1} */
-    }   
+    let item_id = this.id.split('_')[1];
+    let itemInfo = orderListArr.filter(item => item[1].item_id === item_id)[0];
+    if (itemInfo.length === 2) {
+        let orderId = itemInfo[1].buy_orderid;
+        if(orderId !==null && sessionId !==null) {
+            let params = `sessionid=${sessionId}&buy_orderid=${orderId}`;
+            let url = "https://steamcommunity.com/market/cancelbuyorder/";
+            let serverResponse = await globalThis.httpPostErrorPause(url, params);
+            let htmlResponce = document.getElementById(`responceServerRequest_${item_id}`);
+            htmlResponce.textContent = (serverResponse.success === 1) ?  "Done cancel" : "Error cancel"; /* {success: 1} */
+        }   
+    }
 }
 
 async function createBuyOrder() {
-    let appid = this.getAttribute("appid");
-    let hashname = encodeURIComponent(this.getAttribute("hashname"));
-    let item_id = this.getAttribute("item_id");
-    let inputPriceDom = document.getElementById(`myItemPrice${item_id}`);
-    let itemCountDom =document.getElementById(`myItemQuality${item_id}`);
-    if (inputPriceDom.value.trim() == '' || itemCountDom.value.trim() == '' || itemCountDom.value.trim() <= 0) {
-        if (document.getElementById(`error${item_id}`)) return; 
-        let error = document.createElement('p');
-        error.innerText = "input value";
-        error.id = `error${item_id}`;
-        itemCountDom.after(error);
-        return; 
-    }
-    let inputPrice = inputPriceDom.value.trim();
-    let itemCount = itemCountDom.value.trim();
-    if(appid !== null && hashname !== null && item_id !== null) {
-        let params = `sessionid=${sessionId}&currency=1&appid=${appid}&market_hash_name=${hashname}&price_total=${Math.round(inputPrice * 100 * itemCount)}&quantity=${itemCount}&billing_state=&save_my_address=0`;
-        let url = "https://steamcommunity.com/market/createbuyorder/";
-        let serverResponse = await globalThis.httpPostErrorPause(url, params);
-        console.log(serverResponse.success , +serverResponse.success, typeof serverResponse.success);
-        let htmlResponce = document.getElementById(`responceServerRequest_${item_id}`);
-        if (+serverResponse.success == 1) {
-            document.getElementById(`cancelBuyOrder_${item_id}`).setAttribute("buyOrderId", +serverResponse.buy_orderid);
+
+    let item_id = this.id.split('_')[1];
+    let itemInfo = orderListArr.filter(item => item[1].item_id === item_id)[0];
+    if (itemInfo.length === 2) {
+        let appid = itemInfo[1].appid;
+        let hashname = itemInfo[1].hash_name;
+        let inputPriceDom = document.getElementById(`myItemPrice${item_id}`);
+        let itemCountDom =document.getElementById(`myItemQuality${item_id}`); 
+
+        if (inputPriceDom.value.trim() == '' || itemCountDom.value.trim() == '' || itemCountDom.value.trim() <= 0) {
+            if (document.getElementById(`error${item_id}`)) return; 
+            let error = document.createElement('p');
+            error.innerText = "input value";
+            error.id = `error${item_id}`;
+            itemCountDom.after(error);
+            return; 
         }
-        htmlResponce.textContent = (serverResponse.success === 29) ? serverResponse.message : 
-        (serverResponse.success === 1) ? "Price updated" : "Eroor"; // message: "У вас уже есть заказ на этот предмет. Вы должны либо ." success: 29{buy_orderid: "4562009753" success: 1}
+        let inputPrice = inputPriceDom.value.trim();
+        let itemCount = itemCountDom.value.trim();
+        if(appid !== null && hashname !== null && item_id !== null) {
+            let params = `sessionid=${sessionId}&currency=1&appid=${appid}&market_hash_name=${hashname}&price_total=${Math.round(inputPrice * 100 * itemCount)}&quantity=${itemCount}&billing_state=&save_my_address=0`;
+            let url = "https://steamcommunity.com/market/createbuyorder/";
+            let serverResponse = await globalThis.httpPostErrorPause(url, params);
+            let htmlResponce = document.getElementById(`responceServerRequest_${item_id}`);
+            if (serverResponse.success === 1) {
+                orderListArr[itemInfo[0]][1].buy_orderid = serverResponse.buy_orderid;
+            }
+            htmlResponce.textContent = (serverResponse.success === 29) ? serverResponse.message : 
+            (serverResponse.success === 1) ? "Price updated" : "Eroor"; // message: "У вас уже есть заказ на этот предмет. Вы должны либо ." success: 29{buy_orderid: "4562009753" success: 1}
+        }
     }
 }
 
