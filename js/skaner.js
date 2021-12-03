@@ -121,7 +121,7 @@ async function startScan(coefficient = 0.35, selectLang = "russian", CountReques
                 orderListArr[itemDetals[0]][1].item_id = item_id;
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                 let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
-                let priceHistory = await getItemHistory(appId, hashName, selectLang);
+                let priceHistory = await getItemHistory(appId, fixedEncodeURIComponent(hashName), selectLang);
                 InterVal(priceJSON, +buyOrderId, orderPrice, coefficient, item_id, itemQuantity, quantity, priceHistory);
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
             }

@@ -20,4 +20,11 @@ async function getItemHistory(appId, hashName, selectLang) {
     return{countSell, countSellSevenDays};
 }
 
-
+/**
+ * форматирование ссылок
+ */
+ function fixedEncodeURIComponent(str) {
+	return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
+		return '%' + c.charCodeAt(0).toString(16);
+	});
+}

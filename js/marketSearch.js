@@ -120,7 +120,7 @@ async function marketSearch() {
                 let orderCount = +marketItems[index].getElementsByClassName('market_listing_num_listings_qty')[0].innerText.replace( /[^+\d]/g, '');
                 var appId = marketItems[index].firstElementChild.dataset.appid;
                 var aId = marketItems[index].firstElementChild.id;
-                var hashName = encodeURIComponent(marketItems[index].firstElementChild.dataset.hashName);
+                var hashName = fixedEncodeURIComponent(marketItems[index].firstElementChild.dataset.hashName);
                 let minPriceVal = (document.getElementById("minPriceVal").value === undefined || document.getElementById("minPriceVal").value === null || document.getElementById("minPriceVal").value === '') ? 0 : document.getElementById("minPriceVal").value;
                 let minCountVal = (document.getElementById("minCountVal").value === undefined || document.getElementById("minCountVal").value === null || document.getElementById("minCountVal").value === '') ? 0 : document.getElementById("minCountVal").value;
                 let minProfitVal = (document.getElementById("minProfitVal").value === undefined || document.getElementById("minProfitVal").value === null || document.getElementById("minProfitVal").value === '') ? -Infinity : document.getElementById("minProfitVal").value;
