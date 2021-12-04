@@ -272,48 +272,6 @@ function Color(JSONbuy_order, MyBuyOrderPrice, actualProfit, myProfit, coefPrice
     } return '#000732;';
 }
 
-function calculatepriceWithoutFee(nAmount) { 
-    let feeInfo = CalculateFeeAmount(nAmount, g_rgWalletInfo['wallet_publisher_fee_percent_default']);
-    nAmount = nAmount - feeInfo.fees;
-    return v_currencyformat(nAmount, GetCurrencyCode(g_rgWalletInfo['wallet_currency']));// цена без комиссии $0.11
-}
-
-function freePrice(priceValue = 0) {
-    let inputValue = GetPriceValueAsInt(getNumber(`${priceValue}`));
-    let nAmount = inputValue;
-    if (inputValue > 0 && nAmount == parseInt(nAmount)) {
-        return calculatepriceWithoutFee(nAmount); //calculatepriceWithoutFee -> $0.11
-    }
-    return 0;
-}
-
-function NextPrice(lowestSellOrder, tupe = "higest") {
-    let nextPriceWithoutFee;
-    let myNextPrice;
-    if (lowestSellOrder === null) {
-        nextPriceWithoutFee = 0.01;
-        myNextPrice = 0.03;
-        return {nextPriceWithoutFee, myNextPrice};
-    }
-    var inputValue = GetPriceValueAsInt(getNumber(`${lowestSellOrder/100}`));
-    var nAmount = inputValue;
-    if (inputValue > 0 && nAmount == parseInt(nAmount)) {
-        priceWithoutFee = getNumber(calculatepriceWithoutFee(nAmount));//calculatepriceWithoutFee -> $0.11
-        nextPriceWithoutFee = priceWithoutFee; //nextPriceWithoutFee прибыль которая длжна меняться
-        while (nextPriceWithoutFee == priceWithoutFee) {
-            if (tupe === "higest")  ++inputValue;
-            if (tupe === "real")  --inputValue;  
-            nextPriceWithoutFee = getNumber(calculatepriceWithoutFee(inputValue));//calculatepriceWithoutFee -> $0.11
-            myNextPrice = getNumber(v_currencyformat(inputValue, GetCurrencyCode(g_rgWalletInfo['wallet_currency'])));
-        }
-        if (tupe === "real") {
-            nextPriceWithoutFee = getNumber(calculatepriceWithoutFee(inputValue + 1));//calculatepriceWithoutFee -> $0.11
-            myNextPrice = getNumber(v_currencyformat(+inputValue + 1, GetCurrencyCode(g_rgWalletInfo['wallet_currency'])));
-        }
-    }
-    return {nextPriceWithoutFee, myNextPrice};
-}
-
 async function cancelBuyOrder() {
     let item_id = this.id.split('_')[1];
     let itemInfo = orderListArr.filter(item => item[1].item_id === item_id)[0];
