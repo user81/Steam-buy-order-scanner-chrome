@@ -13,6 +13,21 @@ let CountRequesrs;
 let scanIntervalSET;
 let errorPauseSET;
 let sizePage;
+let buyOrderHeader = document.getElementById("findItems");
+let html = `<div id="profitScaner" class="my_market_listing_table_header" style="opacity: 1;">
+
+</div> `;
+buyOrderHeader.insertAdjacentHTML('afterend', DOMPurify.sanitize(html));
+
+//headersNames массив элементов
+let headersNames = ["Price", "Count", "Buy_tab", "Sell_tab", "Name"];
+
+for (const key in headersNames) {
+    var createHeader = document.createElement("span");
+    createHeader.className = `market_listing_right_cell market_listing_num_listings market_sortable_column market_my_listing_${headersNames[key].toLowerCase()}`;
+    createHeader.innerText = headersNames[key];
+    buyOrderHeader.append(createHeader);
+}
 
 chrome.storage.local.get([
     "scanIntervalSET",
@@ -29,79 +44,56 @@ chrome.storage.local.get([
         CountRequesrs = 5;
         scanIntervalSET = + data.scanIntervalSET;
         errorPauseSET = + data.errorPauseSET;
-        
+
     }
 });
 displaySearchRunScan();
-function displaySearchRunScan() { 
+function displaySearchRunScan() {
     let divRunScan = document.getElementById("market_search");
     if (document.getElementById("runSearchScan") == null) {
-        let buttonRunScan = document.createElement('div');
-        let buttonReloadScan = document.createElement('div');
-        let inputMinPrice = document.createElement('input');
-        let inputMinProfit = document.createElement('input');
-        let inputMinCount =  document.createElement('input');
-        let inputMinSell = document.createElement('input');
-        let inputOnlyProfitable = document.createElement('input');
-        let span_inputMinPrice = document.createElement('span');
-        let span_inputMinProfit = document.createElement('span');
-        let span_inputMinCount =  document.createElement('span');
-        let span_inputMinSell = document.createElement('span');
-        let span_inputOnlyProfitable = document.createElement('span');
-        inputMinPrice.setAttribute("type", "number");
-        inputMinProfit.setAttribute("type", "number");
-        inputMinCount.setAttribute("type", "number");
-        inputMinSell.setAttribute("type", "number");
-        inputOnlyProfitable.setAttribute("type", "checkbox");
-        buttonRunScan.className = "market_search_advanced_button";
-        buttonReloadScan.className = "market_search_advanced_button";
-        span_inputMinPrice.className = "market_search_sidebar_section_tip_small market_listing_item_name";
-        span_inputMinProfit.className = "market_search_sidebar_section_tip_small market_listing_item_name";
-        span_inputMinCount.className = "market_search_sidebar_section_tip_small market_listing_item_name";
-        span_inputMinSell.className = "market_search_sidebar_section_tip_small market_listing_item_name";
-        span_inputOnlyProfitable.className = "market_search_sidebar_section_tip_small market_listing_item_name";
-        buttonRunScan.id = "runSearchScan";
-        buttonReloadScan.id = "reloadScan";
-        inputMinPrice.id ="minPriceVal";
-        inputMinProfit.id ="minProfitVal";
-        inputMinCount.id ="minCountVal";
-        inputMinSell.id ="minSellVal";
-        inputOnlyProfitable.id ="onlyProfitable";
-        span_inputMinPrice.textContent ="Min Price";
-        span_inputMinProfit.textContent ="Min Profit";
-        span_inputMinCount.textContent ="Min Count";
-        span_inputMinSell.textContent ="Min Sell";
-        span_inputOnlyProfitable.textContent ="only Profitable";
-        buttonRunScan.textContent = "Run Scan";
-        buttonReloadScan.textContent = "🗘";
-        span_inputMinPrice.append(inputMinPrice);
-        span_inputMinProfit.append(inputMinProfit);
-        span_inputMinCount.append(inputMinCount);
-        span_inputMinSell.append(inputMinSell);
-        span_inputOnlyProfitable.append(inputOnlyProfitable);
-        divRunScan.prepend(buttonRunScan);
-        divRunScan.prepend(buttonReloadScan);
-        divRunScan.prepend(span_inputOnlyProfitable);
-        divRunScan.prepend(span_inputMinProfit);
-        divRunScan.prepend(span_inputMinSell);
-        divRunScan.prepend(span_inputMinCount);
-        divRunScan.prepend(span_inputMinPrice);
-        
+        let scanerMarketSearchHTML = `
+        <div>
+            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
+                Min Price
+                <input type="number" id="minPriceVal">
+            </span>
+            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
+                Min Count
+                <input type="number" id="minCountVal">
+            </span>
+            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
+                Min Sell
+                <input type="number" id="minSellVal">
+            </span>
+            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
+                Min Profit
+                <input type="number" id="minProfitVal">
+            </span>
+            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
+                only Profitable
+                <input type="checkbox" id="onlyProfitable">
+            </span>
+            <div class="market_search_advanced_button" id="reloadScan">🗘</div>
+            <div class="market_search_advanced_button" id="runSearchScan">Run Scan</div>
+        </div>
+        `;
+        divRunScan.insertAdjacentHTML('afterbegin', DOMPurify.sanitize(scanerMarketSearchHTML));
+
     }
 }
 let StopScan = false;
 
-function ordersReload(){
+function ordersReload() {
     let pageSize = 0;
-    if (window.location.href.split('#', )[1]!== undefined) {
-        pageSize = window.location.href.split('#', )[1].split('_', )[0].replace(/\D/g, '');
+    if (window.location.href.split('#',)[1] !== undefined) {
+        pageSize = window.location.href.split('#',)[1].split('_',)[0].replace(/\D/g, '');
     }
     console.log(pageSize);
     changeSearchSize(pageSize);
     StopScan = true;
 }
-document.getElementById("reloadScan").addEventListener( "click" , () => {ordersReload();} );
-document.getElementById("runSearchScan").addEventListener( "click" , () => {marketSearch(); StopScan = false;});
+document.getElementById("reloadScan").addEventListener("click", () => { ordersReload(); });
+document.getElementById("runSearchScan").addEventListener("click", () => { marketSearch(); StopScan = false; });
 
 async function marketSearch() {
     let numberOfRepetitions = 10;
@@ -115,9 +107,18 @@ async function marketSearch() {
         if (marketItems.length > 0) {
             for (let index = 0; index < marketItems.length; index++) {
                 if (StopScan) return;
+
+                //!! повторяется надо будет исправить
+                let blockNames = ["Buy_tab", "Sell_tab"];
+                for (const key in blockNames) {
+                    countBlock = marketItems[index].getElementsByClassName(" market_listing_price_listings_block")[0];
+                    let myItemBlocksHTML = `<div class="market_listing_right_cell market_listing_my_price market_my_listing_${blockNames[key].toLowerCase()}"></div>`;
+                    countBlock.insertAdjacentHTML('afterend', DOMPurify.sanitize(myItemBlocksHTML));
+                }
+
                 let orderHref = marketItems[index].href;
                 let orderPrice = +marketItems[index].getElementsByClassName('normal_price')[0].innerText.match(/([0-9]*\.[0-9]+|[0-9]+)/g);
-                let orderCount = +marketItems[index].getElementsByClassName('market_listing_num_listings_qty')[0].innerText.replace( /[^+\d]/g, '');
+                let orderCount = +marketItems[index].getElementsByClassName('market_listing_num_listings_qty')[0].innerText.replace(/[^+\d]/g, '');
                 var appId = marketItems[index].firstElementChild.dataset.appid;
                 var aId = marketItems[index].firstElementChild.id;
                 var hashName = fixedEncodeURIComponent(marketItems[index].firstElementChild.dataset.hashName);
@@ -126,21 +127,22 @@ async function marketSearch() {
                 let minProfitVal = (document.getElementById("minProfitVal").value === undefined || document.getElementById("minProfitVal").value === null || document.getElementById("minProfitVal").value === '') ? -Infinity : document.getElementById("minProfitVal").value;
                 let minSellVal = (document.getElementById("minSellVal").value === undefined || document.getElementById("minSellVal").value === null || document.getElementById("minSellVal").value === '') ? 0 : document.getElementById("minSellVal").value;
                 let onlyProfitable = (document.getElementById("onlyProfitable").checked === undefined || document.getElementById("onlyProfitable").checked === null || document.getElementById("onlyProfitable").checked === '') ? 0 : document.getElementById("onlyProfitable").checked;
-                if (minPriceVal >= orderPrice ||  minCountVal >= orderCount) document.getElementById(aId).style.display = "none";
+                if (minPriceVal >= orderPrice || minCountVal >= orderCount) document.getElementById(aId).style.display = "none";
                 let sourceCode = await globalThis.httpErrorPause(orderHref, CountRequesrs, scanIntervalSET, errorPauseSET);
                 let item_id = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
                 let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                 let priceHistory = await getItemHistory(appId, hashName, selectLang);
                 let pricesProfit = InterVal(priceJSON, coefficient);
-                if ( minProfitVal >= pricesProfit.actualProfit || minSellVal >= priceHistory.countSellSevenDays ) {
+                if (minProfitVal >= pricesProfit.actualProfit || minSellVal >= priceHistory.countSellSevenDays) {
                     document.getElementById(aId).style.display = "none";
                 }
-                if (onlyProfitable && pricesProfit.coefPrice >= pricesProfit.actualProfit ) {
+                if (onlyProfitable && pricesProfit.coefPrice >= pricesProfit.actualProfit) {
                     document.getElementById(aId).style.display = "none";
-                    console.log(onlyProfitable, pricesProfit.coefPrice );
+                    console.log(onlyProfitable, pricesProfit.coefPrice);
                 }
-                displayProfitable(pricesProfit, aId, priceJSON,  priceHistory); 
+                displayProfitable(pricesProfit, aId, priceJSON, priceHistory);
+
             }
             return;
         }
@@ -161,7 +163,7 @@ function InterVal(priceJSON, coefficient = 0.35) {
     ProfitableList.realPrice = "Nan";
     var priceWithoutFee = null;
     if (priceJSON.lowest_sell_order !== null && priceJSON.highest_buy_order !== null) {
-        var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.lowest_sell_order/100}`));
+        var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.lowest_sell_order / 100}`));
         var nAmount = inputValue;
         if (inputValue > 0 && nAmount == parseInt(nAmount)) {
             var feeInfo = CalculateFeeAmount(nAmount, g_rgWalletInfo['wallet_publisher_fee_percent_default']);
@@ -169,47 +171,42 @@ function InterVal(priceJSON, coefficient = 0.35) {
             priceWithoutFee = v_currencyformat(nAmount, GetCurrencyCode(g_rgWalletInfo['wallet_currency']));
         }
         ProfitableList.realPrice = getNumber(priceWithoutFee);
-        ProfitableList.actualProfit = (ProfitableList.realPrice - (priceJSON.highest_buy_order/100)).toFixed(2);
-        ProfitableList.coefPrice = ((priceJSON.highest_buy_order/100) * coefficient).toFixed(2);
+        ProfitableList.actualProfit = (ProfitableList.realPrice - (priceJSON.highest_buy_order / 100)).toFixed(2);
+        ProfitableList.coefPrice = ((priceJSON.highest_buy_order / 100) * coefficient).toFixed(2);
     }
     return ProfitableList;
 }
 
-function displayProfitable(ProfitableList, aId, priceJSON, historySell) {
+function displayProfitable(pricesProfit, aId, priceJSON, priceHistory) {
+
     let divItemBlock = document.getElementById(aId);
     let spanPriceBlock = divItemBlock.getElementsByClassName("normal_price")[0];
+    let sellsHistoryHTML = `
+        <span class="market_listing_num_listings_qty">1d sell: ${priceHistory.countSell.toLocaleString()}</span>
+        <span class="market_listing_num_listings_qty">7d sell: ${priceHistory.countSellSevenDays.toLocaleString()}</span>`;
+    spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(sellsHistoryHTML));
+
     let spanCountBlock = divItemBlock.getElementsByClassName("market_listing_num_listings_qty")[0];
-    let spanRealPriceString = document.createElement('span');
-    let spanActualProfitString = document.createElement('span');
-    let spanCoefPriceString = document.createElement('span');
-    let spanCountSale = document.createElement('span');
-    let spanCountWeekSale = document.createElement('span');
-    spanRealPriceString.innerText = "(" + ProfitableList.realPrice + ")";
-    spanActualProfitString.innerText = "Profit: " + ProfitableList.actualProfit;
-    spanCoefPriceString.innerText = "K. Profit: " + ProfitableList.coefPrice;
-    spanCountSale.innerText = '1d sell: ' + historySell.countSell.toLocaleString();
-    spanCountWeekSale.innerText = '7d sell: ' + historySell.countSellSevenDays.toLocaleString();
-    spanRealPriceString.className = "normal_price";
-    spanActualProfitString.className = "normal_price";
-    spanCoefPriceString.className = "normal_price";
-    spanCountSale.className = "market_listing_num_listings_qty";
-    spanCountWeekSale.className = "market_listing_num_listings_qty";
-    spanPriceBlock.append(spanRealPriceString);
-    spanPriceBlock.prepend(spanActualProfitString);
-    spanPriceBlock.prepend(spanCoefPriceString);
-    spanCountBlock.append(spanCountSale);
-    spanCountBlock.append(spanCountWeekSale);
-    const OrderTable = priceJSON.sell_order_table + priceJSON.buy_order_table;
-    const parser = new DOMParser();
-    const parsed = parser.parseFromString(OrderTable, `text/html`);
-    const tags = parsed.getElementsByTagName(`body`);
-    for (const tag of tags) {
-        divItemBlock.prepend(tag);
-    }
-    divItemBlock.style.backgroundColor = setSearchSolor(ProfitableList);
+    let ProfitItemHTML = `
+    <span class="market_listing_num_listings_qty">K. Profit: ${pricesProfit.coefPrice}</span>
+    <span class="market_listing_num_listings_qty">Profit: ${pricesProfit.actualProfit}</span>
+    `;
+    spanCountBlock.insertAdjacentHTML('afterbegin', DOMPurify.sanitize(ProfitItemHTML));
+
+    let realPriceHTML = `<span class="normal_price">(${pricesProfit.realPrice})</span>`;
+    spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(realPriceHTML));
+
+    let myListingSellTabHTML = `<span class="market_table_value market_table_price_json_sell">${priceJSON.sell_order_table}</span>`;
+    divItemBlock.getElementsByClassName("market_my_listing_sell_tab")[0].insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingSellTabHTML));
+
+    let myListingBuyTabHTML = `<span class="market_table_value market_table_price_json_buy">${priceJSON.buy_order_table}</span>`;
+    divItemBlock.getElementsByClassName("market_my_listing_buy_tab")[0].insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyTabHTML));
+
+    divItemBlock.style.backgroundColor = setSearchSolor(pricesProfit);
+
 }
-function setSearchSolor(ProfitableList){
+function setSearchSolor(ProfitableList) {
     if (+ProfitableList.actualProfit > +ProfitableList.coefPrice) return "#09553c";
     if (+ProfitableList.actualProfit > 0.1 && +ProfitableList.actualProfit <= +ProfitableList.coefPrice) return "#61632b";
-    if (+ProfitableList.actualProfit <= 0.1 ) return "#602F38";
+    if (+ProfitableList.actualProfit <= 0.1) return "#602F38";
 }

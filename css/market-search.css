@@ -129,21 +129,24 @@ market_listing_row {
     min-width: 10em !important;
 }
 
-/* блок таблицы цен */
-.market_listing_row > body {
-    margin: 0 auto;
-    position: absolute !important;
-    margin-top: -15px;
-}
-/* название товара справа */
-.market_listing_item_name_block {
-    max-width: 270px !important;
-    /* float: right !important; */
-    margin-left: 33%;
-}
-/* картика товара справа */
-.market_listing_item_img{
-    /* float: right !important; */
-    margin-left: 30% !important;
+.market_listing_row {
+    height: 135px;
 }
 
+.market_listing_table_header{
+    display: none;
+}
+
+/* заголовки поиска */
+.my_market_listing_table_header{
+    background-color: #324965;
+    margin-bottom: 30px !important;
+    color: #AFAFAF;
+    font-size: 85.7%;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0);
+    margin: 8px 0 10px;
+    height: 2.25em;
+    vertical-align: middle;
+    line-height: 2.25em;
+}

@@ -2,6 +2,30 @@ body {
     color: #FAFAFA !important;
 }
 
+/* зелёный блок */
+.market_header_bg{
+    display: none !important;
+}
+
+/* стиль бока поиска в истории */
+.market_history_sreach{
+    position: absolute;
+    margin-left: 22em;
+    margin-top: 13px;
+}
+
+.market_custom_tab_well_tab_contents {
+    display: block;
+    line-height: 22px;
+    padding: 0 4px;
+    margin: 0px;
+    font-size: 14px;
+    font-family: "Motiva Sans", Sans-serif;
+    font-weight: 300;
+    text-align: center;
+    color: #969aa1;
+}
+
 /* блок отмена маленький */
 .market_listing_edit_.button_orderss {
     width: 80px !important;
@@ -120,4 +144,41 @@ th:first-child, th:first-child+th {
 
 #sreach-filter, #displayNoneListingCanceledCreated {
     margin-left: 50px;
+}
+
+
+
+
+/* скрол в истории */
+#tabContentsMyActiveMarketListingsTable,
+#tabContentsMyMarketHistory,
+#custom_results_html{
+    overflow:scroll;
+    overflow-x:hidden;
+}
+
+#tabContentsMyActiveMarketListingsTable,
+#tabContentsMyMarketHistory{
+    max-height: 600px;
+}
+
+#custom_results_html{
+    max-height: 460px;
+}
+
+#tabContentsMyActiveMarketListingsTable::-webkit-scrollbar,
+#tabContentsMyMarketHistory::-webkit-scrollbar,
+#custom_results_html::-webkit-scrollbar{
+    width: 8px; /* ширина для вертикального скролла */
+    background-color: #003618;
+    
+}
+/* ползунок скроллбара */
+::-webkit-scrollbar-thumb {
+    background-color: #005c0c;
+    border-radius: 1em;
+    box-shadow: inset 1px 1px 10px #004d39;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: #00331a;
 }

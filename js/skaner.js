@@ -155,7 +155,7 @@ function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.35, it
         myRealPrice =  NextPrice(priceJSON.highest_buy_order, "real");
     }
 
-/*     let realPriceString = `${chrome.i18n.getMessage("priceWithoutCommissionDescription")} ${realPrice}`;
+    /*   let realPriceString = `${chrome.i18n.getMessage("priceWithoutCommissionDescription")} ${realPrice}`;
     let actualProfitString = `${chrome.i18n.getMessage("profitAtTheMomentDescription")} ${actualProfit}`;
     let coefPriceString = `${chrome.i18n.getMessage("coefficientPriceAtTheMomentDescription")} ${coefPrice}`;
     let myProfitString = `${chrome.i18n.getMessage("myProfitDescription")} ${myProfit}`;
