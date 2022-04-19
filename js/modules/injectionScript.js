@@ -68,7 +68,6 @@ function showHistory(OrdersCount = 500) {
                     elMyHistoryContents.innerHTML = response.results_html;
                 
                     MergeWithAssetArray( response.assets );
-                    eval( response.hovers );
                 
                     g_oMyHistory = new CAjaxPagingControls(
                             {
@@ -82,7 +81,6 @@ function showHistory(OrdersCount = 500) {
                         
                     g_oMyHistory.SetResponseHandler( function( response ) {
                         MergeWithAssetArray( response.assets );
-                        eval( response.hovers );
                     });
                 }
             },
