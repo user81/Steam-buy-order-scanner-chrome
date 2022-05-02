@@ -20,7 +20,13 @@
 let scanInterval = document.getElementById("scanInterval");
 let errorPause = document.getElementById("errorPause");
 let coefficientHtml = document.getElementById("coefficient");
-let checkboxRun = document.getElementById("run");
+let checkboxRunBuyOrders = document.getElementById("runBuyOrders");
+
+let checkboxrunSaleOrders = document.getElementById("runSaleOrders");
+let checkboxRunSearch = document.getElementById("runSearch");
+let checkboxDisplayHistory = document.getElementById("displayHistory");
+
+
 let save = document.getElementById("save");
 let selectLang = document.getElementById("selectLang");
 let quantity = document.getElementById("quantity");
@@ -42,7 +48,10 @@ chrome.storage.local.get([
 	"coefficient",
 	"quantity",
 	"selectLang",
-	"run",
+	"runBuyOrders",
+	"runSaleOrders",
+	"runSearch",
+	"displayHistory",
 	"quantityItemsInHistory",
 ],
 	(setings) => {
@@ -50,8 +59,10 @@ chrome.storage.local.get([
 		errorPause.value = setings.errorPauseSET;
 		coefficientHtml.value = setings.coefficient;
 		quantity.value = setings.quantity;
-		checkboxRun.checked = setings.run;
-
+		checkboxRunBuyOrders.checked = setings.runBuyOrders;
+		checkboxrunSaleOrders.checked = setings.runSaleOrders;
+		checkboxRunSearch.checked = setings.runSearch;
+		checkboxDisplayHistory.checked = setings.displayHistory;
 		quantityItemsInHistory.value = ( setings.quantityItemsInHistory > 500 || setings.quantityItemsInHistory <= 0) ? 500 : setings.quantityItemsInHistory;
 
 		for (let index = 0; index < selectLang.length; index++) {
@@ -69,7 +80,10 @@ save.addEventListener("click", function () {
 		coefficient: coefficientHtml.value,
 		quantity: quantity.value,
 		selectLang: selectLang.selectedOptions[0].value,
-		run: checkboxRun.checked,
+		runBuyOrders: checkboxRunBuyOrders.checked,
+		runSaleOrders: checkboxrunSaleOrders.checked,
+		runSearch: checkboxRunSearch.checked,
+		displayHistory: checkboxDisplayHistory.checked,
 		quantityItemsInHistory: quantityItemsInHistory.value,
 	});
 });

@@ -21,30 +21,35 @@ buyOrderHeader.insertAdjacentHTML('afterend', DOMPurify.sanitize(html));
 
 //headersNames массив элементов
 let headersNames = {
-"Price": 
-    {"name": "Price",
-    "dataSorttype":"price",
-    "classSorttype": "market_listing_right_cell market_listing_their_price market_sortable_column"
+    "Price":
+    {
+        "name": "Price",
+        "dataSorttype": "price",
+        "classSorttype": "market_listing_right_cell market_listing_their_price market_sortable_column"
     },
-"Count": 
-    {"name": "Count",
-    "dataSorttype":"quantity",
-    "classSorttype": "market_listing_right_cell market_listing_num_listings market_sortable_column",
+    "Count":
+    {
+        "name": "Count",
+        "dataSorttype": "quantity",
+        "classSorttype": "market_listing_right_cell market_listing_num_listings market_sortable_column",
     },
-"Buy_tab":
-    {"name": "Buy_tab",
-    "dataSorttype":"",
-    "classSorttype": "market_listing_right_cell market_listing_my_orders",
+    "Buy_tab":
+    {
+        "name": "Buy_tab",
+        "dataSorttype": "",
+        "classSorttype": "market_listing_right_cell market_listing_my_orders",
     },
-"Sell_tab":
-    {"name": "Sell_tab",
-    "dataSorttype":"",
-    "classSorttype": "market_listing_right_cell market_listing_my_orders",
+    "Sell_tab":
+    {
+        "name": "Sell_tab",
+        "dataSorttype": "",
+        "classSorttype": "market_listing_right_cell market_listing_my_orders",
     },
-"Name":
-    {"name": "Name",
-    "dataSorttype":"name",
-    "classSorttype": "market_sortable_column market_listing_my_name",
+    "Name":
+    {
+        "name": "Name",
+        "dataSorttype": "name",
+        "classSorttype": "market_sortable_column market_listing_my_name",
     },
 };
 //!! наптсать вывод заголовка
@@ -64,21 +69,23 @@ chrome.storage.local.get([
     "errorPauseSET",
     "coefficient",
     "selectLang",
-    "run",
+    "runSearch",
 
 ], function (data) {
 
-    if (data.run) {
+    if (data.runSearch) {
         coefficient = + data.coefficient;
         selectLang = data.selectLang;
         CountRequesrs = 5;
         scanIntervalSET = + data.scanIntervalSET;
         errorPauseSET = + data.errorPauseSET;
+        displaySearchRunScan();
         getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET);
+        
     }
 });
-displaySearchRunScan();
-function displaySearchRunScan() {
+
+async function displaySearchRunScan() {
     let divRunScan = document.getElementById("market_search");
     if (document.getElementById("runSearchScan") == null) {
         let scanerMarketSearchHTML = `
@@ -146,11 +153,11 @@ function ordersReload() {
     changeSearchSize(pageSize);
     StopScan = true;
 }
-document.getElementById("reloadScan").addEventListener("click", () => { ordersReload(); });
-document.getElementById("runSearchScan").addEventListener("click", () => { marketSearch(); StopScan = false; });
-document.getElementById("runLoadOrder").addEventListener("click", () => { loadOrdersListinSearch(); });
 
 async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET) {
+    document.getElementById("reloadScan").addEventListener("click", () => { ordersReload(); });
+    document.getElementById("runSearchScan").addEventListener("click", () => { marketSearch(); StopScan = false; });
+
     /**
      * https://steamcommunity.com/market/search?select=value2&select=value2&select=value2&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=tag_weapon_knife_flip&appid=730&q=#p2_popular_desc
      * https://steamcommunity.com/market/search?select=0&select=100&appid=730&q=Dreams#p1_default_desc
@@ -163,22 +170,22 @@ async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET
     let Urlfragment;
 
     let getArraySortingAppid = function (searchUrl) {
-        if (searchUrl!== null) {
+        if (searchUrl !== null) {
             let appId = searchUrl[0].match(/(?<=appid\=)\d*/)[0];
             let AppidSortingVal = searchUrl[0].match(/(?<=\#).*/)[0];
             let arraySortingVal = AppidSortingVal.split("_");
-            console.log({appId, arraySortingVal});
-            return {appId, arraySortingVal};
+            console.log({ appId, arraySortingVal });
+            return { appId, arraySortingVal };
         }
     }
 
-    async function ServerRequestAddSearchResults(searchUrlСategory, start=0, count = 100) {
-        if (searchUrlСategory!== null) {
+    async function ServerRequestAddSearchResults(searchUrlСategory, start = 0, count = 100) {
+        if (searchUrlСategory !== null) {
             ArraySortingAppidObject = getArraySortingAppid(searchUrlСategory);
             if (ArraySortingAppidObject) {
                 let categoryVal = searchUrlСategory[0].match(/category.*(?=\&)/g).join('&');
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
-                Urlfragment =`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=${start}&count=${count}&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}&${categoryVal}`;
+                Urlfragment = `https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=${start}&count=${count}&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}&${categoryVal}`;
                 marketSeachInfo = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=0&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}&${categoryVal}`, CountRequesrs, scanIntervalSET, errorPauseSET));
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
             }
@@ -186,7 +193,7 @@ async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET
             let searchUrl = window.location.href.match(/search\?(.*)/);
             let ArraySortingAppidObject = getArraySortingAppid(searchUrl);
             if (ArraySortingAppidObject) {
-                Urlfragment =`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=0&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}`;
+                Urlfragment = `https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=0&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}`;
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                 marketSeachInfo = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=0&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}`, CountRequesrs, scanIntervalSET, errorPauseSET));
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
@@ -198,14 +205,14 @@ async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET
     let queryItem = document.getElementById("findItemsSearchBox");
     if (queryItem !== null) {
         let marketSeachInfo = await ServerRequestAddSearchResults(searchUrlСategory);
-        const pageSize = Math.ceil(marketSeachInfo.total_count/100);
+        const pageSize = Math.ceil(marketSeachInfo.total_count / 100);
         console.log(pageSize, Urlfragment);
-        selectBlockPagesize(["StartPageNumber","EndPageNumber"],pageSize);
+        selectBlockPagesize(["StartPageNumber", "EndPageNumber"], pageSize);
     }
 
 
 
-let runLoadOrder = document.getElementById("runLoadOrder");
+    let runLoadOrder = document.getElementById("runLoadOrder");
 
     runLoadOrder.onclick = async function () {
         StartPageNumber = +document.getElementById("StartPageNumber").value;
@@ -215,18 +222,18 @@ let runLoadOrder = document.getElementById("runLoadOrder");
             let changeCountLoaders = CountLoaders;
             console.log(StartPageNumber, EndPageNumber, changeCountLoaders);
             if (changeCountLoaders <= 0) return;
-            for (let index = 0; index < CountLoaders; index+=100) {
+            for (let index = 0; index < CountLoaders; index += 100) {
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                 let marketSeachJSON = await ServerRequestAddSearchResults(searchUrlСategory);
                 console.log(marketSeachJSON);
                 let myCustomMarketTableHTML = document.getElementById("BG_bottom");
                 myCustomMarketTableHTML.insertAdjacentHTML('beforeend', marketSeachJSON.results_html);
                 document.getElementById("numberOfOperations").textContent = `(${CountLoaders})`;
-                document.getElementById("operationsProcess").textContent = `(${index +100})`;
+                document.getElementById("operationsProcess").textContent = `(${index + 100})`;
             }
         }
 
-    } 
+    }
     /*
     нумерация не работает
     https://steamcommunity.com/market/search/render/?query=P90&start=0&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2
@@ -237,11 +244,11 @@ let runLoadOrder = document.getElementById("runLoadOrder");
 
 
 }
-function selectBlockPagesize (idArr, pageSize) {
+function selectBlockPagesize(idArr, pageSize) {
     idArr.forEach((idVal, indexArr) => {
         let ElementDom = document.getElementById(idVal);
         for (let index = 0; index < pageSize; index++) {
-            ElementDom.insertAdjacentHTML('beforeend', `<option value="${(+index + indexArr)*100}">${(+index + indexArr)*100}</option>`);
+            ElementDom.insertAdjacentHTML('beforeend', `<option value="${(+index + indexArr) * 100}">${(+index + indexArr) * 100}</option>`);
         }
     });
 }
@@ -252,18 +259,16 @@ https://steamcommunity.com/market/search/render/?query=q&start=0&count=100&searc
 https://steamcommunity.com/market/search/render/?query=s&start=100&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=tag_weapon_usp_silencer */
 
 
-       /*  let searchUrl = window.location.href.match(/search\?(.*)/); */// 1: "appid=730#p2_popular_desc" https://steamcommunity.com/market/search?appid=730#p1_popular_desc
-    // 1: "appid=730#p2_popular_desc" https://steamcommunity.com/market/search?appid=730#p1_popular_desc
+/*  let searchUrl = window.location.href.match(/search\?(.*)/); */// 1: "appid=730#p2_popular_desc" https://steamcommunity.com/market/search?appid=730#p1_popular_desc
+// 1: "appid=730#p2_popular_desc" https://steamcommunity.com/market/search?appid=730#p1_popular_desc
 /*  
     https://steamcommunity.com/market/search?select=value2&select=value2&select=value2&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=tag_weapon_knife_flip&appid=730&q=#p2_popular_desc
 
     category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2
     https://steamcommunity.com/market/search?q=&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2&appid=730#p2_popular_desc
-    https://steamcommunity.com/market/search/render/?query=&start=10&count=10&search_descriptions=0&sort_column=popular&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2      */                                                                                                                                                                           
+    https://steamcommunity.com/market/search/render/?query=&start=10&count=10&search_descriptions=0&sort_column=popular&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2      */
 
-async function loadOrdersListinSearch() {
 
-}
 
 async function marketSearch() {
     let numberOfRepetitions = 10;
@@ -279,7 +284,7 @@ async function marketSearch() {
             for (let index = 0; index < marketItems.length; index++) {
                 if (StopScan) return;
                 console.log(marketItems[index].firstElementChild.dataset.scanned);
-                if (marketItems[index].firstElementChild.dataset.scanned === undefined){
+                if (marketItems[index].firstElementChild.dataset.scanned === undefined) {
 
                     //!! повторяется надо будет исправить
                     let blockNames = ["Buy_tab", "Sell_tab"];
@@ -336,27 +341,27 @@ async function marketSearch() {
             <span class="market_listing_num_listings_qty">1d sell: ${priceHistory.countSell.toLocaleString()}</span>
             <span class="market_listing_num_listings_qty">7d sell: ${priceHistory.countSellSevenDays.toLocaleString()}</span>`;
         spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(sellsHistoryHTML));
-    
+
         let spanCountBlock = divItemBlock.getElementsByClassName("market_listing_num_listings_qty")[0];
         let ProfitItemHTML = `
         <span class="market_listing_num_listings_qty">K. Profit: ${pricesProfit.coefPrice}</span>
         <span class="market_listing_num_listings_qty">Profit: ${pricesProfit.actualProfit}</span>
         `;
         spanCountBlock.insertAdjacentHTML('afterbegin', DOMPurify.sanitize(ProfitItemHTML));
-    
+
         let realPriceHTML = `<span class="normal_price">(${pricesProfit.realPrice})</span>`;
         spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(realPriceHTML));
-    
+
         let myListingSellTabHTML = `<span class="market_table_value market_table_price_json_sell">${priceJSON.sell_order_table}</span>`;
         divItemBlock.getElementsByClassName("market_my_listing_sell_tab")[0].insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingSellTabHTML));
-    
+
         let myListingBuyTabHTML = `<span class="market_table_value market_table_price_json_buy">${priceJSON.buy_order_table}</span>`;
         divItemBlock.getElementsByClassName("market_my_listing_buy_tab")[0].insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyTabHTML));
-    
+
         divItemBlock.firstElementChild.style.backgroundColor = setSearchSolor(pricesProfit);
         divItemBlock.firstElementChild.dataset.scanned = "true";
-        
-    
+
+
     }
 
 

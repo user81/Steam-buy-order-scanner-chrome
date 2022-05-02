@@ -95,23 +95,71 @@
       </div>
     </div>
 
-    <div>
-      <a href="#runPopup" class="run info-details">?</a>
-      <label for="run" data-localize="__MSG_runScan__">Run Scan</label>
-      <input type="checkbox" class="input-value" id="run" name="run">
+  </div>
+
+  <div class="pading-top">
+    <a href="#runScanInfoPopup" class="info-details">?</a>
+    <p data-localize="__MSG_runScan__">Run Scan</p>
+  </div>
+
+  <div id="runScanInfoPopup" class="overlay">
+    <div class="popup">
+        <p data-localize="__MSG_runScanTitle__">Scanning buys and sells.</p>
+        <a class="close" href="#">x</a>
+        <div class="content" data-localize="__MSG_runScanDescription__">
+            <p>Choose what exactly you want to scan: 1) items for sale 2) items for sale To apply the settings, click save settings. In order for the script to apply to the page, you need to refresh it by pressing ↶ or F5, or simply re-login. Scanning will run in the background.</p>
+        </div>
     </div>
-    <div id="runPopup" class="overlay light">
+  </div>
+  <div class="line">
+
+    <div>
+      <a href="#runBuyOrdersPopup" class="info-details">?</a>
+      <label for="runBuyOrders" data-localize="__MSG_runBuyOrdersScan__">Buy orders</label>
+      <input type="checkbox" class="input-value-checkbox" id="runBuyOrders" name="runBuyOrders">
+    </div>
+    <div id="runBuyOrdersPopup" class="overlay light">
       <a class="cancel" href="#"></a>
       <div class="popup-info">
         <div class="content">
-          <p><b data-localize="__MSG_runScanInfo__">Scanning will run in the background.</b></p>
+          <p><b data-localize="__MSG_runBuyOrdersScanInfo__">Scanned buy orders.</b></p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <a href="#runSaleOrdersPopup" class="info-details">?</a>
+      <label for="runSaleOrders" data-localize="__MSG_runSaleOrdersScan__">Sale orders</label>
+      <input type="checkbox" class="input-value-checkbox" id="runSaleOrders" name="runSaleOrders">
+    </div>
+    <div id="runSaleOrdersPopup" class="overlay light">
+      <a class="cancel" href="#"></a>
+      <div class="popup-info">
+        <div class="content">
+          <p><b data-localize="__MSG_runSaleOrdersScanInfo__">Scanned sale orders.</b></p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <a href="#runSearchPopup" class="info-details">?</a>
+      <label for="runSearch" data-localize="__MSG_ __">Run search</label>
+      <input type="checkbox" class="input-value-checkbox" id="runSearch" name="runSearch">
+    </div>
+    <div id="runSearchPopup" class="overlay light">
+      <a class="cancel" href="#"></a>
+      <div class="popup-info">
+        <div class="content">
+          <p><b data-localize="__MSG_ __">Scanned sale orders.</b></p>
         </div>
       </div>
     </div>
 
   </div>
-  <br>
-  <p data-localize="__MSG_historyTitle__">History</p>
+
+  <div  class="pading-top">
+    <p data-localize="__MSG_historyTitle__">History</p>
+  </div>
 
   <div class="line">
 
@@ -129,34 +177,48 @@
         </div>
       </div>
     </div>
+
+    <div>
+      <a href="#displayHistoryPopup" class="info-details">?</a>
+      <label for="displayHistory" data-localize="__MSG_displayHistory__">Display history</label>
+      <input type="checkbox" class="input-value-checkbox" id="displayHistory" name="displayHistory">
+    </div>
+    <div id="displayHistoryPopup" class="overlay light">
+      <a class="cancel" href="#"></a>
+      <div class="popup-info">
+        <div class="content">
+          <p><b data-localize="__MSG_displayHistoryInfo__">Display history on the same tab as buy orders.</b></p>
+        </div>
+      </div>
+    </div>
     
     <!-- История конец -->
 
-    <div class="submit-button">
+    <div class="submit-button pading-top">
       <button id="save" data-localize="__MSG_buttonSave__">Save settings</button>
-    </div>
-    
-  </div>
-
-  <br>
-  <div class="solial-list">
-    <div class="swg-icon-block">
-      <div class="swg-steam">
-        <a  href="https://steamcommunity.com/groups/order_scanner" target="_blank"></a>
-      </div>
-    </div>
-    <div class="swg-icon-block">
-      <text>
-        <div class="swg-discord">
-          <a  href="https://discord.gg/XHEDpcy" target="_blank"></a>
+      
+      <div class="solial-list floatright">
+        <div class="swg-icon-block">
+          <div class="swg-steam">
+            <a  href="https://steamcommunity.com/groups/order_scanner" target="_blank"></a>
+          </div>
         </div>
-      </text>
-
-    </div>
-    <div class="swg-icon-block">
-      <div class="swg-donate">
-        <a  href="https://steamcommunity.com/sharedfiles/filedetails/?id=2598908969" target="_blank"></a>
+        <div class="swg-icon-block">
+          <text>
+            <div class="swg-discord">
+              <a  href="https://discord.gg/XHEDpcy" target="_blank"></a>
+            </div>
+          </text>
+    
+        </div>
+        <div class="swg-icon-block">
+          <div class="swg-donate">
+            <a  href="https://steamcommunity.com/sharedfiles/filedetails/?id=2598908969" target="_blank"></a>
+          </div>
+        </div>
+    
       </div>
+
     </div>
 
   </div>

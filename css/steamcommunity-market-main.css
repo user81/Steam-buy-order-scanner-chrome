@@ -149,15 +149,16 @@ th:first-child, th:first-child+th {
 
 
 
+
 /* скрол в истории */
-#tabContentsMyActiveMarketListingsTable,
+#tabContentsMyActiveMarketListingsRows,
 #tabContentsMyMarketHistory,
 #custom_results_html{
     overflow:scroll;
     overflow-x:hidden;
 }
 
-#tabContentsMyActiveMarketListingsTable,
+#tabContentsMyActiveMarketListingsRows,
 #tabContentsMyMarketHistory{
     max-height: 600px;
 }
@@ -166,19 +167,19 @@ th:first-child, th:first-child+th {
     max-height: 460px;
 }
 
-#tabContentsMyActiveMarketListingsTable::-webkit-scrollbar,
+#tabContentsMyActiveMarketListingsRows::-webkit-scrollbar,
 #tabContentsMyMarketHistory::-webkit-scrollbar,
 #custom_results_html::-webkit-scrollbar{
     width: 8px; /* ширина для вертикального скролла */
-    background-color: #003618;
+    background-color: #0f151e;
     
 }
 /* ползунок скроллбара */
 ::-webkit-scrollbar-thumb {
-    background-color: #005c0c;
+    background-color: #233347;
     border-radius: 1em;
-    box-shadow: inset 1px 1px 10px #004d39;
+    box-shadow: inset 1px 1px 10px #293d55;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background-color: #00331a;
+    background-color: #151f2b;
 }

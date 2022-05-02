@@ -63,9 +63,29 @@
         "message": "Run Scan",
         "description": "Description of the scan start."
     },
-    "runScanInfo": {
-        "message": "Scanning will run in the background.",
+    "runScanTitle": {
+        "message": "Scanning buys and sells.",
+        "description": "Header scanning buys and sells."
+    },
+    "runScanDescription": {
+        "message": "Choose what exactly you want to scan: 1) items for sale 2) items for sale To apply the settings, click save settings. In order for the script to apply to the page, you need to refresh it by pressing ↶ or F5, or simply re-login. Scanning will run in the background.",
         "description": "Pop-up window that displays a hint to start scanning."
+    },
+    "runBuyOrdersScan":{
+        "message": "Buy orders",
+        "description": "Name buy orders"
+    },
+    "runBuyOrdersScanInfo":{
+        "message": "Scanned buy orders.",
+        "description": "Description buy orders."
+    },
+    "runSaleOrdersScan":{
+        "message": "Sale orders",
+        "description": "Name sale orders"
+    },
+    "runSaleOrdersScanInfo":{
+        "message": "Scanned sale orders.",
+        "description": "Description sale orders."
     },
     "historyTitle": {
         "message": "History",
@@ -78,6 +98,14 @@
     "sizeOfHistoryInfo": {
         "message": "The number of records in history should be no more than 500.",
         "description": "Pop-up window that displays a hint for the size of the story."
+    },
+    "displayHistory": {
+        "message": "Display history",
+        "description": "Description title display history."
+    },
+    "displayHistoryInfo": {
+        "message": "Display history on the same tab as buy orders.",
+        "description": "A pop-up window that displays a history display hint."
     },
     "buttonSave": {
         "message": "Save settings",

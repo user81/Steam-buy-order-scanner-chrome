@@ -1,12 +1,12 @@
 body {
-  font-family:  sans-serif;
+  font-family: sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 13px; 
-  background-color: rgb(0, 58, 50);
+  font-size: 13px;
+  background-color: rgb(76, 88, 68);
   margin: 0px !important;
-  width: 250px;
-  border: 3px solid rgb(3, 140, 121);
+  width: 366px;
+  border: 3px outset rgb(0 0 0 / 21%);
   padding: 10px 10px 10px 10px;
   line-height: 175%;
   color: white;
@@ -18,67 +18,129 @@ p {
   margin: 0px;
   padding: 0px;
 }
-a{
+
+.pading-top {
+  display: block;
+  padding-top: 10px;
+}
+
+a {
   width: 100%;
   height: 100%;
 }
-button{
+
+button {
   color: white;
-  border-radius: 20%;
-  background-color: rgb(58, 70, 82);
+  padding: 10px;
+  background-color: rgb(76, 88, 68);
 }
 
-.selectLang, .floatright{
+.selectLang,
+.floatright {
   float: right;
 }
-.selectLang{
+
+.selectLang {
+  background-color: rgb(62, 70, 55);
+  color: #fff;
   width: 57px;
 }
 
-.input-value{
+.selectLang:focus {
+  background-color: rgb(62, 70, 55);
+}
+
+.input-value {
   width: 50px;
   height: 15px;
   float: right;
   overflow: hidden;
-  background-color: rgb(3, 140, 121);
+  background-color: rgb(62, 70, 55);
   color: white;
 }
 
+.input-value-checkbox:after {
+  content: " ";
+  background-color: rgb(62, 70, 55);
+  display: inline-block;
+  visibility: visible;
+}
+
+.input-value-checkbox:checked:after {
+  content: "\2714";
+  box-shadow: 0px 2px 4px rgba(155, 155, 155, 0.15);
+  height: 14px;
+  display: block;
+  width: 13px;
+  text-align: center;
+  color: rgb(195, 180, 79);
+  font-size: 12px;
+}
+
+input[type='checkbox'] {
+  width: 14px !important;
+  height: 14px !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+  line-height: 1em;
+  background: rgb(62, 70, 55);
+}
+
+input[type="checkbox"i]:focus {
+  outline-offset: none;
+}
+
+input[type="checkbox"]:focus,
+input[type="number"]:focus,
+input[type="text"]:focus,
+select:focus {
+  outline: 0;
+}
+
+
 .line::before {
   content: '';
-  width: 50%;
-  background-color: rgb(3, 140, 121);
+  width: 84%;
+  background-color: rgb(0 0 0 / 21%);
   height: 3px;
   margin-bottom: 8px;
   display: block;
 }
 
-.info-details{
+.info-details {
   color: #fff;
+  text-decoration: none;
   padding-left: 4px;
   padding-right: 4px;
   border-radius: 50%;
-  background-color: rgb(3, 140, 121);
-  border: 1px solid rgb(3, 140, 121);
+  background-color: rgb(62, 70, 55);
+  border: 2px inset -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
 }
 
-.submit-button{
+.submit-button {
   margin-top: 4px;
   margin-bottom: 7px;
 }
 
-.solial-list{
+.solial-list {
   display: flex;
   justify-content: center;
+  flex-wrap: nowrap;
+  align-items: center;
+  max-width: 181px;
 }
 
-.swg-icon-block{
-  margin-right:15px;
-  margin-left:15px;
+.swg-icon-block {
+  margin-right: 15px;
+  margin-left: 15px;
   padding: 1px;
 }
 
-.swg-steam, .swg-discord, .swg-donate{
+.swg-steam,
+.swg-discord,
+.swg-donate {
   background-repeat: no-repeat, repeat;
   width: 40px;
   height: 40px;
@@ -90,33 +152,28 @@ button{
 
 }
 
-.swg-steam:hover, .swg-steam:focus, .swg-discord:hover, .swg-discord:focus , .swg-donate:hover, .swg-donate:focus{
-  
-  filter: invert(35%) sepia(65%) saturate(2878%) hue-rotate(
-    146deg) brightness(113%) contrast(97%);
+.swg-steam:hover,
+.swg-steam:focus,
+.swg-discord:hover,
+.swg-discord:focus,
+.swg-donate:hover,
+.swg-donate:focus {
+
+  filter: invert(75%) sepia(55%) saturate(413%) hue-rotate(10deg) brightness(86%) contrast(91%);
 }
 
-.swg-steam{
+.swg-steam {
   display: flex;
   background-image: url('../images/svg/steam-symbol.svg');
 
 }
 
-.swg-discord{
+.swg-discord {
   display: flex;
   background-image: url('../images/svg/discord.svg');
 }
 
-.swg-donate{
+.swg-donate {
   display: flex;
   background-image: url('../images/svg/donate-solid.svg');
 }
-
-
-
-
-
-
-
-
-

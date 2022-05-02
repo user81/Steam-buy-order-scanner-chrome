@@ -24,7 +24,7 @@ chrome.storage.local.get([
 	"coefficient",
 	"selectLang",
 	"quantity",
-	"run",
+	"displayHistory",
 	"quantityItemsInHistory",
 
 ], function (data) {
@@ -37,7 +37,10 @@ chrome.storage.local.get([
 		"selectLang": data.selectLang,
 		"quantityItemsInHistory": data.quantityItemsInHistory,
 	};
-	MyCustomHistoryTable(data.coefficient, data.selectLang, 5, data.scanIntervalSET, data.errorPauseSET, data.quantity, data.quantityItemsInHistory);
+	if (data.displayHistory) {
+		MyCustomHistoryTable(data.coefficient, data.selectLang, 5, data.scanIntervalSET, data.errorPauseSET, data.quantity, data.quantityItemsInHistory);
+	}
+	
 
 });
 // кнопка истории
@@ -110,13 +113,15 @@ async function MyCustomHistoryTable(coefficient = 0.35, selectLang = "russian", 
 	document.getElementById("changeCountLoaders").textContent = `(${changeCountLoaders})`;
 	document.getElementById("quantityItemsInHistoryOld").textContent = `(${quantityItemsInHistoryOld})`;
 	}
-}
-
 
 /**
  * поиск в истории
  */
 steamHistorySreach();
+}
+
+
+
 function steamHistorySreach() {
 	let steamHistorySreachBlock = document.getElementById("myMarketTabs");
 	if (document.getElementById('divMarketListingTableHeader') === null) {
