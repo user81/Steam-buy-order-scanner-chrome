@@ -144,12 +144,7 @@ async function ordersScan(blockValues, coefficient = 0.35, selectLang = "russian
 
             let boolVal = true;
             let IdArrDuplicateItemsInfo;
-
-            for (let index = 0; index < DuplicateItemsArr.length; index++) {
-                if (DuplicateItemsArr[index].includes(orderHref)) {
-                    boolVal = false;
-                }
-            }
+            DuplicateItemsArr.map(item => item.includes(orderHref) ? boolVal = false : boolVal = true);
 
             if (blockValues.orderTupe === "buy_orders") {
                 
@@ -167,7 +162,7 @@ async function ordersScan(blockValues, coefficient = 0.35, selectLang = "russian
                 /* console.log(itemDetals); */
             } else if (boolVal && blockValues.orderTupe === "listings") {
                 IdArrDuplicateItemsInfo = Object.entries(arrMyPriceLink).filter(item => item[1][1] === orderHref);
-                DuplicateItemsArr.push([orderHref, IdArrDuplicateItemsInfo]);
+                DuplicateItemsArr.push(orderHref);
                 orderId = IdArrDuplicateItemsInfo[0][1][2];
                 itemDetals = orderListArr.filter(item => item[1].listingid === orderId)[0]; //1 ключ 2 содержимое
                 console.log(IdArrDuplicateItemsInfo);
@@ -179,10 +174,7 @@ async function ordersScan(blockValues, coefficient = 0.35, selectLang = "russian
 
                     //массив listingid
                     let listingidArr = [];
-                    for (let index = 0; index < IdArrDuplicateItemsInfo.length; index++) {
-                        const listingid = IdArrDuplicateItemsInfo[index][1][2];
-                        listingidArr.push(listingid);
-                    }
+                    IdArrDuplicateItemsInfo.map(itemInfo => listingidArr.push(itemInfo[1][2]));
                     await listingsTreatment(priceJSON, listingidArr, orderPrice, coefficient, item_id, priceHistory);
                     await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                 }
@@ -224,7 +216,7 @@ async function myPriceLink(selectLang, blockValues, CountRequesrs, scanIntervalS
         orderListArr = await loadAllListings(myListings.num_active_listings, 100, CountRequesrs = 5, scanIntervalSET = 6000, errorPauseSET = 10000);
         /* console.log(orderListArr); */
         let listing = document.getElementById("tabContentsMyActiveMarketListingsTable");
-        sortMarketListings(listing);
+        sortMarketListings(listing, true, false, false);
     }
 
     for (let marketItem of marketItems) {
@@ -579,7 +571,7 @@ async function createBuyOrder() {
     }
 }
 
-function sortMarketListings(domElement) {
+function sortMarketListings(domElement, name, dataTime, price) {
     if (domElement == null) {
         console.log('Invalid parameter, could not find a list.');
         return;
@@ -590,7 +582,6 @@ function sortMarketListings(domElement) {
     let currentDomArr = domElement.querySelectorAll('.market_listing_table_header > span'); //массив
     Array.prototype.map.call(currentDomArr,
     (currentDom) => {
-        console.log(currentDom.classList.contains("market_listing_edit_buttons"));
         let notUseSort =[
         "market_listing_edit_buttons",
         "market_my_listing_update",
@@ -598,13 +589,30 @@ function sortMarketListings(domElement) {
         "market_my_listing_update",
         ];
         let notUseSortBool = false;
-        notUseSort.map(itemClass => {
-            if (currentDom.classList.contains(itemClass)) {
-                notUseSortBool = true;
-            }
-        });
+        //игнорировать эти классы чтобы сортировка не выполнялась
+        notUseSort.map(itemClass => notUseSortBool = currentDom.classList.contains(itemClass)? true : false);
         if (notUseSortBool) return;
+        let currentDomHead = domElement.querySelector('.market_listing_table_header');
+        
+        let nameDomVal= currentDomHead.querySelectorAll('span')[3];
+        let dataTimeDomVal= currentDomHead.querySelector('.market_listing_listed_date')
+        let priceDomVal= currentDomHead.querySelector('.market_listing_my_price');
+        if (name) 
+            defaultSort (nameDomVal, "market_listing_item_name_block");
 
+        if (dataTime) 
+            defaultSort (dataTimeDomVal, "market_listing_listed_date");
+
+        if (price) 
+            defaultSort (priceDomVal, "market_listing_my_price");
+
+        function defaultSort (DomVal, columnClassName) {
+            if (!nameDomVal.outerText.includes(arrowUp) && !dataTimeDomVal.outerText.includes(arrowUp) && !priceDomVal.outerText.includes(arrowUp)) {
+                DomVal.innerText = `${DomVal.innerText} ${arrowUp}`;
+            }
+            sortDom(columnClassName, domElement, false);
+            return;
+        }
         currentDom.onclick = (event) => {
 
             let eventv = event.target;
@@ -662,5 +670,5 @@ function sortDom(columnName, domElement, asc) {
             return firstDom.getElementsByClassName(columnName)[0].innerText>secondDom.getElementsByClassName(columnName)[0].innerText?1:-1
         }
     })
-    .forEach(node=>domTable.appendChild(node));
+    .map(node=>domTable.appendChild(node));
 }
