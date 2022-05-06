@@ -26,6 +26,23 @@ body {
     color: #969aa1;
 }
 
+.market_table_value {
+    max-height: 136px;
+}
+.market_listing_their_price > span.market_table_value, .market_listing_my_price > span.market_table_value, .market_listing_num_listings > span.market_table_value {
+    font-size: 81.7% !important;
+    line-height: 1em;
+    vertical-align: middle;
+    display: inline-block;
+    overflow: hidden;
+    width: 100%;
+    /* margin: 10px 0; */
+    margin: 0px !important;
+}
+.market_commodity_orders_table{
+    margin: 0px !important;
+}
+
 /* блок отмена маленький */
 .market_listing_edit_.button_orderss {
     width: 80px !important;
@@ -160,7 +177,7 @@ th:first-child, th:first-child+th {
 
 #tabContentsMyActiveMarketListingsRows,
 #tabContentsMyMarketHistory{
-    max-height: 600px;
+    max-height: 646px;
 }
 
 #custom_results_html{

@@ -308,7 +308,7 @@ async function listingsTreatment(priceJSON, listingidArr, MySaleOrderPrice, coef
         let myListingBuyUpdateDom = currentOrder.getElementsByClassName('market_my_listing_update')[0];
         DomRemove(myListingBuyUpdateDom.getElementsByClassName("change_price_block")[0]);
         let item_id = listingid.split("mylisting_");
-        itemOrderChangeSale(item_id, myListingBuyUpdateDom, myNextSellPrice, myRealSellPrice);
+        itemOrderChangeSale(item_id, myListingBuyUpdateDom, myNextSellPrice);
 
 
         currentOrder.style.cssText = `background-color: ${colorSale(priceJSON.lowest_sell_order / 100, MySaleOrderPrice)}`;
@@ -503,12 +503,10 @@ function itemOrderChange(item_id, myListingBuyUpdateDom, myNextBuyPrice, quantit
     buttonCreateBuy.onclick = createBuyOrder;
 }
 
-function itemOrderChangeSale(item_id, myListingSaleUpdateDom, myNextSellPrice, myRealSellPrice) {
+function itemOrderChangeSale(item_id, myListingSaleUpdateDom, myNextSellPrice) {
 
     let myListingBuyUpdateHTML = `
     <span class="market_table_value change_price_block">
-            <span>${myRealSellPrice.myNextPrice}(${myRealSellPrice.nextPriceWithoutFee})</span>
-            <br>
             <span id="myItemRealSalePrice${item_id}">${myNextSellPrice.nextPriceWithoutFee}</span>
             <br>
             <input type="number" step="0.01" id="myItemSalePrice${item_id}" class="create_buy_input">
