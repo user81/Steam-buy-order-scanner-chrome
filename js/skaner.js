@@ -29,6 +29,8 @@ let extensionSetings;
 let sessionId;
 var orderListJson;
 let orderListArr;
+let orderListBuyArr;
+let orderListSaleArr;
 let buyOrderHeader = document.getElementsByClassName("market_listing_table_header")[1];
 let listingsOrderHeader = document.getElementsByClassName("market_listing_table_header")[0];
 //buyHeadersNames массив элементов
@@ -56,7 +58,7 @@ chrome.storage.local.get([
     "quantityItemsInHistory",
 
 ], function (data) {
-    console.log(data.runBuyOrders);
+    
     sessionId = SessionIdVal();
     console.log(sessionId);
     
@@ -136,8 +138,7 @@ async function ordersScan(blockValues, coefficient = 0.35, selectLang = "russian
     let ObjectOrderInfo = await myPriceLink(selectLang, blockValues, CountRequesrs, scanIntervalSET, errorPauseSET);
     let arrMyPriceLink = ObjectOrderInfo.arrMyPriceLink;
     orderListArr = ObjectOrderInfo.orderListArr;
-/*     console.log(arrMyPriceLink.length);
-    console.log(orderListArr); */
+
     if (orderListArr.length > 0 && orderListArr.length === arrMyPriceLink.length) {
         for (let orderKey = 0; orderKey < orderListArr.length; orderKey++) {
             let [orderPrice, orderHref, orderId] = arrMyPriceLink[orderKey];
@@ -149,7 +150,7 @@ async function ordersScan(blockValues, coefficient = 0.35, selectLang = "russian
             if (blockValues.orderTupe === "buy_orders") {
                 
                 itemDetals = orderListArr.filter(item => item[1].buy_orderid === orderId)[0]; //1 ключ 2 содержимое
-                console.log(itemDetals);
+
                 if (itemDetals.length === 2) {
                     //appid = 753 (id game) //buy_orderid (id заказа) //hash_name = "489630-Lord Commissar (Foil Trading Card)"
                     //wallet_currency = 1 //quantity = 7 (сколько было) //quantity_remaining = 5 (сколько стало)
@@ -159,13 +160,13 @@ async function ordersScan(blockValues, coefficient = 0.35, selectLang = "russian
                     await InterVal(priceJSON, buy_orderid, orderPrice, coefficient, item_id, quantity, quantityWant, priceHistory);
                     await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                 }
-                /* console.log(itemDetals); */
+
             } else if (boolVal && blockValues.orderTupe === "listings") {
                 IdArrDuplicateItemsInfo = Object.entries(arrMyPriceLink).filter(item => item[1][1] === orderHref);
                 DuplicateItemsArr.push(orderHref);
                 orderId = IdArrDuplicateItemsInfo[0][1][2];
                 itemDetals = orderListArr.filter(item => item[1].listingid === orderId)[0]; //1 ключ 2 содержимое
-                console.log(IdArrDuplicateItemsInfo);
+
                 if (itemDetals.length === 2) {
                     let { appid, market_hash_name } = itemDetals[1].asset;
                     let hash_name = market_hash_name;
@@ -175,7 +176,7 @@ async function ordersScan(blockValues, coefficient = 0.35, selectLang = "russian
                     //массив listingid
                     let listingidArr = [];
                     IdArrDuplicateItemsInfo.map(itemInfo => listingidArr.push(itemInfo[1][2]));
-                    await listingsTreatment(priceJSON, listingidArr, orderPrice, coefficient, item_id, priceHistory);
+                    await listingsTreatment(priceJSON, listingidArr, orderPrice, coefficient);
                     await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                 }
                 /* 1: Array(3) IdArrDuplicateItemsInfo
@@ -192,7 +193,7 @@ async function itemIdpriceJSONpriceHistory (itemDetals, appid, orderHref, select
     let sourceCode = await globalThis.httpErrorPause(orderHref, CountRequesrs, scanIntervalSET, errorPauseSET);
     let item_id = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
     orderListArr[itemDetals[0]][1].item_id = item_id;
-    /* console.log(orderListArr); */
+
     await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
     let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
     let priceHistory = await getItemHistory(appid, fixedEncodeURIComponent(hash_name), selectLang);
@@ -210,11 +211,13 @@ async function myPriceLink(selectLang, blockValues, CountRequesrs, scanIntervalS
         let orderListJson = myListings[blockValues.orderTupe];
         blockNames = buyHeadersNames.reverse();
         orderListArr = Object.entries(orderListJson); // массив значений товаров
+        orderListBuyArr = orderListArr; //чобы работали кнопки отменить разместить заказ иначе они обуляются при вызове
     }
     if (blockValues.orderTupe === "listings") {
         blockNames = listingsHeadersNames.reverse();
         orderListArr = await loadAllListings(myListings.num_active_listings, 100, CountRequesrs = 5, scanIntervalSET = 6000, errorPauseSET = 10000);
-        /* console.log(orderListArr); */
+        orderListSaleArr = orderListArr; //чобы работали кнопки отменить разместить заказ иначе они обуляются при вызове
+
         let listing = document.getElementById("tabContentsMyActiveMarketListingsTable");
         sortMarketListings(listing, true, false, false);
     }
@@ -237,7 +240,7 @@ async function myPriceLink(selectLang, blockValues, CountRequesrs, scanIntervalS
 
 async function loadAllListings(num_active_listings, step, CountRequesrs, scanIntervalSET, errorPauseSET) {
     let countLoadslistings = Math.ceil(num_active_listings / step);
-    /* console.log(num_active_listings, step, CountRequesrs, scanIntervalSET, errorPauseSET); */
+
     let tabListing = document.getElementById('tabContentsMyActiveMarketListingsRows');
     document.getElementsByClassName("market_pagesize_options")[0].style.display = "none";
     document.getElementById("tabContentsMyActiveMarketListings_ctn").style.display = "none";
@@ -251,7 +254,7 @@ async function loadAllListings(num_active_listings, step, CountRequesrs, scanInt
         await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
         tabListing.insertAdjacentHTML('beforeend', DOMPurify.sanitize(listJSONhtml.results_html));
         let listJSON = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/mylistings/render/?query=&start=${startVal}&count=${step}&norender=1`, CountRequesrs, scanIntervalSET, errorPauseSET));
-        /* console.log(listJSON); */
+
         arrListJson = [...arrListJson, ...listJSON.listings].filter(Object);
     }
     return Object.entries(arrListJson);
@@ -271,11 +274,11 @@ function createHtmlBlock(blockNamesArr, marketItem, PastBeforeName) {
 
 let DomRemove = (Dom) => { if (Dom !== undefined) Dom.remove() };
 
-async function listingsTreatment(priceJSON, listingidArr, MySaleOrderPrice, coefficient = 0.35, item_id) {
+async function listingsTreatment(priceJSON, listingidArr, MySaleOrderPrice, coefficient = 0.35) {
     for (let index = 0; index < listingidArr.length; index++) {
         const listingid = listingidArr[index];
         let currentOrder = document.querySelector(' [id ="mylisting_' + listingid + '"]');
-        /* console.log(currentOrder); */
+
         let {
             actualProfit,
             myProfit,
@@ -284,7 +287,8 @@ async function listingsTreatment(priceJSON, listingidArr, MySaleOrderPrice, coef
             realPriceLowestSellOrder,
             higestBuyOrder,
             lowestSellOrder,
-            myNextPrice
+            myNextSellPrice,
+            myRealSellPrice,
         } = orderCalculation(priceJSON, MySaleOrderPrice, coefficient);
         let myListingSellTabDom = currentOrder.getElementsByClassName('market_my_listing_sell_tab')[0];
         DomRemove(myListingSellTabDom.getElementsByClassName("market_table_price_json_sell")[0]);
@@ -298,8 +302,15 @@ async function listingsTreatment(priceJSON, listingidArr, MySaleOrderPrice, coef
         let myListingPriceDom = currentOrder.getElementsByClassName('market_listing_price')[0]; // моя цена на покупку, наивысшая цена на покупку, цена на продажу
         DomRemove(myListingPriceDom.parentElement.getElementsByClassName("market_listing_lowest_sell_order")[0]);
         lowestSellOrderVal(priceJSON, lowestSellOrder, realPriceLowestSellOrder, myListingPriceDom);
-        /* console.log(priceJSON.lowest_sell_order); */
+
     
+         //market_my_listing_update
+        let myListingBuyUpdateDom = currentOrder.getElementsByClassName('market_my_listing_update')[0];
+        DomRemove(myListingBuyUpdateDom.getElementsByClassName("change_price_block")[0]);
+        let item_id = listingid.split("mylisting_");
+        itemOrderChangeSale(item_id, myListingBuyUpdateDom, myNextSellPrice, myRealSellPrice);
+
+
         currentOrder.style.cssText = `background-color: ${colorSale(priceJSON.lowest_sell_order / 100, MySaleOrderPrice)}`;
     }
 }
@@ -316,7 +327,7 @@ async function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.
         realPriceLowestSellOrder,
         higestBuyOrder,
         lowestSellOrder,
-        myNextPrice
+        myNextBuyPrice
     } = orderCalculation(priceJSON, MyBuyOrderPrice, coefficient);
 
     /*   let realPriceString = `${chrome.i18n.getMessage("priceWithoutCommissionDescription")} ${realPriceLowestSellOrder}`;
@@ -324,7 +335,7 @@ async function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.
     let coefPriceString = `${chrome.i18n.getMessage("coefficientPriceAtTheMomentDescription")} ${coefPrice}`;
     let myProfitString = `${chrome.i18n.getMessage("myProfitDescription")} ${myProfit}`;
     let MycoefPriceString = `${chrome.i18n.getMessage("myCoefficientPriceDescription")} ${MycoefPrice}`; */
-    /*  console.log(priceJSON); */
+
 
     //цены
     let myListingPriceDom = currentOrder.getElementsByClassName('market_listing_price')[0]; // моя цена на покупку, наивысшая цена на покупку, цена на продажу
@@ -361,7 +372,7 @@ async function InterVal(priceJSON, buyOrderId, MyBuyOrderPrice, coefficient = 0.
     //market_my_listing_update
     let myListingBuyUpdateDom = currentOrder.getElementsByClassName('market_my_listing_update')[0];
     DomRemove(myListingBuyUpdateDom.getElementsByClassName("change_price_block")[0]);
-    itemOrderChange(item_id, myListingBuyUpdateDom, myNextPrice, quantityWant);
+    itemOrderChange(item_id, myListingBuyUpdateDom, myNextBuyPrice, quantityWant);
     currentOrder.style.cssText = `background-color: ${Color(priceJSON.highest_buy_order / 100, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice)}`;
 }
 
@@ -373,12 +384,17 @@ function orderCalculation(priceJSON, MyBuyOrderPrice, coefficient) {
     let realPriceLowestSellOrder = "Nan";
     let higestBuyOrder = 0;
     let lowestSellOrder = 0;
-    let myNextPrice = 0;
-    let myRealPrice = 0;
+    let myNextBuyPrice = 0;
+    let myRealBuyPrice = 0;
+    let myNextSellPrice = 0;
+    let myRealSellPrice = 0;
 
     if (priceJSON.lowest_sell_order !== null) {
         lowestSellOrder = (priceJSON.lowest_sell_order / 100).toFixed(2);
         realPriceLowestSellOrder = getNumber(freePrice(lowestSellOrder));
+
+        myNextSellPrice = NextPrice(priceJSON.lowest_sell_order, "higest");
+        myRealSellPrice = NextPrice(priceJSON.lowest_sell_order, "real");
     }
 
     if (priceJSON.lowest_sell_order !== null && priceJSON.highest_buy_order !== null) {
@@ -387,10 +403,10 @@ function orderCalculation(priceJSON, MyBuyOrderPrice, coefficient) {
         myProfit = (realPriceLowestSellOrder - MyBuyOrderPrice).toFixed(2);
         coefPrice = (higestBuyOrder * coefficient).toFixed(2);
         MycoefPrice = (MyBuyOrderPrice * coefficient).toFixed(2);
-        myNextPrice = NextPrice(priceJSON.highest_buy_order, "higest");
-        myRealPrice = NextPrice(priceJSON.highest_buy_order, "real");
+        myNextBuyPrice = NextPrice(priceJSON.highest_buy_order, "higest");
+        myRealBuyPrice = NextPrice(priceJSON.highest_buy_order, "real");
     }
-    return { actualProfit, myProfit, coefPrice, MycoefPrice, realPriceLowestSellOrder, higestBuyOrder, lowestSellOrder, myNextPrice };
+    return { actualProfit, myProfit, coefPrice, MycoefPrice, realPriceLowestSellOrder, higestBuyOrder, lowestSellOrder, myNextBuyPrice, myRealBuyPrice, myNextSellPrice, myRealSellPrice};
 
 }
 
@@ -458,28 +474,57 @@ function itemSellTab(priceJSON, listingSellTabDom) {
 }
 
 function itemBuyTab(priceJSON, listingBuyTabDom) {
+
     let listingBuyTabHTML = `<span class="market_table_value market_table_price_json_buy">${priceJSON.buy_order_table}</span>`;
     listingBuyTabDom.insertAdjacentHTML('beforeend', DOMPurify.sanitize(listingBuyTabHTML));
 }
 
-function itemOrderChange(item_id, myListingBuyUpdateDom, myNextPrice, quantityWant) {
+function itemOrderChange(item_id, myListingBuyUpdateDom, myNextBuyPrice, quantityWant) {
     let myListingBuyUpdateHTML = `
     <span class="market_table_value change_price_block">
-            <input type="number" step="0.01" id="myItemPrice${item_id}" class="create_buy_input">
-            <input type="number" id="myItemQuality${item_id}" class="create_buy_input">
-            <button id="cancelBuyOrder_${item_id}" class = "button_orders"> ⦸ </button>
-            <button id="createBuyOrder_${item_id}" class = "button_orders"> ⨭ </button>
+        <span id="myItemRealBuyPrice${item_id}">${myNextBuyPrice.nextPriceWithoutFee}</span>
+        <br>
+        <input type="number" step="0.01" id="myItemBuyPrice${item_id}" class="create_buy_input">
+        <input type="number" id="myItemQuality${item_id}" class="create_buy_input">
+        <button id="cancelBuyOrder_${item_id}" class = "button_orders"> ⦸ </button>
+        <button id="createBuyOrder_${item_id}" class = "button_orders"> ⨭ </button>
         <div id="responceServerRequestBuyOrder_${item_id}"></div>
     </span>`;
     myListingBuyUpdateDom.insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyUpdateHTML));
     let buttonCancelBuy = document.getElementById(`cancelBuyOrder_${item_id}`);
     let buttonCreateBuy = document.getElementById(`createBuyOrder_${item_id}`);
-    let myItemPrice = document.getElementById(`myItemPrice${item_id}`);
+    let myNextItemBuyPrice = document.getElementById(`myItemBuyPrice${item_id}`);
     let myItemQuality = document.getElementById(`myItemQuality${item_id}`);
-    myItemPrice.value = myNextPrice.myNextPrice;
+    let myItemRealBuyPrice = document.getElementById(`myItemRealBuyPrice${item_id}`);
+    myNextItemBuyPrice.value = myNextBuyPrice.myNextPrice;
     myItemQuality.value = quantityWant;
+    myNextItemBuyPrice.onchange = () => {myItemRealBuyPrice.textContent = myNextItemBuyPrice.value ? NextPrice((myNextItemBuyPrice.value * 100).toFixed(), "real").nextPriceWithoutFee : '';};
     buttonCancelBuy.onclick = cancelBuyOrder;
     buttonCreateBuy.onclick = createBuyOrder;
+}
+
+function itemOrderChangeSale(item_id, myListingSaleUpdateDom, myNextSellPrice, myRealSellPrice) {
+
+    let myListingBuyUpdateHTML = `
+    <span class="market_table_value change_price_block">
+            <span>${myRealSellPrice.myNextPrice}(${myRealSellPrice.nextPriceWithoutFee})</span>
+            <br>
+            <span id="myItemRealSalePrice${item_id}">${myNextSellPrice.nextPriceWithoutFee}</span>
+            <br>
+            <input type="number" step="0.01" id="myItemSalePrice${item_id}" class="create_buy_input">
+            <button id="cancelBuyOrderForSale_${item_id}" class = "button_orders"> ⦸ </button>
+            <button id="createBuyOrderForSale_${item_id}" class = "button_orders"> ⨭ </button>
+        <div id="responceServerRequestBuyOrderSale${item_id}"></div>
+    </span>`;
+    myListingSaleUpdateDom.insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyUpdateHTML));
+    let buttonCancelSale = document.getElementById(`cancelBuyOrderForSale_${item_id}`);
+    let buttonCreateSale = document.getElementById(`createBuyOrderForSale_${item_id}`);
+    let myItemSalePrice = document.getElementById(`myItemSalePrice${item_id}`);
+    let myItemRealSalePrice = document.getElementById(`myItemRealSalePrice${item_id}`);
+    myItemSalePrice.value = myNextSellPrice.myNextPrice;
+    myItemSalePrice.onchange = () => {myItemRealSalePrice.textContent = myItemSalePrice.value ? NextPrice((myItemSalePrice.value * 100).toFixed(), "real").nextPriceWithoutFee : myNextSellPrice.nextPriceWithoutFee;};
+    buttonCancelSale.onclick = cancelBuyOrderSale;
+    buttonCreateSale.onclick = createBuyOrderSale;
 }
 
 function Color(JSONbuy_order, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice) {
@@ -500,7 +545,7 @@ function Color(JSONbuy_order, MyBuyOrderPrice, actualProfit, myProfit, coefPrice
 }
 
 function colorSale(JSONsale_order, MySaleOrderPrice) {
-    console.log(JSONsale_order, MySaleOrderPrice);
+
     if (JSONsale_order.length != 0) {
         if (MySaleOrderPrice == "Nan") {
             return '#000732;'; //blue неизвестно
@@ -515,7 +560,7 @@ function colorSale(JSONsale_order, MySaleOrderPrice) {
 
 async function cancelBuyOrder() {
     let item_id = this.id.split('_')[1];
-    let itemInfo = orderListArr.filter(item => item[1].item_id === item_id)[0];
+    let itemInfo = orderListBuyArr.filter(item => item[1].item_id === item_id)[0];
     if (itemInfo.length === 2) {
         let orderId = itemInfo[1].buy_orderid;
         if (orderId !== null && sessionId !== null) {
@@ -528,13 +573,19 @@ async function cancelBuyOrder() {
     }
 }
 
+async function cancelBuyOrderSale() {
+
+}
+
+/* https://steamcommunity.com/market/removelisting/3347823316609638798 */
+
 async function createBuyOrder() {
 
     let item_id = this.id.split('_')[1];
-    let itemInfo = orderListArr.filter(item => item[1].item_id == item_id)[0];
+    let itemInfo = orderListBuyArr.filter(item => item[1].item_id == item_id)[0];
     if (itemInfo.length === 2) {
         let { appid, hash_name } = itemInfo[1];
-        let inputPriceDom = document.getElementById(`myItemPrice${item_id}`);
+        let inputPriceDom = document.getElementById(`myItemBuyPrice${item_id}`);
         let itemCountDom = document.getElementById(`myItemQuality${item_id}`);
 
         if (inputPriceDom.value.trim() == '' || itemCountDom.value.trim() == '' || itemCountDom.value.trim() <= 0) {
@@ -554,22 +605,28 @@ async function createBuyOrder() {
             let htmlResponce = document.getElementById(`responceServerRequestBuyOrder_${item_id}`);
             if (serverResponse.success === 1) {
                 htmlResponce.textContent = "Price updated";
-                orderListArr[itemInfo[0]][1].buy_orderid = serverResponse.buy_orderid;
-                console.log(this.parentElement.parentElement.parentElement);
+                orderListBuyArr[itemInfo[0]][1].buy_orderid = serverResponse.buy_orderid;
+                
                 let steamItemBlock = this.parentElement.parentElement.parentElement;
                 //<div class="market_listing_row market_recent_listing_row" id="mybuyorder_4157921926" style="background-color: rgb(96, 55, 62);"></div>
-                steamItemBlock.getElementsByClassName("market_listing_price")[0].innerText = NextPrice((inputPrice * 100).toFixed(), "real").myNextPrice;
+                steamItemBlock.getElementsByClassName("market_listing_price")[0].innerText = NextPrice((inputPrice * 100).toFixed(), "real").myNextBuyPrice;
                 steamItemBlock.getElementsByClassName('market_listing_price')[1].innerText = itemCount;
                 await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
                 let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + extensionSetings.selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', 5, extensionSetings.scanIntervalSET, extensionSetings.errorPauseSET));
                 let priceHistory = await getItemHistory(appid, hash_name, extensionSetings.selectLang);
                 let buyOrderId = steamItemBlock.id.split('_')[1]; // 4078635920
-                InterVal(priceJSON, buyOrderId, NextPrice((inputPrice * 100).toFixed(), "real").myNextPrice, extensionSetings.coefficient, item_id, itemCount, itemCount, priceHistory);
+                InterVal(priceJSON, buyOrderId, NextPrice((inputPrice * 100).toFixed(), "real").myNextBuyPrice, extensionSetings.coefficient, item_id, itemCount, itemCount, priceHistory);
             }
             htmlResponce.textContent = (serverResponse.success === 29) ? serverResponse.message : "Eroor"; // message: "У вас уже есть заказ на этот предмет. Вы должны либо ." success: 29{buy_orderid: "4562009753" success: 1}
         }
     }
 }
+
+
+async function createBuyOrderSale() {
+
+}
+
 
 function sortMarketListings(domElement, name, dataTime, price) {
     if (domElement == null) {
