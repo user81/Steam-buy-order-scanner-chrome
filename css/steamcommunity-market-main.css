@@ -27,20 +27,24 @@ body {
 }
 
 .market_table_value {
+    padding-top: 11px;
     max-height: 136px;
+}
+.market_listing_my_price > .market_table_value > .market_listing_price {
+    margin-top: 9px;
+}
+
+.market_listing_buyorder_qty{
+    margin-top: -4px;
 }
 .market_listing_their_price > span.market_table_value, .market_listing_my_price > span.market_table_value, .market_listing_num_listings > span.market_table_value {
     font-size: 81.7% !important;
-    line-height: 1em;
+    line-height: 1em !important;
     vertical-align: middle;
     display: inline-block;
     overflow: hidden;
     width: 100%;
-    /* margin: 10px 0; */
-    margin: 0px !important;
-}
-.market_commodity_orders_table{
-    margin: 0px !important;
+    margin: 0 0 0 7px !important;
 }
 
 /* блок отмена маленький */
@@ -52,6 +56,21 @@ body {
 }
 .market_listing_edit_buttons {
     width: 90px !important;
+}
+.change_price_block{
+padding-top: 10px;
+width: 100%;
+}
+.change_price_block > span {
+    margin-right: 10px;
+}
+.create_buy_input{
+    width: 100px  !important;
+    overflow: hidden !important;
+    color: white !important;
+    border: 2px solid rgb(255, 255, 255) !important;
+    text-align: center;
+    outline:none;
 }
 
 /* стиль кнопок */
@@ -66,7 +85,7 @@ body {
     font-weight: bold;
     letter-spacing: 3px;
     cursor: pointer;
-    color: #FAFAFA;
+    color: white;
 }
 
 .button_orders:after, .button_orders:before {
@@ -102,11 +121,6 @@ div [id^="priceTable"] {
     padding: 0px;
 }
 
-.market_commodity_orders_table {
-    margin: 10px auto;
-    display: inline-flex !important;
-}
-
 .create_buy_input {
     width: 80px;
     display: block;
@@ -125,8 +139,11 @@ div [id^="priceTable"] {
 /* таблица цен */
 
 .market_commodity_orders_table {
-    display: inline-flex !important;
+    width: 115px !important;
+    flex-direction: column;
+    border: 1px solid rgb(255, 255, 255);
     font-size: 12px;
+    margin: 0px;
 }
 
 .market_commodity_orders_table th {

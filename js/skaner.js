@@ -308,7 +308,7 @@ async function listingsTreatment(priceJSON, listingidArr, MySaleOrderPrice, coef
         let myListingBuyUpdateDom = currentOrder.getElementsByClassName('market_my_listing_update')[0];
         DomRemove(myListingBuyUpdateDom.getElementsByClassName("change_price_block")[0]);
         let item_id = listingid.split("mylisting_");
-        itemOrderChangeSale(item_id, myListingBuyUpdateDom, myNextSellPrice);
+        itemOrderChangeSale(item_id, myListingBuyUpdateDom, myRealSellPrice);
 
 
         currentOrder.style.cssText = `background-color: ${colorSale(priceJSON.lowest_sell_order / 100, MySaleOrderPrice)}`;
@@ -480,9 +480,12 @@ function itemBuyTab(priceJSON, listingBuyTabDom) {
 }
 
 function itemOrderChange(item_id, myListingBuyUpdateDom, myNextBuyPrice, quantityWant) {
+
     let myListingBuyUpdateHTML = `
     <span class="market_table_value change_price_block">
         <span id="myItemRealBuyPrice${item_id}">${myNextBuyPrice.nextPriceWithoutFee}</span>
+        <br>
+        <span id="myItemNextBuyPrice${item_id}">${myNextBuyPrice.myNextPrice}</span>
         <br>
         <input type="number" step="0.01" id="myItemBuyPrice${item_id}" class="create_buy_input">
         <input type="number" id="myItemQuality${item_id}" class="create_buy_input">
@@ -496,33 +499,46 @@ function itemOrderChange(item_id, myListingBuyUpdateDom, myNextBuyPrice, quantit
     let myNextItemBuyPrice = document.getElementById(`myItemBuyPrice${item_id}`);
     let myItemQuality = document.getElementById(`myItemQuality${item_id}`);
     let myItemRealBuyPrice = document.getElementById(`myItemRealBuyPrice${item_id}`);
+    let myItemNextBuyPrice = document.getElementById(`myItemNextBuyPrice${item_id}`);
     myNextItemBuyPrice.value = myNextBuyPrice.myNextPrice;
     myItemQuality.value = quantityWant;
-    myNextItemBuyPrice.onchange = () => {myItemRealBuyPrice.textContent = myNextItemBuyPrice.value ? NextPrice((myNextItemBuyPrice.value * 100).toFixed(), "real").nextPriceWithoutFee : '';};
+    myNextItemBuyPrice.onchange = () => {
+        myItemRealBuyPrice.textContent = myNextItemBuyPrice.value ? NextPrice((myNextItemBuyPrice.value * 100).toFixed(), "real").nextPriceWithoutFee : '';
+        myItemNextBuyPrice.textContent = myNextItemBuyPrice.value ? NextPrice((myNextItemBuyPrice.value * 100).toFixed(), "real").myNextPrice : '';
+    };
     buttonCancelBuy.onclick = cancelBuyOrder;
     buttonCreateBuy.onclick = createBuyOrder;
 }
 
-function itemOrderChangeSale(item_id, myListingSaleUpdateDom, myNextSellPrice) {
-
+function itemOrderChangeSale(item_id, myListingSaleUpdateDom, myRealSellPrice) {
+    let lessСenter = (myRealSellPrice.myNextPrice - 0.01).toFixed(2);
+    let moreEstimated = (lessСenter > 0.03) ? lessСenter : 0.03;
+    let LowestSalePrice =NextPrice((moreEstimated * 100).toFixed(), "real");
+    
     let myListingBuyUpdateHTML = `
     <span class="market_table_value change_price_block">
-            <span id="myItemRealSalePrice${item_id}">${myNextSellPrice.nextPriceWithoutFee}</span>
+            <span id="myItemRealSalePrice${item_id}">${myRealSellPrice.nextPriceWithoutFee}</span>
+            <br>
+            <span id="myItemNextSalePrice${item_id}">${LowestSalePrice.myNextPrice}</span>
             <br>
             <input type="number" step="0.01" id="myItemSalePrice${item_id}" class="create_buy_input">
             <button id="cancelBuyOrderForSale_${item_id}" class = "button_orders"> ⦸ </button>
-            <button id="createBuyOrderForSale_${item_id}" class = "button_orders"> ⨭ </button>
-        <div id="responceServerRequestBuyOrderSale${item_id}"></div>
+            <button id="createBuyOrderForSale_${item_id}" class = "button_orders"> ↻ </button>
+        <div id="responceServerRequestBuyOrderSale_${item_id}"></div>
     </span>`;
     myListingSaleUpdateDom.insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyUpdateHTML));
     let buttonCancelSale = document.getElementById(`cancelBuyOrderForSale_${item_id}`);
     let buttonCreateSale = document.getElementById(`createBuyOrderForSale_${item_id}`);
     let myItemSalePrice = document.getElementById(`myItemSalePrice${item_id}`);
     let myItemRealSalePrice = document.getElementById(`myItemRealSalePrice${item_id}`);
-    myItemSalePrice.value = myNextSellPrice.myNextPrice;
-    myItemSalePrice.onchange = () => {myItemRealSalePrice.textContent = myItemSalePrice.value ? NextPrice((myItemSalePrice.value * 100).toFixed(), "real").nextPriceWithoutFee : myNextSellPrice.nextPriceWithoutFee;};
+    let myItemNextSalePrice = document.getElementById(`myItemNextSalePrice${item_id}`);
+    myItemSalePrice.value = LowestSalePrice.myNextPrice;
+    myItemSalePrice.onchange = () => {
+        myItemRealSalePrice.textContent = myItemSalePrice.value ? NextPrice((myItemSalePrice.value * 100).toFixed(), "real").nextPriceWithoutFee : '';
+        myItemNextSalePrice.textContent = myItemSalePrice.value ? NextPrice((myItemSalePrice.value * 100).toFixed(), "real").myNextPrice : '';
+    };
     buttonCancelSale.onclick = cancelBuyOrderSale;
-    buttonCreateSale.onclick = createBuyOrderSale;
+    buttonCreateSale.onclick = reloadBuyOrderSale;
 }
 
 function Color(JSONbuy_order, MyBuyOrderPrice, actualProfit, myProfit, coefPrice, MycoefPrice) {
@@ -572,7 +588,24 @@ async function cancelBuyOrder() {
 }
 
 async function cancelBuyOrderSale() {
+    let listingid = this.id.split('_')[1];
+    let itemInfo = orderListSaleArr.filter(item => item[1].listingid === listingid)[0];
+    console.log(itemInfo);
+    if (itemInfo.length === 2) {
+        let serverResponseCancelBuyOrder = await cancelBuyOrderSaleRequest (sessionId, listingid);
+        let htmlResponce = document.getElementById(`responceServerRequestBuyOrderSale_${listingid}`);
+        htmlResponce.textContent = (serverResponseCancelBuyOrder.success === 1) ? "Done cancel" : "Error cancel"; 
+    }
+    await new Promise(done => timer = setTimeout(() => done(), + 2000 + Math.floor(Math.random() * 500)));
+    document.getElementById(`mylisting_${listingid}`).remove();
+}
 
+async function cancelBuyOrderSaleRequest (sessionId, listingid) { 
+    if (sessionId !== null && listingid !== null) {
+        let url = `https://steamcommunity.com/market/removelisting/${listingid}`;
+        let params = `sessionid=${sessionId}`;
+        return await globalThis.httpPostErrorPause(url, params);
+    }
 }
 
 /* https://steamcommunity.com/market/removelisting/3347823316609638798 */
@@ -621,8 +654,60 @@ async function createBuyOrder() {
 }
 
 
-async function createBuyOrderSale() {
+async function reloadBuyOrderSale() {
+    let listingid = this.id.split('_')[1];
+    let buyOrderInput = document.getElementById(`myItemSalePrice${listingid}`);
+    let realSalePrice = buyOrderInput.value ? (NextPrice((buyOrderInput.value * 100).toFixed(), "real").nextPriceWithoutFee * 100).toFixed() : 0;
+    let itemInfo = orderListSaleArr.filter(item => item[1].listingid === listingid)[0];
+    let htmlResponce = document.getElementById(`responceServerRequestBuyOrderSale_${listingid}`);
+    if (itemInfo.length === 2 && realSalePrice) {
 
+        let serverResponseCancelBuyOrder = await cancelBuyOrderSaleRequest (sessionId, listingid);
+        let htmlResponce = document.getElementById(`responceServerRequestBuyOrderSale_${listingid}`);
+        htmlResponce.textContent = (serverResponseCancelBuyOrder.success === 1) ? "Done cancel" : "Error cancel"; 
+        let {appid, contextid, classid} = itemInfo[1].asset;
+        let UserUrlName = document.getElementsByClassName("user_avatar")[0].href.split("/")[4];
+        if (sessionId !== null && appid !== null && contextid !== null&& classid !== null) {
+            await new Promise(done => timer = setTimeout(() => done(), + extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
+            let UserNameXmlString = await globalThis.httpErrorPause(`https://steamcommunity.com/id/${UserUrlName}/?xml=1`, extensionSetings.CountRequesrs, extensionSetings.scanIntervalSET, extensionSetings.errorPauseSET);
+            await new Promise(done => timer = setTimeout(() => done(), + extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
+            var parser = new DOMParser();
+            var UserNameXml = parser.parseFromString(UserNameXmlString, "application/xml");
+            steamID = UserNameXml.getElementsByTagName("steamID64")[0].textContent;
+            let arrAssetidJson = await loadAllAssetid(5000, appid, contextid, steamID); 
+            let {assetid} = arrAssetidJson.find(itemAsset =>  classid === itemAsset.classid ? itemAsset.assetid : false);
+            let params = `sessionid=${sessionId}&appid=${appid}&contextid=${contextid}&assetid=${assetid}&amount=1&price=${realSalePrice}`;
+            let url = "https://steamcommunity.com/market/sellitem/";
+            
+            let serverResponse = await globalThis.httpPostErrorPause(url, params);
+            console.log(serverResponse);
+            htmlResponce.textContent = (serverResponse.success === true) ? "Price updated" : "Updated Error";
+            await new Promise(done => timer = setTimeout(() => done(), + extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
+            document.getElementById(`mylisting_${listingid}`).remove();
+            return; 
+        }
+    }
+    htmlResponce.textContent = "incorrect value"; 
+
+    /**
+    чужой инвентарь
+    https://steamcommunity.com/inventory/76561198241424096/753/6?la=english&count=5000
+     */
+}
+
+async function loadAllAssetid (step, appid, contextid, steamID) { 
+    let AssetidFirstJSON = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/inventory/${steamID}/${appid}/${contextid}?language=${extensionSetings.selectLang}&count=${step}`, 5, extensionSetings.scanIntervalSET, extensionSetings.errorPauseSET));
+    let lastAsset = AssetidFirstJSON.last_assetid;
+    let arrAssetidJson = [];
+    arrAssetidJson = [...arrAssetidJson, ...AssetidFirstJSON.assets];
+    console.log()
+    while (lastAsset !== undefined) {
+        await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
+        let AssetidJSON = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/inventory/${steamID}/${appid}/${contextid}?language=${extensionSetings.selectLang}&count=${step}&start_assetid=${lastAsset}`, extensionSetings.CountRequesrs, extensionSetings.scanIntervalSET, extensionSetings.errorPauseSET));
+        lastAsset = AssetidJSON.last_assetid;
+        arrAssetidJson = [...arrAssetidJson, ...AssetidJSON.assets];
+    }
+    return arrAssetidJson;
 }
 
 

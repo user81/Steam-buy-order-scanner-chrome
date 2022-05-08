@@ -122,8 +122,15 @@ globalThis.httpPostErrorPause = async function(httpUrl, httpParams) {
             }
             return response.json();
         }).then((nextResponseJSON) => {
+            console.log(nextResponseJSON);
             if (nextResponseJSON === null){
                 reject('Error!');
+            }
+            if (Object.keys(nextResponseJSON).length === 0){
+                resolve({success: 1});
+            }
+            else if (nextResponseJSON.success === true) {
+                resolve(nextResponseJSON);
             }
             else if (nextResponseJSON.success === 1) {
                 resolve(nextResponseJSON);
