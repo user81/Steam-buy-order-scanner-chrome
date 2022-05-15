@@ -19,51 +19,53 @@ let html = `<div id="profitScaner" class="my_market_listing_table_header">
 </div> `;
 buyOrderHeader.insertAdjacentHTML('afterend', DOMPurify.sanitize(html));
 
-//headersNames массив элементов
-let headersNames = {
-    "Price":
-    {
-        "name": "Price",
-        "dataSorttype": "price",
-        "classSorttype": "market_listing_right_cell market_listing_their_price market_sortable_column"
-    },
-    "Count":
-    {
-        "name": "Count",
-        "dataSorttype": "quantity",
-        "classSorttype": "market_listing_right_cell market_listing_num_listings market_sortable_column",
-    },
-    "Buy_tab":
-    {
-        "name": "Buy_tab",
-        "dataSorttype": "",
-        "classSorttype": "market_listing_right_cell market_listing_my_orders",
-    },
-    "Sell_tab":
-    {
-        "name": "Sell_tab",
-        "dataSorttype": "",
-        "classSorttype": "market_listing_right_cell market_listing_my_orders",
-    },
-    "Name":
-    {
-        "name": "Name",
-        "dataSorttype": "name",
-        "classSorttype": "market_sortable_column market_listing_my_name",
-    },
-};
-//!! наптсать вывод заголовка
-let profitScaner = document.getElementById("profitScaner");
+function searchHeadersNames() {
+    //headersNames массив элементов
+    let headersNames = {
+        "Price":
+        {
+            "name": "Price",
+            "dataSorttype": "price",
+            "classSorttype": "market_listing_right_cell market_listing_their_price market_sortable_column"
+        },
+        "Count":
+        {
+            "name": "Count",
+            "dataSorttype": "quantity",
+            "classSorttype": "market_listing_right_cell market_listing_num_listings market_sortable_column",
+        },
+        "Buy_tab":
+        {
+            "name": "Buy_tab",
+            "dataSorttype": "",
+            "classSorttype": "market_listing_right_cell market_listing_my_orders",
+        },
+        "Sell_tab":
+        {
+            "name": "Sell_tab",
+            "dataSorttype": "",
+            "classSorttype": "market_listing_right_cell market_listing_my_orders",
+        },
+        "Name":
+        {
+            "name": "Name",
+            "dataSorttype": "name",
+            "classSorttype": "market_sortable_column market_listing_my_name",
+        },
+    };
+    //!! наптсать вывод заголовка
+    let profitScaner = document.getElementById("profitScaner");
 
-for (const key in headersNames) {
-    let hederNamesHtml = `
+    for (const key in headersNames) {
+        let hederNamesHtml = `
     <div class="${headersNames[key].classSorttype} market_my_listing_${headersNames[key].name.toLowerCase()}" data-sorttype="${headersNames[key].dataSorttype}">
     ${headersNames[key].name}
     </div>
     `;
-    profitScaner.insertAdjacentHTML('beforeend', DOMPurify.sanitize(hederNamesHtml));
+        profitScaner.insertAdjacentHTML('beforeend', DOMPurify.sanitize(hederNamesHtml));
+    }
 }
-
+searchHeadersNames();
 chrome.storage.local.get([
     "scanIntervalSET",
     "errorPauseSET",
@@ -79,9 +81,10 @@ chrome.storage.local.get([
         CountRequesrs = 5;
         scanIntervalSET = + data.scanIntervalSET;
         errorPauseSET = + data.errorPauseSET;
+        
         displaySearchRunScan();
         getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET);
-        
+
     }
 });
 
@@ -91,9 +94,13 @@ async function displaySearchRunScan() {
         let scanerMarketSearchHTML = `
         <div>
             <span class="market_search_sidebar_section_tip_small market_listing_item_name">
-                Min Price
-                <input type="number" id="minPriceVal">
+                Price From
+                <input type="number" id="priceFromVal">
             </span>
+            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
+            Price To
+            <input type="number" id="priceToVal">
+        </span>
             <span class="market_search_sidebar_section_tip_small market_listing_item_name">
                 Min Count
                 <input type="number" id="minCountVal">
@@ -106,10 +113,13 @@ async function displaySearchRunScan() {
                 Min Profit
                 <input type="number" id="minProfitVal">
             </span>
+            <br>
+            <br>
             <span class="market_search_sidebar_section_tip_small market_listing_item_name">
                 only Profitable
                 <input type="checkbox" id="onlyProfitable">
             </span>
+            <br>
             <div class="selectBlock">
             <span class="market_search_sidebar_section_tip_small market_listing_item_name">
                 StartPage
@@ -279,11 +289,11 @@ async function marketSearch() {
             await waitTime((+errorPauseSET + Math.floor(Math.random() * 5)) * 60000);
             return RereadTheAmountItems(numberOfRepetitions = 10);
         }
-        console.log(marketItems.length);
+        
         if (marketItems.length > 0) {
             for (let index = 0; index < marketItems.length; index++) {
                 if (StopScan) return;
-                console.log(marketItems[index].firstElementChild.dataset.scanned);
+
                 if (marketItems[index].firstElementChild.dataset.scanned === undefined) {
 
                     //!! повторяется надо будет исправить
@@ -300,26 +310,30 @@ async function marketSearch() {
                     var appId = marketItems[index].firstElementChild.dataset.appid;
                     /* var aId = marketItems[index].firstElementChild.id; */
                     var hashName = fixedEncodeURIComponent(marketItems[index].firstElementChild.dataset.hashName);
-                    let minPriceVal = (document.getElementById("minPriceVal").value === undefined || document.getElementById("minPriceVal").value === null || document.getElementById("minPriceVal").value === '') ? 0 : document.getElementById("minPriceVal").value;
-                    let minCountVal = (document.getElementById("minCountVal").value === undefined || document.getElementById("minCountVal").value === null || document.getElementById("minCountVal").value === '') ? 0 : document.getElementById("minCountVal").value;
-                    let minProfitVal = (document.getElementById("minProfitVal").value === undefined || document.getElementById("minProfitVal").value === null || document.getElementById("minProfitVal").value === '') ? -Infinity : document.getElementById("minProfitVal").value;
-                    let minSellVal = (document.getElementById("minSellVal").value === undefined || document.getElementById("minSellVal").value === null || document.getElementById("minSellVal").value === '') ? 0 : document.getElementById("minSellVal").value;
-                    let onlyProfitable = (document.getElementById("onlyProfitable").checked === undefined || document.getElementById("onlyProfitable").checked === null || document.getElementById("onlyProfitable").checked === '') ? 0 : document.getElementById("onlyProfitable").checked;
-                    if (minPriceVal >= orderPrice || minCountVal >= orderCount) marketItems[index].style.display = "none";
+                    let priceFromVal = document.getElementById("priceFromVal").value || 0 ;
+                    let priceToVal = document.getElementById("priceToVal").value || Infinity ;
+                    let minCountVal = document.getElementById("minCountVal").value || -1 ;
+                    let minProfitVal = document.getElementById("minProfitVal").value || -Infinity ;
+                    let minSellVal = document.getElementById("minSellVal").value || 0 ;
+                    let onlyProfitable = document.getElementById("onlyProfitable").checked || false;
+
                     let sourceCode = await globalThis.httpErrorPause(orderHref, CountRequesrs, scanIntervalSET, errorPauseSET);
                     let item_id = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
                     let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
                     await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                     let priceHistory = await getItemHistory(appId, hashName, selectLang);
+                    
                     let pricesProfit = InterVal(priceJSON, coefficient);
-                    if (minProfitVal >= pricesProfit.actualProfit || minSellVal >= priceHistory.countSellSevenDays) {
+
+                    if (priceFromVal > orderPrice || priceToVal < orderPrice || minCountVal > orderCount) {
                         marketItems[index].style.display = "none";
-                    }
-                    if (onlyProfitable && pricesProfit.coefPrice >= pricesProfit.actualProfit) {
+                    }else if (minProfitVal > pricesProfit.actualProfit || minSellVal > priceHistory.countSellSevenDays) {
                         marketItems[index].style.display = "none";
-                        console.log(onlyProfitable, pricesProfit.coefPrice);
+                    }else if (onlyProfitable && pricesProfit.coefPrice > pricesProfit.actualProfit) {
+                        marketItems[index].style.display = "none";
+                    }else{
+                        await displayProfitable(pricesProfit, marketItems[index], priceJSON, priceHistory, item_id);
                     }
-                    displayProfitable(pricesProfit, index, priceJSON, priceHistory);
                 }
             }
             return;
@@ -327,45 +341,252 @@ async function marketSearch() {
         ordersReload();
         await waitTime(5000 + scanIntervalSET + Math.floor(Math.random() * 50));
         marketItems = Array.from(document.getElementsByClassName("market_listing_row_link"));
-        console.log(5000 + scanIntervalSET + Math.floor(Math.random() * 50));
+        
         return RereadTheAmountItems(numberOfRepetitions - 1);
     }
     RereadTheAmountItems(numberOfRepetitions);
 
 
-    function displayProfitable(pricesProfit, index, priceJSON, priceHistory) {
+}
 
-        let divItemBlock = marketItems[index];
-        let spanPriceBlock = divItemBlock.getElementsByClassName("normal_price")[0];
-        let sellsHistoryHTML = `
-            <span class="market_listing_num_listings_qty">1d sell: ${priceHistory.countSell.toLocaleString()}</span>
-            <span class="market_listing_num_listings_qty">7d sell: ${priceHistory.countSellSevenDays.toLocaleString()}</span>`;
-        spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(sellsHistoryHTML));
+async function displayProfitable(pricesProfit, divItemBlock, priceJSON, priceHistory, item_id) {
 
-        let spanCountBlock = divItemBlock.getElementsByClassName("market_listing_num_listings_qty")[0];
-        let ProfitItemHTML = `
-        <span class="market_listing_num_listings_qty">K. Profit: ${pricesProfit.coefPrice}</span>
-        <span class="market_listing_num_listings_qty">Profit: ${pricesProfit.actualProfit}</span>
-        `;
-        spanCountBlock.insertAdjacentHTML('afterbegin', DOMPurify.sanitize(ProfitItemHTML));
+    let spanPriceBlock = divItemBlock.getElementsByClassName("normal_price")[0];
+    let sellsHistoryHTML = `
+        <span class="market_listing_num_listings_qty">1d sell: ${priceHistory.countSell.toLocaleString()}</span>
+        <span class="market_listing_num_listings_qty">7d sell: ${priceHistory.countSellSevenDays.toLocaleString()}</span>`;
+    spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(sellsHistoryHTML));
 
-        let realPriceHTML = `<span class="normal_price">(${pricesProfit.realPrice})</span>`;
-        spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(realPriceHTML));
+    let spanCountBlock = divItemBlock.getElementsByClassName("market_listing_num_listings_qty")[0];
+    let ProfitItemHTML = `
+    <span class="market_listing_num_listings_qty">K. Profit: ${pricesProfit.coefPrice}</span>
+    <span class="market_listing_num_listings_qty">Profit: ${pricesProfit.actualProfit}</span>
+    `;
+    spanCountBlock.insertAdjacentHTML('afterbegin', DOMPurify.sanitize(ProfitItemHTML));
 
-        let myListingSellTabHTML = `<span class="market_table_value market_table_price_json_sell">${priceJSON.sell_order_table}</span>`;
-        divItemBlock.getElementsByClassName("market_my_listing_sell_tab")[0].insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingSellTabHTML));
+    let realPriceHTML = `<span class="normal_price">(${pricesProfit.realPrice})</span>`;
+    spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(realPriceHTML));
 
-        let myListingBuyTabHTML = `<span class="market_table_value market_table_price_json_buy">${priceJSON.buy_order_table}</span>`;
-        divItemBlock.getElementsByClassName("market_my_listing_buy_tab")[0].insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyTabHTML));
+    let myListingSellTabHTML = `<span class="market_table_value market_table_price_json_sell">${priceJSON.sell_order_table}</span>`;
+    divItemBlock.getElementsByClassName("market_my_listing_sell_tab")[0].insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingSellTabHTML));
 
-        divItemBlock.firstElementChild.style.backgroundColor = setSearchSolor(pricesProfit);
-        divItemBlock.firstElementChild.dataset.scanned = "true";
+    let myListingBuyTabHTML = `<span class="market_table_value market_table_price_json_buy">${priceJSON.buy_order_table}</span>`;
+    divItemBlock.getElementsByClassName("market_my_listing_buy_tab")[0].insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyTabHTML));
 
+    let historyChartHTML = `   
+    <div id="chart_${item_id}">
+        <div id="chart-timeline_${item_id}"></div>
+        <div id="chart-map_${item_id}"></div>
+    </div>`;
+    divItemBlock.insertAdjacentHTML('afterend', DOMPurify.sanitize(historyChartHTML));
+    let minMaxPricePerDayVal = await minMaxPricePerDay(priceHistory.historyPriceJSON.prices);
 
+    if (minMaxPricePerDayVal !== undefined && minMaxPricePerDayVal.length > 1) {
+        await schemeHistory(minMaxPricePerDayVal, item_id);
     }
 
+    divItemBlock.firstElementChild.style.backgroundColor = setSearchSolor(pricesProfit);
+    divItemBlock.firstElementChild.dataset.scanned = "true";
 
 }
+
+
+    
+async function schemeHistory(countArrYear, item_id) {
+
+    if (countArrYear.length === 0 || countArrYear.length === 1) return;
+    let nowTime = Date.parse(new Date);
+    let lastThirtyDaysMs = nowTime - (1000 * 60 * 60 * 24 * 30);
+
+    let saleArr = countArrYear.map((item) => [Date.parse(item[0]), item[1]]);
+    let countArr = countArrYear.map((item) => [Date.parse(item[0]), item[2]]);
+    
+    let firstData =countArrYear.shift()[0];
+    let lastData = countArrYear.pop()[0];
+
+    var options = {
+        series: [{
+            name: 'Sale Price',
+            type: 'area',
+            data: saleArr
+        },
+        {
+            name: 'Count Sale',
+            type: 'line',
+            data: countArr,
+        }],
+        chart: {
+            id: `chart-price-history${item_id}`,
+            height: 350,
+            type: 'line',
+            zoom: {
+                autoScaleYaxis: true
+            }
+        },
+        dataLabels: {
+            /* enabled: true,
+            enabledOnSeries: [1] */
+        },
+        markers: {
+            size: 0,
+            colors: ["#000524"],
+            strokeColor: "#ffe339",
+            strokeWidth: 3
+        },
+        grid: {
+            borderColor: "#555",
+            clipMarkers: false,
+
+        },
+    
+        //ось x
+        xaxis: {
+            type: 'datetime',
+            min: firstData,
+            tickAmount: 6,
+        },
+        // ось y
+        yaxis: [
+            {
+                title: {
+                    text: "Price",
+                    style: {
+                        color: "#FF1654"
+                    }
+                }
+            },
+            {
+                opposite: true,
+                title: {
+                    text: "Count",
+                    style: {
+                        color: "#FF1654"
+                    }
+                }
+            },
+        ],
+        tooltip: {
+            x: {
+                format: 'dd MMM yyyy'
+            }
+        },
+        // стиль таблицы  fill
+        fill: {
+            type:'solid',
+            opacity: [0.35, 1],
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector(`#chart-timeline_${item_id}`), options);
+    chart.render();
+
+    var optionsMap = {
+        chart: {
+            id: `map-price-history${item_id}`,
+            height: 130,
+            type: "bar",
+            foreColor: "#ccc",
+
+            brush: {
+                target: `chart-price-history${item_id}`,
+                enabled: true
+            },
+
+            selection: {
+                enabled: true,
+                fill: {
+                    color: "#fff",
+                    opacity: 0.4
+                },
+                xaxis: {
+                    min: lastThirtyDaysMs,
+                    max: lastData
+                }
+            }
+
+        },
+        colors: ["#FF0080"],
+        series: [
+            {
+                data: saleArr
+            }
+        ],
+        stroke: {
+            width: 2
+        },
+        grid: {
+            borderColor: "#444"
+        },
+        markers: {
+            size: 0
+        },
+        xaxis: {
+            type: "datetime",
+            tooltip: {
+                enabled: false
+            }
+        },
+        yaxis: {
+            tickAmount: 2
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector(`#chart-map_${item_id}`), optionsMap);
+    chart.render();
+
+}
+
+async function minMaxPricePerDay(priceArr) {
+
+    let nowTime = Date.parse(new Date);
+    let lastYearMs = nowTime - (1000 * 60 * 60 * 24 * 30 * 12);
+    let countArrYear =priceArr.map((item) => Date.parse(item[0])> lastYearMs ? item : undefined ).filter(Boolean);
+
+    let chartsArr = [];
+    let dublicateArr =[];
+    let pastDate;
+    countArrYear.map((priceHistoryData) => {
+
+    const timeformat = new Date(priceHistoryData[0]).toLocaleDateString();
+
+    if (priceHistoryData.length === 0) return;
+
+    if (pastDate !==undefined && pastDate === timeformat) {
+        dublicateArr.push(priceHistoryData);
+    }else{
+        pastDate = timeformat;
+        let minVal;
+        let maxVal;
+        let countVal = 0;
+        if (dublicateArr.length > 0 &&  dublicateArr.length !== 1) {
+            dublicateArr.map( (dublicateItem) =>{
+                if (dublicateItem[1] < minVal || minVal === undefined) {
+                    minVal = dublicateItem[1];
+                }
+
+                if (dublicateItem[1] > maxVal || maxVal === undefined) {
+                    maxVal = dublicateItem[1];
+                }
+                countVal += +dublicateItem[2];
+            });
+            if (minVal === maxVal) {
+                chartsArr.push([priceHistoryData[0], minVal, countVal]);
+            }else{
+                chartsArr.push([priceHistoryData[0], maxVal, countVal]);
+            }
+            dublicateArr =[];
+            return;
+        }
+        dublicateArr =[];
+        chartsArr.push(priceHistoryData);
+    }
+
+    });
+
+    return chartsArr;
+}
+
+
 
 function InterVal(priceJSON, coefficient = 0.35) {
     let currentDiv = document.getElementById("largeiteminfo_item_descriptors");

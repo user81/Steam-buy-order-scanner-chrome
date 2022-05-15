@@ -57,7 +57,7 @@
     font-size: 20px;
 }
 
-#minPriceVal, #minCountVal, #minSellVal, #minProfitVal, #StartPageNumber, #EndPageNumber{
+#priceFromVal, #priceToVal, #minCountVal, #minSellVal, #minProfitVal, #StartPageNumber, #EndPageNumber{
     width: 80px;
     margin-right: 20px;
     margin-left: 5px;

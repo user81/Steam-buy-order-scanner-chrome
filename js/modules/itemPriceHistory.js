@@ -20,7 +20,7 @@ async function getItemHistory(appId, hashName, selectLang) {
             }
         }
         
-    return{countSell, countSellSevenDays};
+    return{countSell, countSellSevenDays, historyPriceJSON};
 }
 
 /**
