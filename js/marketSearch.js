@@ -14,9 +14,7 @@ let scanIntervalSET;
 let errorPauseSET;
 let sizePage;
 let buyOrderHeader = document.getElementById("findItems");
-let html = `<div id="profitScaner" class="my_market_listing_table_header">
-
-</div> `;
+let html = `<div id="profitScaner" class="my_market_listing_table_header"></div> `;
 buyOrderHeader.insertAdjacentHTML('afterend', DOMPurify.sanitize(html));
 
 function searchHeadersNames() {
@@ -81,7 +79,7 @@ chrome.storage.local.get([
         CountRequesrs = 5;
         scanIntervalSET = + data.scanIntervalSET;
         errorPauseSET = + data.errorPauseSET;
-        
+
         displaySearchRunScan();
         getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET);
 
@@ -181,10 +179,9 @@ async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET
 
     let getArraySortingAppid = function (searchUrl) {
         if (searchUrl !== null) {
-            let appId = searchUrl[0].match(/(?<=appid\=)\d*/)[0];
-            let AppidSortingVal = searchUrl[0].match(/(?<=\#).*/)[0];
+            let appId = searchUrl.input.match(/(?<=appid\=)\d*/)[0];
+            let AppidSortingVal = searchUrl.input.match(/(?<=\#).*/)[0];
             let arraySortingVal = AppidSortingVal.split("_");
-            console.log({ appId, arraySortingVal });
             return { appId, arraySortingVal };
         }
     }
@@ -193,7 +190,16 @@ async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET
         if (searchUrlСategory !== null) {
             ArraySortingAppidObject = getArraySortingAppid(searchUrlСategory);
             if (ArraySortingAppidObject) {
-                let categoryVal = searchUrlСategory[0].match(/category.*(?=\&)/g).join('&');
+
+                let categoryVal;
+                let categoryString = searchUrlСategory.input.match(/category.*(?=\&)/g);
+
+                if (categoryString) {
+                    categoryVal = searchUrlСategory.input.match(/category.*(?=\&)/g).join('&');
+                } else {
+                    categoryVal = searchUrlСategory.input.match(/category.*(?=\#)/g).join('&');
+                }
+
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                 Urlfragment = `https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=${start}&count=${count}&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}&${categoryVal}`;
                 marketSeachInfo = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=0&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}&${categoryVal}`, CountRequesrs, scanIntervalSET, errorPauseSET));
@@ -216,11 +222,9 @@ async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET
     if (queryItem !== null) {
         let marketSeachInfo = await ServerRequestAddSearchResults(searchUrlСategory);
         const pageSize = Math.ceil(marketSeachInfo.total_count / 100);
-        console.log(pageSize, Urlfragment);
+
         selectBlockPagesize(["StartPageNumber", "EndPageNumber"], pageSize);
     }
-
-
 
     let runLoadOrder = document.getElementById("runLoadOrder");
 
@@ -230,12 +234,12 @@ async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET
         if (StartPageNumber !== null && EndPageNumber !== null) {
             let CountLoaders = EndPageNumber - StartPageNumber;
             let changeCountLoaders = CountLoaders;
-            console.log(StartPageNumber, EndPageNumber, changeCountLoaders);
+
             if (changeCountLoaders <= 0) return;
             for (let index = 0; index < CountLoaders; index += 100) {
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                 let marketSeachJSON = await ServerRequestAddSearchResults(searchUrlСategory);
-                console.log(marketSeachJSON);
+
                 let myCustomMarketTableHTML = document.getElementById("BG_bottom");
                 myCustomMarketTableHTML.insertAdjacentHTML('beforeend', marketSeachJSON.results_html);
                 document.getElementById("numberOfOperations").textContent = `(${CountLoaders})`;
@@ -246,13 +250,10 @@ async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET
     }
     /*
     нумерация не работает
+    https://steamcommunity.com/market/search?appid=753&category_753_Game[]=tag_app_416450#p1_popular_desc
     https://steamcommunity.com/market/search/render/?query=P90&start=0&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2
     https://steamcommunity.com/market/search/render/?query=P90&start=0&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&query=usp&appid=730&query=usp
     */
-
-
-
-
 }
 function selectBlockPagesize(idArr, pageSize) {
     idArr.forEach((idVal, indexArr) => {
@@ -278,8 +279,6 @@ https://steamcommunity.com/market/search/render/?query=s&start=100&count=100&sea
     https://steamcommunity.com/market/search?q=&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2&appid=730#p2_popular_desc
     https://steamcommunity.com/market/search/render/?query=&start=10&count=10&search_descriptions=0&sort_column=popular&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2      */
 
-
-
 async function marketSearch() {
     let numberOfRepetitions = 10;
     let marketItems;
@@ -289,7 +288,7 @@ async function marketSearch() {
             await waitTime((+errorPauseSET + Math.floor(Math.random() * 5)) * 60000);
             return RereadTheAmountItems(numberOfRepetitions = 10);
         }
-        
+
         if (marketItems.length > 0) {
             for (let index = 0; index < marketItems.length; index++) {
                 if (StopScan) return;
@@ -310,11 +309,11 @@ async function marketSearch() {
                     var appId = marketItems[index].firstElementChild.dataset.appid;
                     /* var aId = marketItems[index].firstElementChild.id; */
                     var hashName = fixedEncodeURIComponent(marketItems[index].firstElementChild.dataset.hashName);
-                    let priceFromVal = document.getElementById("priceFromVal").value || 0 ;
-                    let priceToVal = document.getElementById("priceToVal").value || Infinity ;
-                    let minCountVal = document.getElementById("minCountVal").value || -1 ;
-                    let minProfitVal = document.getElementById("minProfitVal").value || -Infinity ;
-                    let minSellVal = document.getElementById("minSellVal").value || 0 ;
+                    let priceFromVal = document.getElementById("priceFromVal").value || 0;
+                    let priceToVal = document.getElementById("priceToVal").value || Infinity;
+                    let minCountVal = document.getElementById("minCountVal").value || -1;
+                    let minProfitVal = document.getElementById("minProfitVal").value || -Infinity;
+                    let minSellVal = document.getElementById("minSellVal").value || 0;
                     let onlyProfitable = document.getElementById("onlyProfitable").checked || false;
 
                     let sourceCode = await globalThis.httpErrorPause(orderHref, CountRequesrs, scanIntervalSET, errorPauseSET);
@@ -322,16 +321,16 @@ async function marketSearch() {
                     let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
                     await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                     let priceHistory = await getItemHistory(appId, hashName, selectLang);
-                    
+
                     let pricesProfit = InterVal(priceJSON, coefficient);
 
                     if (priceFromVal > orderPrice || priceToVal < orderPrice || minCountVal > orderCount) {
                         marketItems[index].style.display = "none";
-                    }else if (minProfitVal > pricesProfit.actualProfit || minSellVal > priceHistory.countSellSevenDays) {
+                    } else if (minProfitVal > pricesProfit.actualProfit || minSellVal > priceHistory.countSellSevenDays) {
                         marketItems[index].style.display = "none";
-                    }else if (onlyProfitable && pricesProfit.coefPrice > pricesProfit.actualProfit) {
+                    } else if (onlyProfitable && pricesProfit.coefPrice > pricesProfit.actualProfit) {
                         marketItems[index].style.display = "none";
-                    }else{
+                    } else {
                         await displayProfitable(pricesProfit, marketItems[index], priceJSON, priceHistory, item_id);
                     }
                 }
@@ -341,12 +340,10 @@ async function marketSearch() {
         ordersReload();
         await waitTime(5000 + scanIntervalSET + Math.floor(Math.random() * 50));
         marketItems = Array.from(document.getElementsByClassName("market_listing_row_link"));
-        
+
         return RereadTheAmountItems(numberOfRepetitions - 1);
     }
     RereadTheAmountItems(numberOfRepetitions);
-
-
 }
 
 async function displayProfitable(pricesProfit, divItemBlock, priceJSON, priceHistory, item_id) {
@@ -387,11 +384,8 @@ async function displayProfitable(pricesProfit, divItemBlock, priceJSON, priceHis
 
     divItemBlock.firstElementChild.style.backgroundColor = setSearchSolor(pricesProfit);
     divItemBlock.firstElementChild.dataset.scanned = "true";
-
 }
 
-
-    
 async function schemeHistory(countArrYear, item_id) {
 
     if (countArrYear.length === 0 || countArrYear.length === 1) return;
@@ -400,8 +394,8 @@ async function schemeHistory(countArrYear, item_id) {
 
     let saleArr = countArrYear.map((item) => [Date.parse(item[0]), item[1]]);
     let countArr = countArrYear.map((item) => [Date.parse(item[0]), item[2]]);
-    
-    let firstData =countArrYear.shift()[0];
+
+    let firstData = countArrYear.shift()[0];
     let lastData = countArrYear.pop()[0];
 
     var options = {
@@ -436,9 +430,7 @@ async function schemeHistory(countArrYear, item_id) {
         grid: {
             borderColor: "#555",
             clipMarkers: false,
-
         },
-    
         //ось x
         xaxis: {
             type: 'datetime',
@@ -472,7 +464,7 @@ async function schemeHistory(countArrYear, item_id) {
         },
         // стиль таблицы  fill
         fill: {
-            type:'solid',
+            type: 'solid',
             opacity: [0.35, 1],
         }
     };
@@ -540,53 +532,51 @@ async function minMaxPricePerDay(priceArr) {
 
     let nowTime = Date.parse(new Date);
     let lastYearMs = nowTime - (1000 * 60 * 60 * 24 * 30 * 12);
-    let countArrYear =priceArr.map((item) => Date.parse(item[0])> lastYearMs ? item : undefined ).filter(Boolean);
+    let countArrYear = priceArr.map((item) => Date.parse(item[0]) > lastYearMs ? item : undefined).filter(Boolean);
 
     let chartsArr = [];
-    let dublicateArr =[];
+    let dublicateArr = [];
     let pastDate;
     countArrYear.map((priceHistoryData) => {
 
-    const timeformat = new Date(priceHistoryData[0]).toLocaleDateString();
+        const timeformat = new Date(priceHistoryData[0]).toLocaleDateString();
 
-    if (priceHistoryData.length === 0) return;
+        if (priceHistoryData.length === 0) return;
 
-    if (pastDate !==undefined && pastDate === timeformat) {
-        dublicateArr.push(priceHistoryData);
-    }else{
-        pastDate = timeformat;
-        let minVal;
-        let maxVal;
-        let countVal = 0;
-        if (dublicateArr.length > 0 &&  dublicateArr.length !== 1) {
-            dublicateArr.map( (dublicateItem) =>{
-                if (dublicateItem[1] < minVal || minVal === undefined) {
-                    minVal = dublicateItem[1];
+        if (pastDate !== undefined && pastDate === timeformat) {
+            dublicateArr.push(priceHistoryData);
+        } else {
+            pastDate = timeformat;
+            let minVal;
+            let maxVal;
+            let countVal = 0;
+            if (dublicateArr.length > 0 && dublicateArr.length !== 1) {
+                dublicateArr.map((dublicateItem) => {
+                    if (dublicateItem[1] < minVal || minVal === undefined) {
+                        minVal = dublicateItem[1];
+                    }
+
+                    if (dublicateItem[1] > maxVal || maxVal === undefined) {
+                        maxVal = dublicateItem[1];
+                    }
+                    countVal += +dublicateItem[2];
+                });
+                if (minVal === maxVal) {
+                    chartsArr.push([priceHistoryData[0], minVal, countVal]);
+                } else {
+                    chartsArr.push([priceHistoryData[0], maxVal, countVal]);
                 }
-
-                if (dublicateItem[1] > maxVal || maxVal === undefined) {
-                    maxVal = dublicateItem[1];
-                }
-                countVal += +dublicateItem[2];
-            });
-            if (minVal === maxVal) {
-                chartsArr.push([priceHistoryData[0], minVal, countVal]);
-            }else{
-                chartsArr.push([priceHistoryData[0], maxVal, countVal]);
+                dublicateArr = [];
+                return;
             }
-            dublicateArr =[];
-            return;
+            dublicateArr = [];
+            chartsArr.push(priceHistoryData);
         }
-        dublicateArr =[];
-        chartsArr.push(priceHistoryData);
-    }
 
     });
 
     return chartsArr;
 }
-
-
 
 function InterVal(priceJSON, coefficient = 0.35) {
     let currentDiv = document.getElementById("largeiteminfo_item_descriptors");
@@ -609,7 +599,6 @@ function InterVal(priceJSON, coefficient = 0.35) {
     }
     return ProfitableList;
 }
-
 
 function setSearchSolor(ProfitableList) {
     if (+ProfitableList.actualProfit > +ProfitableList.coefPrice) return "#09553c";
