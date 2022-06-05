@@ -700,7 +700,6 @@ async function loadAllAssetid (step, appid, contextid, steamID) {
     let lastAsset = AssetidFirstJSON.last_assetid;
     let arrAssetidJson = [];
     arrAssetidJson = [...arrAssetidJson, ...AssetidFirstJSON.assets];
-    console.log()
     while (lastAsset !== undefined) {
         await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
         let AssetidJSON = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/inventory/${steamID}/${appid}/${contextid}?language=${extensionSetings.selectLang}&count=${step}&start_assetid=${lastAsset}`, extensionSetings.CountRequesrs, extensionSetings.scanIntervalSET, extensionSetings.errorPauseSET));

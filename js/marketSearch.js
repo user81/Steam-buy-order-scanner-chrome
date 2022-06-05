@@ -7,15 +7,15 @@ var g_rgWalletInfo = {
     wallet_publisher_fee_percent_default: 0.10,
     wallet_currency: 1
 };
-let coefficient;
-let selectLang;
-let CountRequesrs;
-let scanIntervalSET;
-let errorPauseSET;
+
 let sizePage;
+let orderListBuyArr;
+let orderListBuyJSONArr;
 let buyOrderHeader = document.getElementById("findItems");
 let html = `<div id="profitScaner" class="my_market_listing_table_header"></div> `;
 buyOrderHeader.insertAdjacentHTML('afterend', DOMPurify.sanitize(html));
+
+let DomRemove = (Dom) => { if (Dom !== undefined) Dom.remove() };
 
 function searchHeadersNames() {
     //headersNames массив элементов
@@ -69,35 +69,32 @@ chrome.storage.local.get([
     "errorPauseSET",
     "coefficient",
     "selectLang",
+    "quantity",
     "runSearch",
 
 ], function (data) {
 
     if (data.runSearch) {
-        coefficient = + data.coefficient;
-        selectLang = data.selectLang;
-        CountRequesrs = 5;
-        scanIntervalSET = + data.scanIntervalSET;
-        errorPauseSET = + data.errorPauseSET;
+        sessionId = SessionIdVal();
 
-        displaySearchRunScan();
-        getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET);
+        displaySearchRunScan(data.coefficient);
+        getPageSizeInSearch(5, data.quantity, data.coefficient, data.selectLang, data.scanIntervalSET, data.errorPauseSET, SessionIdVal());
 
     }
 });
 
-async function displaySearchRunScan() {
+async function displaySearchRunScan(coefficient) {
     let divRunScan = document.getElementById("market_search");
     if (document.getElementById("runSearchScan") == null) {
         let scanerMarketSearchHTML = `
         <div>
             <span class="market_search_sidebar_section_tip_small market_listing_item_name">
                 Price From
-                <input type="number" id="priceFromVal">
+                <input type="number" id="priceFromVal" step="0.01">
             </span>
             <span class="market_search_sidebar_section_tip_small market_listing_item_name">
             Price To
-            <input type="number" id="priceToVal">
+            <input type="number" id="priceToVal" step="0.01">
         </span>
             <span class="market_search_sidebar_section_tip_small market_listing_item_name">
                 Min Count
@@ -109,7 +106,7 @@ async function displaySearchRunScan() {
             </span>
             <span class="market_search_sidebar_section_tip_small market_listing_item_name">
                 Min Profit
-                <input type="number" id="minProfitVal">
+                <input type="number" id="minProfitVal" value ="">
             </span>
             <br>
             <br>
@@ -157,14 +154,16 @@ function ordersReload() {
     if (window.location.href.split('#',)[1] !== undefined) {
         pageSize = window.location.href.split('#',)[1].split('_',)[0].replace(/\D/g, '');
     }
-    console.log(pageSize);
+
     changeSearchSize(pageSize);
     StopScan = true;
 }
 
-async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET) {
+async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId) {
     document.getElementById("reloadScan").addEventListener("click", () => { ordersReload(); });
-    document.getElementById("runSearchScan").addEventListener("click", () => { marketSearch(); StopScan = false; });
+    document.getElementById("runSearchScan").addEventListener("click", () => {
+        marketSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId); StopScan = false;
+    });
 
     /**
      * https://steamcommunity.com/market/search?select=value2&select=value2&select=value2&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=tag_weapon_knife_flip&appid=730&q=#p2_popular_desc
@@ -174,14 +173,20 @@ async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET
 
     let searchUrlСategory = window.location.href.match(/category(.*)/);
     let marketSeachInfo;
+    let marketSeachInfoNorender;
     let ArraySortingAppidObject;
     let Urlfragment;
 
     let getArraySortingAppid = function (searchUrl) {
         if (searchUrl !== null) {
-            let appId = searchUrl.input.match(/(?<=appid\=)\d*/)[0];
-            let AppidSortingVal = searchUrl.input.match(/(?<=\#).*/)[0];
-            let arraySortingVal = AppidSortingVal.split("_");
+
+            let appIdMatch = searchUrl.input.match(/(?<=appid\=)\d*/);
+            let AppidSortingValMatch = searchUrl.input.match(/(?<=\#).*/);
+            let appId = appIdMatch !== null ? appIdMatch[0] : null;
+            let AppidSortingVal = AppidSortingValMatch !== null ? AppidSortingValMatch[0] : null;
+
+            let arraySortingVal = AppidSortingVal !== null ? AppidSortingVal.split("_") : ['p', 'default', 'desc'];
+            arraySortingVal[2] = arraySortingVal[2].includes('desc') ? 'desc' : 'asc';
             return { appId, arraySortingVal };
         }
     }
@@ -192,38 +197,51 @@ async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET
             if (ArraySortingAppidObject) {
 
                 let categoryVal;
-                let categoryString = searchUrlСategory.input.match(/category.*(?=\&)/g);
-
-                if (categoryString) {
-                    categoryVal = searchUrlСategory.input.match(/category.*(?=\&)/g).join('&');
-                } else {
+                let categoryStringAnd = searchUrlСategory.input.match(/category.*(?=\&)/g);
+                let categoryStringHashtag = searchUrlСategory.input.match(/category.*(?=\#)/g);
+                if (categoryStringAnd) {
+                    categoryVal = categoryStringAnd.join('&');
+                } else if (categoryStringHashtag) {
+                    // для ссылок https://steamcommunity.com/market/search?appid=753&category_753_Game[]=tag_app_416450#p1_popular_desc
                     categoryVal = searchUrlСategory.input.match(/category.*(?=\#)/g).join('&');
                 }
-
-                await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
-                Urlfragment = `https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=${start}&count=${count}&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}&${categoryVal}`;
-                marketSeachInfo = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=0&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}&${categoryVal}`, CountRequesrs, scanIntervalSET, errorPauseSET));
-                await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+                if (categoryVal && ArraySortingAppidObject.appId) {
+                    await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+                    marketSeachInfo = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=${start}&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}&${categoryVal}`, CountRequesrs, scanIntervalSET, errorPauseSET));
+                    await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+                    marketSeachInfoNorender = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=${start}&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}&${categoryVal}&norender=1`, CountRequesrs, scanIntervalSET, errorPauseSET));
+                    await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+                }
             }
         } else {
             let searchUrl = window.location.href.match(/search\?(.*)/);
             let ArraySortingAppidObject = getArraySortingAppid(searchUrl);
-            if (ArraySortingAppidObject) {
-                Urlfragment = `https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=0&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}`;
+            if (ArraySortingAppidObject && ArraySortingAppidObject.appId) {
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
-                marketSeachInfo = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=0&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}`, CountRequesrs, scanIntervalSET, errorPauseSET));
+                marketSeachInfo = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=${start}&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}`, CountRequesrs, scanIntervalSET, errorPauseSET));
+                await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+                marketSeachInfoNorender = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=${start}&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&appid=${ArraySortingAppidObject.appId}&norender=1`, CountRequesrs, scanIntervalSET, errorPauseSET));
+                await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+            }
+            if (ArraySortingAppidObject && ArraySortingAppidObject.appId === null) {
+                await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+                marketSeachInfo = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=${start}&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}`, CountRequesrs, scanIntervalSET, errorPauseSET));
+                await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+                marketSeachInfoNorender = JSON.parse(await globalThis.httpErrorPause(`https://steamcommunity.com/market/search/render/?query=${queryItem.value}&start=${start}&count=100&search_descriptions=0&sort_column=${ArraySortingAppidObject.arraySortingVal[1]}&sort_dir=${ArraySortingAppidObject.arraySortingVal[2]}&norender=1`, CountRequesrs, scanIntervalSET, errorPauseSET));
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
             }
         }
-        return marketSeachInfo;
+        return { marketSeachInfo, marketSeachInfoNorender };
     }
 
     let queryItem = document.getElementById("findItemsSearchBox");
     if (queryItem !== null) {
-        let marketSeachInfo = await ServerRequestAddSearchResults(searchUrlСategory);
+        let { marketSeachInfo, marketSeachInfoNorender } = await ServerRequestAddSearchResults(searchUrlСategory);
         const pageSize = Math.ceil(marketSeachInfo.total_count / 100);
 
-        selectBlockPagesize(["StartPageNumber", "EndPageNumber"], pageSize);
+        selectBlockPagesize(["StartPageNumber", "EndPageNumber"], pageSize, marketSeachInfo);
+        orderListBuyJSONArr = marketSeachInfoNorender.results;
+
     }
 
     let runLoadOrder = document.getElementById("runLoadOrder");
@@ -238,30 +256,43 @@ async function getPageSizeInSearch(CountRequesrs, scanIntervalSET, errorPauseSET
             if (changeCountLoaders <= 0) return;
             for (let index = 0; index < CountLoaders; index += 100) {
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
-                let marketSeachJSON = await ServerRequestAddSearchResults(searchUrlСategory);
+                let { marketSeachInfo, marketSeachInfoNorender } = await ServerRequestAddSearchResults(searchUrlСategory, StartPageNumber);
 
-                let myCustomMarketTableHTML = document.getElementById("BG_bottom");
-                myCustomMarketTableHTML.insertAdjacentHTML('beforeend', marketSeachJSON.results_html);
+                let myCustomMarketTableHTML = document.getElementById("searchResultsRows");
+                myCustomMarketTableHTML.insertAdjacentHTML('afterend', DOMPurify.sanitize(marketSeachInfo.results_html));
+                orderListBuyJSONArr = [...orderListBuyJSONArr, ...marketSeachInfoNorender.results];
                 document.getElementById("numberOfOperations").textContent = `(${CountLoaders})`;
                 document.getElementById("operationsProcess").textContent = `(${index + 100})`;
+                StartPageNumber += 100;
             }
+
         }
 
     }
-    /*
-    нумерация не работает
-    https://steamcommunity.com/market/search?appid=753&category_753_Game[]=tag_app_416450#p1_popular_desc
+    /*    https://steamcommunity.com/market/search?appid=753&category_753_Game[]=tag_app_416450#p1_popular_desc
     https://steamcommunity.com/market/search/render/?query=P90&start=0&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2
     https://steamcommunity.com/market/search/render/?query=P90&start=0&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&query=usp&appid=730&query=usp
+    
+
+https://steamcommunity.com/market/search/render/?query=&start=0&count=100&search_descriptions=0&sort_column=popular&sort_dir=desc&appid=753&category_753_Game%5B%5D=tag_app_416450
+https://steamcommunity.com/market/search/render/?query=&start=100&count=100&search_descriptions=0&sort_column=popular&sort_dir=desc&appid=753&category_753_Game[]=tag_app_416450
+
+    !!!нумерация не работает
+    https://steamcommunity.com/market/search?q=%D0%A1%D1%83%D0%B2%D0%B5%D0%BD%D0%B8%D1%80%D0%BD%D1%8B%D0%B9+%D0%BD%D0%B0%D0%B1%D0%BE%D1%80#p1_default_desc
+    https://steamcommunity.com/market/search?appid=730#p1_popular_desc&norender=1
     */
 }
-function selectBlockPagesize(idArr, pageSize) {
+function selectBlockPagesize(idArr, pageSize, marketSeachInfo) {
     idArr.forEach((idVal, indexArr) => {
         let ElementDom = document.getElementById(idVal);
         for (let index = 0; index < pageSize; index++) {
-            ElementDom.insertAdjacentHTML('beforeend', `<option value="${(+index + indexArr) * 100}">${(+index + indexArr) * 100}</option>`);
+            ElementDom.insertAdjacentHTML('beforeend', DOMPurify.sanitize(`<option value="${(+index + indexArr) * 100}">${(+index + indexArr) * 100}</option>`));
         }
     });
+
+    let myCustomMarketTableHTML = document.getElementById("searchResultsRows");
+    myCustomMarketTableHTML.textContent = '';
+    myCustomMarketTableHTML.innerHTML = DOMPurify.sanitize(marketSeachInfo.results_html);
 }
 
 /* 
@@ -279,7 +310,7 @@ https://steamcommunity.com/market/search/render/?query=s&start=100&count=100&sea
     https://steamcommunity.com/market/search?q=&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2&appid=730#p2_popular_desc
     https://steamcommunity.com/market/search/render/?query=&start=10&count=10&search_descriptions=0&sort_column=popular&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2      */
 
-async function marketSearch() {
+async function marketSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId) {
     let numberOfRepetitions = 10;
     let marketItems;
     let RereadTheAmountItems = async function (numberOfRepetitions) {
@@ -290,10 +321,18 @@ async function marketSearch() {
         }
 
         if (marketItems.length > 0) {
+            await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+            let myListings = JSON.parse(await globalThis.httpErrorPause("https://steamcommunity.com/market/mylistings/?norender=1", CountRequesrs, scanIntervalSET, errorPauseSET));
+            await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+            orderListArr = myListings.buy_orders; // массив значений товаров
+            orderListBuyArr = orderListArr; //чобы работали кнопки отменить разместить заказ иначе они обуляются при вызове
+
             for (let index = 0; index < marketItems.length; index++) {
                 if (StopScan) return;
 
-                if (marketItems[index].firstElementChild.dataset.scanned === undefined) {
+                let asset_description = orderListBuyJSONArr[index].asset_description;
+
+                if (marketItems[index].firstElementChild.dataset.scanned === undefined || marketItems[index].firstElementChild.dataset.scanned === update) {
 
                     //!! повторяется надо будет исправить
                     let blockNames = ["Buy_tab", "Sell_tab"];
@@ -331,7 +370,9 @@ async function marketSearch() {
                     } else if (onlyProfitable && pricesProfit.coefPrice > pricesProfit.actualProfit) {
                         marketItems[index].style.display = "none";
                     } else {
-                        await displayProfitable(pricesProfit, marketItems[index], priceJSON, priceHistory, item_id);
+                        myNextBuyPrice = NextPrice(priceJSON.highest_buy_order, "higest");
+                        /* myRealBuyPrice = NextPrice(priceJSON.highest_buy_order, "real"); */
+                        await displayProfitable(marketItems[index], priceJSON, priceHistory, { item_id, asset_description }, myNextBuyPrice, quantity, { CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET });
                     }
                 }
             }
@@ -344,46 +385,127 @@ async function marketSearch() {
         return RereadTheAmountItems(numberOfRepetitions - 1);
     }
     RereadTheAmountItems(numberOfRepetitions);
+
 }
 
-async function displayProfitable(pricesProfit, divItemBlock, priceJSON, priceHistory, item_id) {
-
+async function displayProfitable(divItemBlock, priceJSON, priceHistory, item_description, myNextBuyPrice, quantity, extensionSetings) {
+    let { item_id } = item_description;
+    let pricesProfit = InterVal(priceJSON, extensionSetings.coefficient);
     let spanPriceBlock = divItemBlock.getElementsByClassName("normal_price")[0];
-    let sellsHistoryHTML = `
-        <span class="market_listing_num_listings_qty">1d sell: ${priceHistory.countSell.toLocaleString()}</span>
-        <span class="market_listing_num_listings_qty">7d sell: ${priceHistory.countSellSevenDays.toLocaleString()}</span>`;
-    spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(sellsHistoryHTML));
-
     let spanCountBlock = divItemBlock.getElementsByClassName("market_listing_num_listings_qty")[0];
-    let ProfitItemHTML = `
-    <span class="market_listing_num_listings_qty">K. Profit: ${pricesProfit.coefPrice}</span>
-    <span class="market_listing_num_listings_qty">Profit: ${pricesProfit.actualProfit}</span>
-    `;
-    spanCountBlock.insertAdjacentHTML('afterbegin', DOMPurify.sanitize(ProfitItemHTML));
 
+    DomRemove(spanPriceBlock.getElementsByClassName("market_sells")[0]);
+    MarketSells(spanPriceBlock, priceHistory);
+
+    DomRemove(spanCountBlock.getElementsByClassName("market_prifit")[0]);
+    marketPrifit(spanCountBlock, pricesProfit);
+
+    DomRemove(spanPriceBlock.getElementsByClassName("normal_price")[0]);
+    realPrice(spanPriceBlock, pricesProfit);
+
+    DomRemove(divItemBlock.getElementsByClassName("market_table_price_json_sell")[0]);
+    listingSellTab(divItemBlock, priceJSON);
+
+    DomRemove(divItemBlock.getElementsByClassName("market_table_price_json_buy")[0]);
+    listingBuyTab(divItemBlock, priceJSON);
+
+    DomRemove(divItemBlock.getElementsByClassName("chart")[0]);
+    historyChart(divItemBlock, item_id);
+
+    let minMaxPricePerDayVal = await minMaxPricePerDay(priceHistory.historyPriceJSON.prices);
+    DomRemove(document.getElementsByClassName(`order_block_${item_id}`)[0]);
+    itemOrderChange(item_description, divItemBlock, myNextBuyPrice, quantity, extensionSetings, priceJSON, minMaxPricePerDayVal, setSearchSolor(pricesProfit), sessionId);
+
+    divItemBlock.firstElementChild.style.backgroundColor = setSearchSolor(pricesProfit);
+    divItemBlock.firstElementChild.dataset.scanned = "true";
+}
+
+function MarketSells(spanPriceBlock, priceHistory) {
+    let sellsHistoryHTML = `
+    <div class ="market_sells">
+        <span class="market_listing_num_listings_qty">1d sell: ${priceHistory.countSell.toLocaleString()}</span>
+        <span class="market_listing_num_listings_qty">7d sell: ${priceHistory.countSellSevenDays.toLocaleString()}</span>
+    </div>`;
+
+    spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(sellsHistoryHTML));
+}
+
+function marketPrifit(spanCountBlock, pricesProfit) {
+    let ProfitItemHTML = `
+    <div class = "market_prifit">
+        <span class="market_listing_num_listings_qty">K. Profit: ${pricesProfit.coefPrice}</span>
+        <span class="market_listing_num_listings_qty">Profit: ${pricesProfit.actualProfit}</span>
+    </div>`;
+    spanCountBlock.insertAdjacentHTML('afterbegin', DOMPurify.sanitize(ProfitItemHTML));
+}
+
+function realPrice(spanPriceBlock, pricesProfit) {
     let realPriceHTML = `<span class="normal_price">(${pricesProfit.realPrice})</span>`;
     spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(realPriceHTML));
+}
 
+function listingSellTab(divItemBlock, priceJSON) {
     let myListingSellTabHTML = `<span class="market_table_value market_table_price_json_sell">${priceJSON.sell_order_table}</span>`;
-    divItemBlock.getElementsByClassName("market_my_listing_sell_tab")[0].insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingSellTabHTML));
+    let listingSell = divItemBlock.getElementsByClassName("market_my_listing_sell_tab")[0];
+    listingSell.insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingSellTabHTML));
+}
 
+function listingBuyTab(divItemBlock, priceJSON) {
     let myListingBuyTabHTML = `<span class="market_table_value market_table_price_json_buy">${priceJSON.buy_order_table}</span>`;
     divItemBlock.getElementsByClassName("market_my_listing_buy_tab")[0].insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyTabHTML));
+}
 
+function historyChart(divItemBlock, item_id) {
     let historyChartHTML = `   
-    <div id="chart_${item_id}">
+    <div id="chart_${item_id}" class="chart">
         <div id="chart-timeline_${item_id}"></div>
         <div id="chart-map_${item_id}"></div>
     </div>`;
     divItemBlock.insertAdjacentHTML('afterend', DOMPurify.sanitize(historyChartHTML));
-    let minMaxPricePerDayVal = await minMaxPricePerDay(priceHistory.historyPriceJSON.prices);
+}
 
-    if (minMaxPricePerDayVal !== undefined && minMaxPricePerDayVal.length > 1) {
-        await schemeHistory(minMaxPricePerDayVal, item_id);
-    }
 
-    divItemBlock.firstElementChild.style.backgroundColor = setSearchSolor(pricesProfit);
-    divItemBlock.firstElementChild.dataset.scanned = "true";
+
+function itemOrderChange(item_description, myListingBuyUpdateDom, myNextBuyPrice, quantityWant, extensionSetings, priceJSON, minMaxPricePerDayVal, color, sessionId) {
+
+    let { item_id } = item_description;
+    let myListingBuyUpdateHTML = `
+    <span class="market_search_sidebar_contents change_price_search  market_table_value change_price_block order_block_${item_id}"
+    style ="box-shadow: rgb(62 70 55 / 59%) 0px 0px 32px 38px inset;"
+    >
+        <span id="myItemRealBuyPrice${item_id}">${myNextBuyPrice.nextPriceWithoutFee}</span>
+        <span id="myItemNextBuyPrice${item_id}">${myNextBuyPrice.myNextPrice}</span>
+        <input type="number" step="0.01" id="myItemBuyPrice${item_id}" class="change_price_input">
+        <input type="number" id="myItemQuality${item_id}" class="change_price_input">
+        <button id="cancelBuyOrder_${item_id}" class = "market_searchedForTerm"> ⦸ </button>
+        <button id="createBuyOrder_${item_id}" class = "market_searchedForTerm"> ⨭ </button>
+        <button id="showHistory_${item_id}" class = "market_searchedForTerm"> show history </button>
+        <div id="responceServerRequestBuyOrder_${item_id}"></div>
+    </span>`;
+    myListingBuyUpdateDom.insertAdjacentHTML('beforebegin', DOMPurify.sanitize(myListingBuyUpdateHTML));
+    let buttonCancelBuy = document.getElementById(`cancelBuyOrder_${item_id}`);
+    let buttonCreateBuy = document.getElementById(`createBuyOrder_${item_id}`);
+    let buttonshowHistory = document.getElementById(`showHistory_${item_id}`);
+    let myNextItemBuyPrice = document.getElementById(`myItemBuyPrice${item_id}`);
+    let myItemQuality = document.getElementById(`myItemQuality${item_id}`);
+    let myItemRealBuyPrice = document.getElementById(`myItemRealBuyPrice${item_id}`);
+    let myItemNextBuyPrice = document.getElementById(`myItemNextBuyPrice${item_id}`);
+    myNextItemBuyPrice.value = myNextBuyPrice.myNextPrice;
+    myItemQuality.value = quantityWant;
+    myNextItemBuyPrice.onchange = () => {
+        myItemRealBuyPrice.textContent = myNextItemBuyPrice.value ? NextPrice((myNextItemBuyPrice.value * 100).toFixed(), "real").nextPriceWithoutFee : '';
+        myItemNextBuyPrice.textContent = myNextItemBuyPrice.value ? NextPrice((myNextItemBuyPrice.value * 100).toFixed(), "real").myNextPrice : '';
+    };
+    buttonCreateBuy.addEventListener("click", (event) => { createBuyOrder(event.path[0], extensionSetings, sessionId, item_description); });
+    buttonshowHistory.addEventListener("click", (event) => {
+        if (minMaxPricePerDayVal !== undefined && minMaxPricePerDayVal.length > 1) {
+            schemeHistory(minMaxPricePerDayVal, item_id);
+        }
+    });
+
+    buttonCancelBuy.addEventListener("click", (event) => { cancelBuyOrder(event.path[0], extensionSetings, sessionId, item_description); });
+    let orderBlockDom = document.getElementsByClassName(`order_block_${item_id}`);
+    Array.prototype.map.call(orderBlockDom, (currentDom) => currentDom.style.backgroundColor = color);
 }
 
 async function schemeHistory(countArrYear, item_id) {
@@ -604,4 +726,79 @@ function setSearchSolor(ProfitableList) {
     if (+ProfitableList.actualProfit > +ProfitableList.coefPrice) return "#09553c";
     if (+ProfitableList.actualProfit > 0.1 && +ProfitableList.actualProfit <= +ProfitableList.coefPrice) return "#61632b";
     if (+ProfitableList.actualProfit <= 0.1) return "#602F38";
+}
+
+
+async function cancelBuyOrder(thisVal, extensionSetings, sessionId, item_description) {
+    let { item_id, asset_description } = item_description;
+    if (asset_description && item_id !== null && item_id !== undefined) {
+        if (Object.entries(asset_description).length > 0) {
+            let { appid, market_hash_name } = asset_description;
+            let myListings = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/mylistings/?norender=1', 5, extensionSetings.scanIntervalSET, extensionSetings.errorPauseSET));
+            await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
+            let orderListArr = myListings.buy_orders;
+            if (appid !== null && appid !== undefined && market_hash_name) {
+                let itemInfo = orderListArr.filter(item => item.hash_name === market_hash_name && item.appid === appid)[0];
+                let htmlResponce = document.getElementById(`responceServerRequestBuyOrder_${item_id}`);
+                if (Object.entries(itemInfo).length === 8) {
+                    let orderId = itemInfo.buy_orderid;
+                    if (orderId !== null && sessionId !== null) {
+                        let params = `sessionid=${sessionId}&buy_orderid=${orderId}`;
+                        let url = "https://steamcommunity.com/market/cancelbuyorder/";
+                        let serverResponse = await globalThis.httpPostErrorPause(url, params);
+                        htmlResponce.textContent = (serverResponse.success === 1) ? "Done cancel" : "Error cancel"; /* {success: 1} */
+                    }
+                } else {
+                    htmlResponce.textContent = "Buy Order does not exist"; 
+                }
+            }
+        }
+    }
+
+}
+
+async function createBuyOrder(thisVal, extensionSetings, sessionId, item_description) {
+    /* let item_id = thisVal.id.split('_')[1]; */
+    let { item_id, asset_description } = item_description;
+    if (asset_description && item_id !== null && item_id !== undefined) {
+        if (Object.entries(asset_description).length > 0) {
+            let { appid, market_hash_name } = asset_description;
+            let inputPriceDom = document.getElementById(`myItemBuyPrice${item_id}`);
+            let itemCountDom = document.getElementById(`myItemQuality${item_id}`);
+
+            if (inputPriceDom.value.trim() == '' || itemCountDom.value.trim() == '' || itemCountDom.value.trim() <= 0) {
+                if (document.getElementById(`error${item_id}`)) return;
+                let error = document.createElement('p');
+                error.innerText = "input value";
+                error.id = `error${item_id}`;
+                itemCountDom.after(error);
+                return;
+            }
+            let inputPrice = inputPriceDom.value.trim();
+            let itemCount = itemCountDom.value.trim();
+            if (appid !== null && appid !== undefined && market_hash_name) {
+                let params = `sessionid=${sessionId}&currency=1&appid=${appid}&market_hash_name=${market_hash_name}&price_total=${Math.round(inputPrice * 100 * itemCount)}&quantity=${itemCount}&billing_state=&save_my_address=0`;
+                let url = "https://steamcommunity.com/market/createbuyorder/";
+                let serverResponse = await globalThis.httpPostErrorPause(url, params);
+                let htmlResponce = document.getElementById(`responceServerRequestBuyOrder_${item_id}`);
+                if (serverResponse.success === 1) {
+                    htmlResponce.textContent = "Order created";
+
+                    let steamItemBlock = document.getElementsByClassName(`order_block_${item_id}`)[0].nextSibling;
+                    //<div class="market_listing_row market_recent_listing_row" id="mybuyorder_4157921926" style="background-color: rgb(96, 55, 62);"></div>
+                    myNextBuyPrice = NextPrice((inputPrice * 100).toFixed(), "real");
+                    await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
+                    await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
+                    let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + extensionSetings.selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', 5, extensionSetings.scanIntervalSET, extensionSetings.errorPauseSET));
+
+                    let priceHistory = await getItemHistory(appid, market_hash_name, extensionSetings.selectLang);
+
+                    steamItemBlock.firstElementChild.dataset.scanned = "update";
+                    displayProfitable(steamItemBlock, priceJSON, priceHistory, item_description, myNextBuyPrice, itemCount, extensionSetings);
+                }
+                htmlResponce.textContent = (serverResponse.success === 29) ? serverResponse.message : "Eroor"; // message: "У вас уже есть заказ на этот предмет. Вы должны либо ." success: 29{buy_orderid: "4562009753" success: 1}
+            }
+        }
+    }
+
 }

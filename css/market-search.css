@@ -174,3 +174,20 @@ market_listing_row {
     vertical-align: middle;
     line-height: 2.25em;
 }
+
+/* стиль блока создания ордера */
+.change_price_search{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+}
+
+.change_price_input{
+    height: 34px;
+    margin: 8px 10px 10px 5px;
+}
+span [id^="myItemRealBuyPrice"],span [id^="myItemNextBuyPrice"]{
+    padding: 10px;
+}
+
