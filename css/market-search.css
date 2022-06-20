@@ -1,23 +1,27 @@
+body {
+    background-color: rgb(62, 70, 55) !important;
+}
 /* positions */
 #sideBar {
     float: none !important;
     width: auto !important;
 }
+
 /* size sitebar */
 .market_search_sidebar_contents {
     width: auto !important;
     padding: 12px 15px 15px 15px;
-    background: rgba(0, 0, 0, 0.4) none repeat scroll 0 0;
 }
-#sideBar > div {
+
+#sideBar>div {
     width: auto !important;
     margin-top: 0;
-/*     margin-bottom: 0 !important;
+    /*     margin-bottom: 0 !important;
     margin-bottom: 20px; */
 }
 
 
-.market_search_advanced_button > .btn_details_arrow {
+.market_search_advanced_button>.btn_details_arrow {
     right: auto !important;
 }
 
@@ -25,7 +29,8 @@
     position: relative;
     display: inline-block !important;
 }
-.SearchButton{
+
+.SearchButton {
     top: 10px;
     position: relative;
 }
@@ -34,6 +39,7 @@
     width: 150px;
     text-align: center;
 }
+
 .market_listing_my_name {
     float: left;
     padding-left: 10px;
@@ -41,7 +47,9 @@
 
 
 /*запустить сканирование*/
-#runSearchScan, #reloadScan, #runLoadOrder{
+#runSearchScan,
+#reloadScan,
+#runLoadOrder {
     margin-left: 10px;
     background-color: #8ac33e !important;
     float: right !important;
@@ -49,36 +57,125 @@
     font-style: inherit;
 }
 
-#runSearchScan, #runLoadOrder{
+#runSearchScan,
+#runLoadOrder {
     width: 80px;
 }
-#reloadScan{
+
+#reloadScan {
     width: 40px;
     font-size: 20px;
 }
 
-#priceFromVal, #priceToVal, #minCountVal, #minSellVal, #minProfitVal, #StartPageNumber, #EndPageNumber{
+#priceFromVal,
+#priceToVal,
+#minCountVal,
+#minSellVal,
+#minProfitVal,
+#StartPageNumber,
+#EndPageNumber {
     width: 80px;
     margin-right: 20px;
     margin-left: 5px;
-    background-color: #324965;
+    background-color: #373d30;
+    border: none;
+    border-radius: 0px;
 }
 
-.selectBlock{
+.selectBlock {
     margin-top: 10px;
+    margin-bottom: 10px;
 }
 
+#findItemsSearchBox {
+    background-color: #373d30 !important;
+    border: none !important;
+}
+
+.market_search_submit_button {
+    top: 0px !important;
+}
+
+.market_search_sidebar_section_tip_small {
+    color: #fff !important;
+}
+
+/* выпадающий список чекбоков */
+
+.multiselect {
+    color: #fff;
+    width: 400px;
+    background-color: rgb(79, 89, 70);
+}
+
+.selectBox {
+    position: relative;
+}
+
+.selectBox select {
+    width: 100%;
+    font-weight: bold;
+    border: none;
+}
+
+.overSelect {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+#checkboxes {
+    display: none;
+    height: 80px;
+    overflow: auto;
+    position: absolute;
+    z-index: 1;
+    background-color: rgb(62, 70, 55);
+    width: 400px;
+}
+
+#checkboxes label {
+    display: inline-block;
+}
+
+#selectOptionVal{
+    border-radius:0px;
+}
+
+#checkboxes label:hover {
+    background-color: #6f662f;
+}
+
+
+#checkboxes::-webkit-scrollbar {
+    width: 8px;
+    /* ширина для вертикального скролла */
+    background-color: rgb(89, 101, 79);
+
+}
+
+/* ползунок скроллбара */
+::-webkit-scrollbar-thumb {
+    background-color: rgb(45, 51, 40);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(59, 68, 52);
+}
 
 /*item block*/
 
-.market_listing_their_price > .market_table_value .normal_price, .market_listing_their_price > .market_table_value {
+.market_listing_their_price>.market_table_value .normal_price,
+.market_listing_their_price>.market_table_value {
     color: white;
     display: block;
 }
 
 .market_listing_num_listings_qty {
     display: block !important;
-    margin: 5px!important;
+    margin: 5px !important;
 }
 
 
@@ -93,16 +190,18 @@
     max-width: none !important;
 }
 
-th:first-child, th:first-child + th{
+th:first-child,
+th:first-child+th {
     display: none;
 }
 
-.entry-content div:first-child, .entry-content div:first-child + div {
-    display:none;
- }
+.entry-content div:first-child,
+.entry-content div:first-child+div {
+    display: none;
+}
 
 .market_listing_num_listings {
-	width: 150px !important;
+    width: 150px !important;
     text-align: center !important;
 }
 
@@ -121,11 +220,12 @@ th:first-child, th:first-child + th{
 }
 
 .market_commodity_orders_table td {
-    min-width:min-content !important;
+    min-width: min-content !important;
     text-align: center;
 }
 
-.market_listing_their_price > .market_table_value .normal_price, .market_listing_their_price > .market_table_value {
+.market_listing_their_price>.market_table_value .normal_price,
+.market_listing_their_price>.market_table_value {
     color: white;
     display: block !important;
 }
@@ -136,13 +236,15 @@ market_listing_row {
 }
 
 /*размер колонок*/
-#popularItemsRows .market_listing_price_listings_block, #searchResults .market_listing_price_listings_block {
+#popularItemsRows .market_listing_price_listings_block,
+#searchResults .market_listing_price_listings_block {
     min-width: 270px !important;
     float: right;
 }
 
 
-#popularItemsRows .market_listing_price_listings_block .market_listing_num_listings, #searchResults .market_listing_price_listings_block .market_listing_num_listings {
+#popularItemsRows .market_listing_price_listings_block .market_listing_num_listings,
+#searchResults .market_listing_price_listings_block .market_listing_num_listings {
     float: left;
     min-width: 10em !important;
 }
@@ -157,12 +259,12 @@ market_listing_row {
     margin: 0px 0px 10px 0px;
 }
 
-.market_listing_table_header{
+.market_listing_table_header {
     display: none;
 }
 
 /* заголовки поиска */
-.my_market_listing_table_header{
+.my_market_listing_table_header {
     background-color: #324965;
     margin-bottom: 30px !important;
     color: #AFAFAF;
@@ -176,18 +278,19 @@ market_listing_row {
 }
 
 /* стиль блока создания ордера */
-.change_price_search{
+.change_price_search {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 50px;
 }
 
-.change_price_input{
+.change_price_input {
     height: 34px;
     margin: 8px 10px 10px 5px;
 }
-span [id^="myItemRealBuyPrice"],span [id^="myItemNextBuyPrice"]{
+
+span [id^="myItemRealBuyPrice"],
+span [id^="myItemNextBuyPrice"] {
     padding: 10px;
 }
-

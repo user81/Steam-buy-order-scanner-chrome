@@ -616,6 +616,7 @@ async function createBuyOrder() {
     let itemInfo = orderListBuyArr.filter(item => item[1].item_id == item_id)[0];
     if (itemInfo.length === 2) {
         let { appid, hash_name } = itemInfo[1];
+        hash_name = fixedEncodeURIComponent(hash_name);
         let inputPriceDom = document.getElementById(`myItemBuyPrice${item_id}`);
         let itemCountDom = document.getElementById(`myItemQuality${item_id}`);
 

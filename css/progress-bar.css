@@ -1,0 +1,18 @@
+.myProgressLine {
+  width: 100%;
+  background-color: rgb(113, 126, 97);
+}
+
+.myBarsLine {
+  width: 0%;
+  height: 20px;
+  background-color: rgb(55, 61, 48);
+  text-align: center;
+  line-height: 16px;
+  color: white;
+}
+
+.myBarsContent {
+  margin: 4px;
+  display: inline-block;
+}

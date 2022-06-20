@@ -59,14 +59,14 @@ button {
   color: white;
 }
 
-.input-value-checkbox:after {
+.select-input-value-checkbox:after {
   content: " ";
   background-color: rgb(62, 70, 55);
   display: inline-block;
   visibility: visible;
 }
 
-.input-value-checkbox:checked:after {
+.select-input-value-checkbox:checked:after {
   content: "\2714";
   box-shadow: 0px 2px 4px rgba(155, 155, 155, 0.15);
   height: 14px;
@@ -88,7 +88,7 @@ input[type='checkbox'] {
   background: rgb(62, 70, 55);
 }
 
-input[type="checkbox"i]:focus {
+input[type="checkbox"]:focus {
   outline-offset: none;
 }
 

@@ -116,24 +116,28 @@ async function displaySearchRunScan(coefficient) {
             </span>
             <br>
             <div class="selectBlock">
-            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
-                StartPage
-                <select id="StartPageNumber" name="select">
-                </select>
-            </span>
-            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
-                EndPage
-                <select id="EndPageNumber" name="select">
-                </select>
-            </span>
+            <div class="multiselect">
+                <div class="selectBox" id="selectPage">
+                    <select class="selectLang" id="selectOptionVal">
+                        <option>Pages</option>
+                    </select>
+                    <div class="overSelect"></div>
+                </div>
+                <div id="checkboxes">
 
-            <span class="market_search_sidebar_section_tip_small market_listing_item_name" id ="numberOfOperations">
-            0
-            </span>
+                </div>
+            </div>
 
-            <span class="market_search_sidebar_section_tip_small market_listing_item_name" id ="operationsProcess">
-            0
-            </span>
+            </div>
+
+            <div class="myProgressLine" id="myProgresLoading">
+                <div class ="myBarsLine">
+                <span class ="myBarsContent" id ="numberOfOperations"> </span>
+                <span class ="myBarsContent" id ="separatorOfOperations"> </span>
+                <span class ="myBarsContent" id ="operationsProcess"> </span>
+                <span class ="myBarsContent" id ="tupeOfOperations"> </span>
+                </div>
+                <span class ="percentageOfCompletion" style="display: none">0</span>
             </div>
 
             <div class="SearchButton">
@@ -144,7 +148,7 @@ async function displaySearchRunScan(coefficient) {
         </div>
         `;
         divRunScan.insertAdjacentHTML('afterbegin', DOMPurify.sanitize(scanerMarketSearchHTML));
-
+        lineBarRender();
     }
 }
 let StopScan = false;
@@ -158,9 +162,38 @@ function ordersReload() {
     changeSearchSize(pageSize);
     StopScan = true;
 }
+var expanded = false;
+function showCheckboxes() {
+    let checkboxes = document.getElementById("checkboxes");
+    let selectOptionVal = document.getElementById("selectOptionVal");
+    let textActive = "#d9c859"
+    let textDefault = "#fff"
+    if (!expanded) {
+        checkboxes.style.display = "block";
+        selectOptionVal.style.color = textActive;
+        expanded = true;
+        let checkboxList = document.getElementsByClassName("select-input-value-checkbox");
+        if (checkboxList.length !== 0) {
+
+            Array.prototype.map.call(checkboxList, (currentDom) => {
+                currentDom.addEventListener("click", (event) => { changeLabelColor(event.path[0], textDefault, textActive); });
+                if (currentDom.checked) {
+                    currentDom.parentElement.style.color = textActive;
+                }
+            });
+
+        }
+    } else {
+        selectOptionVal.style.color = textDefault;
+        checkboxes.style.display = "none";
+        expanded = false;
+    }
+}
+let changeLabelColor = (thisDom, textDefault, textActive) => thisDom.parentElement.style.color = thisDom.checked ? textActive : textDefault;
 
 async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId) {
     document.getElementById("reloadScan").addEventListener("click", () => { ordersReload(); });
+    document.getElementById("selectPage").addEventListener("click", () => { showCheckboxes(); });
     document.getElementById("runSearchScan").addEventListener("click", () => {
         marketSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId); StopScan = false;
     });
@@ -239,36 +272,57 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
         let { marketSeachInfo, marketSeachInfoNorender } = await ServerRequestAddSearchResults(searchUrlСategory);
         const pageSize = Math.ceil(marketSeachInfo.total_count / 100);
 
-        selectBlockPagesize(["StartPageNumber", "EndPageNumber"], pageSize, marketSeachInfo);
+        selectPageCheckbox(pageSize, marketSeachInfo);
         orderListBuyJSONArr = marketSeachInfoNorender.results;
 
     }
 
     let runLoadOrder = document.getElementById("runLoadOrder");
 
+
     runLoadOrder.onclick = async function () {
-        StartPageNumber = +document.getElementById("StartPageNumber").value;
-        EndPageNumber = +document.getElementById("EndPageNumber").value;
-        if (StartPageNumber !== null && EndPageNumber !== null) {
-            let CountLoaders = EndPageNumber - StartPageNumber;
-            let changeCountLoaders = CountLoaders;
+        let checkboxBlock = document.getElementsByClassName("select-input-value-checkbox");
+        let pagesArr =[];
+        if (checkboxBlock.length !== 0) {
+            Array.prototype.map.call(checkboxBlock, (currentDom) => {
+                if (currentDom.checked === true && !isNaN(currentDom.value)){
+                    currentDom.disabled = true;
+                    pagesArr.push(currentDom.value);
+                    }
+            });
+        }
 
-            if (changeCountLoaders <= 0) return;
-            for (let index = 0; index < CountLoaders; index += 100) {
-                await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
-                let { marketSeachInfo, marketSeachInfoNorender } = await ServerRequestAddSearchResults(searchUrlСategory, StartPageNumber);
+        //линия загрузки lineBarRender
+        
+        let loadinCount = 0;
+        lineBarRender();
+        for (let loadinProgres = 0; loadinProgres < pagesArr.length; loadinProgres++) {
+            
+            await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+            let { marketSeachInfo, marketSeachInfoNorender } = await ServerRequestAddSearchResults(searchUrlСategory, pagesArr[loadinProgres]);
 
-                let myCustomMarketTableHTML = document.getElementById("searchResultsRows");
-                myCustomMarketTableHTML.insertAdjacentHTML('afterend', DOMPurify.sanitize(marketSeachInfo.results_html));
-                orderListBuyJSONArr = [...orderListBuyJSONArr, ...marketSeachInfoNorender.results];
-                document.getElementById("numberOfOperations").textContent = `(${CountLoaders})`;
-                document.getElementById("operationsProcess").textContent = `(${index + 100})`;
-                StartPageNumber += 100;
-            }
+            let myCustomMarketTableHTML = document.getElementById("searchResultsRows");
+            myCustomMarketTableHTML.insertAdjacentHTML('afterend', DOMPurify.sanitize(marketSeachInfo.results_html));
+            orderListBuyJSONArr = [...orderListBuyJSONArr, ...marketSeachInfoNorender.results];
+            let numberOfOperations = document.getElementById("numberOfOperations");
+            let separatorOfOperations = document.getElementById("separatorOfOperations");
+            let operationsProcess = document.getElementById("operationsProcess");
+            let tupeOfOperations = document.getElementById("tupeOfOperations");
+            
+            numberOfOperations.textContent = `${pagesArr.length}`;
+            separatorOfOperations.textContent = '/';
+            operationsProcess.textContent = `${++loadinCount}`;
+            tupeOfOperations.textContent = "page";
 
+            // линия загрузки
+            let widthVal = lineBarWidth(loadinCount, pagesArr.length);
+            let myProgresLoading = document.getElementById("myProgresLoading");
+            myProgresLoading.getElementsByClassName("percentageOfCompletion")[0].textContent =widthVal;
+            
         }
 
     }
+
     /*    https://steamcommunity.com/market/search?appid=753&category_753_Game[]=tag_app_416450#p1_popular_desc
     https://steamcommunity.com/market/search/render/?query=P90&start=0&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2
     https://steamcommunity.com/market/search/render/?query=P90&start=0&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&query=usp&appid=730&query=usp
@@ -282,13 +336,15 @@ https://steamcommunity.com/market/search/render/?query=&start=100&count=100&sear
     https://steamcommunity.com/market/search?appid=730#p1_popular_desc&norender=1
     */
 }
-function selectBlockPagesize(idArr, pageSize, marketSeachInfo) {
-    idArr.forEach((idVal, indexArr) => {
-        let ElementDom = document.getElementById(idVal);
-        for (let index = 0; index < pageSize; index++) {
-            ElementDom.insertAdjacentHTML('beforeend', DOMPurify.sanitize(`<option value="${(+index + indexArr) * 100}">${(+index + indexArr) * 100}</option>`));
-        }
-    });
+
+function selectPageCheckbox(pageSize, marketSeachInfo) { 
+    let checkBoxBlock = document.getElementById("checkboxes");
+    for (let index = 0; index < pageSize; index++) {
+        checkBoxBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(`  
+        <label for="checkboxes_page_${+index + 1}">
+            <input type="checkbox" id="checkboxes_page_${+index + 1}" value="${(+index) * 100}" class="select-input-value-checkbox" />${+index + 1}
+        </label>`));
+    }
 
     let myCustomMarketTableHTML = document.getElementById("searchResultsRows");
     myCustomMarketTableHTML.textContent = '';
@@ -331,8 +387,9 @@ async function marketSearch(CountRequesrs, quantity, coefficient, selectLang, sc
                 if (StopScan) return;
 
                 let asset_description = orderListBuyJSONArr[index].asset_description;
-
-                if (marketItems[index].firstElementChild.dataset.scanned === undefined || marketItems[index].firstElementChild.dataset.scanned === update) {
+                console.log(orderListBuyJSONArr);
+                console.log(marketItems[index].firstElementChild.dataset);
+                if (marketItems[index].firstElementChild.dataset.scanned === undefined || marketItems[index].firstElementChild.dataset.scanned === 'update') {
 
                     //!! повторяется надо будет исправить
                     let blockNames = ["Buy_tab", "Sell_tab"];
@@ -749,7 +806,7 @@ async function cancelBuyOrder(thisVal, extensionSetings, sessionId, item_descrip
                         htmlResponce.textContent = (serverResponse.success === 1) ? "Done cancel" : "Error cancel"; /* {success: 1} */
                     }
                 } else {
-                    htmlResponce.textContent = "Buy Order does not exist"; 
+                    htmlResponce.textContent = "Buy Order does not exist";
                 }
             }
         }
@@ -763,6 +820,7 @@ async function createBuyOrder(thisVal, extensionSetings, sessionId, item_descrip
     if (asset_description && item_id !== null && item_id !== undefined) {
         if (Object.entries(asset_description).length > 0) {
             let { appid, market_hash_name } = asset_description;
+            market_hash_name = fixedEncodeURIComponent(market_hash_name);
             let inputPriceDom = document.getElementById(`myItemBuyPrice${item_id}`);
             let itemCountDom = document.getElementById(`myItemQuality${item_id}`);
 
