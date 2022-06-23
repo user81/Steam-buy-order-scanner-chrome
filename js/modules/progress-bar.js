@@ -2,7 +2,7 @@ let widthLineBar = (data) => data < 100 ? data : 100;
 function moveLineBar(bar, lineCalssName, widthVal) {
   lineBarDom = bar.getElementsByClassName(lineCalssName)[0];
   lineBarDom.style.width = widthVal + "%";
-/*   lineBarDom.textContent = widthVal + "%"; */
+  /*   lineBarDom.textContent = widthVal + "%"; */
 }
 let lineBarWidth = (count, maxCount) => widthLineBar(Math.round((count / maxCount) * 100));
 /**
@@ -16,7 +16,7 @@ function lineBarRender(elemClassName = "myProgressLine", lineCalssName = "myBars
 
     const observer = new MutationObserver((mutationRecords) => {
       let widthVal = mutationRecords[0].addedNodes[0].textContent;
-    console.log(mutationRecords);
+      console.log(mutationRecords);
       if (!isNaN(widthVal)) {
         moveLineBar(bar, lineCalssName, widthVal);
       }
@@ -27,4 +27,14 @@ function lineBarRender(elemClassName = "myProgressLine", lineCalssName = "myBars
     })
   });
 
+}
+
+function changeSizeLineBar(idBarName, loadinCount, allCount, tupeName, percentage = "percentageOfCompletion", barsLine = "myBarsLine") {
+  if (!isNaN(loadinCount) && !isNaN(allCount)) {
+    let widthVal = lineBarWidth(loadinCount, allCount);
+    let myProgresLoading = document.getElementById(idBarName);
+    myProgresLoading.getElementsByClassName(percentage)[0].textContent = widthVal;
+    let textBar = `${allCount} / ${loadinCount} ${tupeName}`;
+    myProgresLoading.getElementsByClassName(barsLine)[0].textContent = textBar;
+  }
 }

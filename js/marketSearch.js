@@ -132,22 +132,19 @@ async function displaySearchRunScan(coefficient) {
 
             <div class="myProgressLine" id="myProgresLoading">
                 <div class ="myBarsLine">
-                <span class ="myBarsContent" id ="numberOfOperations"> </span>
-                <span class ="myBarsContent" id ="separatorOfOperations"> </span>
-                <span class ="myBarsContent" id ="operationsProcess"> </span>
-                <span class ="myBarsContent" id ="tupeOfOperations"> </span>
                 </div>
                 <span class ="percentageOfCompletion" style="display: none">0</span>
             </div>
 
             <div class="SearchButton">
-                <div class="market_search_advanced_button" id="reloadScan">🗘</div>
-                <div class="market_search_advanced_button" id="runSearchScan">Run Scan</div>
-                <div class="market_search_advanced_button" id="runLoadOrder">Run Load</div>
+                <button class="market_search_advanced_button" id="reloadScan" disabled>🗘</button>
+                <button class="market_search_advanced_button" id="runSearchScan" disabled>Run Scan</button>
+                <button class="market_search_advanced_button" id="runLoadOrder" disabled>Run Load</button>
             </div>
         </div>
         `;
         divRunScan.insertAdjacentHTML('afterbegin', DOMPurify.sanitize(scanerMarketSearchHTML));
+        //линия загрузки lineBarRender
         lineBarRender();
     }
 }
@@ -279,49 +276,40 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
 
     let runLoadOrder = document.getElementById("runLoadOrder");
 
-
     runLoadOrder.onclick = async function () {
+        document.getElementById("runSearchScan").disabled = true;
+        document.getElementById("runLoadOrder").disabled = true;
         let checkboxBlock = document.getElementsByClassName("select-input-value-checkbox");
-        let pagesArr =[];
+        let pagesArr = [];
         if (checkboxBlock.length !== 0) {
             Array.prototype.map.call(checkboxBlock, (currentDom) => {
-                if (currentDom.checked === true && !isNaN(currentDom.value)){
+                if (currentDom.checked === true && !isNaN(currentDom.value) && !currentDom.disabled) {
                     currentDom.disabled = true;
                     pagesArr.push(currentDom.value);
-                    }
+                }
             });
         }
 
-        //линия загрузки lineBarRender
-        
         let loadinCount = 0;
-        lineBarRender();
         for (let loadinProgres = 0; loadinProgres < pagesArr.length; loadinProgres++) {
-            
             await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
             let { marketSeachInfo, marketSeachInfoNorender } = await ServerRequestAddSearchResults(searchUrlСategory, pagesArr[loadinProgres]);
 
             let myCustomMarketTableHTML = document.getElementById("searchResultsRows");
             myCustomMarketTableHTML.insertAdjacentHTML('afterend', DOMPurify.sanitize(marketSeachInfo.results_html));
             orderListBuyJSONArr = [...orderListBuyJSONArr, ...marketSeachInfoNorender.results];
-            let numberOfOperations = document.getElementById("numberOfOperations");
-            let separatorOfOperations = document.getElementById("separatorOfOperations");
-            let operationsProcess = document.getElementById("operationsProcess");
-            let tupeOfOperations = document.getElementById("tupeOfOperations");
-            
-            numberOfOperations.textContent = `${pagesArr.length}`;
-            separatorOfOperations.textContent = '/';
-            operationsProcess.textContent = `${++loadinCount}`;
-            tupeOfOperations.textContent = "page";
 
             // линия загрузки
-            let widthVal = lineBarWidth(loadinCount, pagesArr.length);
-            let myProgresLoading = document.getElementById("myProgresLoading");
-            myProgresLoading.getElementsByClassName("percentageOfCompletion")[0].textContent =widthVal;
-            
-        }
+            changeSizeLineBar("myProgresLoading", ++loadinCount, pagesArr.length, 'p');
 
+        }
+        document.getElementById("runSearchScan").disabled = false;
+        document.getElementById("runLoadOrder").disabled = false;
     }
+
+    document.getElementById("reloadScan").disabled = false;
+    document.getElementById("runSearchScan").disabled = false;
+    document.getElementById("runLoadOrder").disabled = false;
 
     /*    https://steamcommunity.com/market/search?appid=753&category_753_Game[]=tag_app_416450#p1_popular_desc
     https://steamcommunity.com/market/search/render/?query=P90&start=0&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2
@@ -336,8 +324,10 @@ https://steamcommunity.com/market/search/render/?query=&start=100&count=100&sear
     https://steamcommunity.com/market/search?appid=730#p1_popular_desc&norender=1
     */
 }
-
-function selectPageCheckbox(pageSize, marketSeachInfo) { 
+/**
+ * !! selectPageCheckbox разблочить кнопки
+ */
+function selectPageCheckbox(pageSize, marketSeachInfo) {
     let checkBoxBlock = document.getElementById("checkboxes");
     for (let index = 0; index < pageSize; index++) {
         checkBoxBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(`  
@@ -370,6 +360,8 @@ async function marketSearch(CountRequesrs, quantity, coefficient, selectLang, sc
     let numberOfRepetitions = 10;
     let marketItems;
     let RereadTheAmountItems = async function (numberOfRepetitions) {
+        document.getElementById("runSearchScan").disabled = true;
+        document.getElementById("runLoadOrder").disabled = true;
         marketItems = Array.from(document.getElementsByClassName("market_listing_row_link"));
         if (numberOfRepetitions <= 0) {
             await waitTime((+errorPauseSET + Math.floor(Math.random() * 5)) * 60000);
@@ -383,13 +375,22 @@ async function marketSearch(CountRequesrs, quantity, coefficient, selectLang, sc
             orderListArr = myListings.buy_orders; // массив значений товаров
             orderListBuyArr = orderListArr; //чобы работали кнопки отменить разместить заказ иначе они обуляются при вызове
 
+            // Общее количество запросов которые необходимо сделать
+            let marketItemsAllCount = 0;
+            let countRequest = 0;
+            for (let index = 0; index < marketItems.length; index++) {
+                if (marketItems[index].firstElementChild.dataset.scanned === undefined) {
+                    marketItemsAllCount++;
+                }
+            }
+
             for (let index = 0; index < marketItems.length; index++) {
                 if (StopScan) return;
 
                 let asset_description = orderListBuyJSONArr[index].asset_description;
                 console.log(orderListBuyJSONArr);
-                console.log(marketItems[index].firstElementChild.dataset);
-                if (marketItems[index].firstElementChild.dataset.scanned === undefined || marketItems[index].firstElementChild.dataset.scanned === 'update') {
+                console.log(marketItems[index].firstElementChild.dataset.scanned);
+                if (marketItems[index].firstElementChild.dataset.scanned === undefined) {
 
                     //!! повторяется надо будет исправить
                     let blockNames = ["Buy_tab", "Sell_tab"];
@@ -431,14 +432,20 @@ async function marketSearch(CountRequesrs, quantity, coefficient, selectLang, sc
                         /* myRealBuyPrice = NextPrice(priceJSON.highest_buy_order, "real"); */
                         await displayProfitable(marketItems[index], priceJSON, priceHistory, { item_id, asset_description }, myNextBuyPrice, quantity, { CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET });
                     }
+                    // линия загрузки
+                    changeSizeLineBar("myProgresLoading", ++countRequest, marketItemsAllCount, 'req');
                 }
             }
+            document.getElementById("runSearchScan").disabled = false;
+            document.getElementById("runLoadOrder").disabled = false;
             return;
         }
         ordersReload();
         await waitTime(5000 + scanIntervalSET + Math.floor(Math.random() * 50));
         marketItems = Array.from(document.getElementsByClassName("market_listing_row_link"));
 
+        document.getElementById("runSearchScan").disabled = false;
+        document.getElementById("runLoadOrder").disabled = false;
         return RereadTheAmountItems(numberOfRepetitions - 1);
     }
     RereadTheAmountItems(numberOfRepetitions);
@@ -471,9 +478,9 @@ async function displayProfitable(divItemBlock, priceJSON, priceHistory, item_des
 
     let minMaxPricePerDayVal = await minMaxPricePerDay(priceHistory.historyPriceJSON.prices);
     DomRemove(document.getElementsByClassName(`order_block_${item_id}`)[0]);
-    itemOrderChange(item_description, divItemBlock, myNextBuyPrice, quantity, extensionSetings, priceJSON, minMaxPricePerDayVal, setSearchSolor(pricesProfit), sessionId);
+    itemOrderChange(item_description, divItemBlock, myNextBuyPrice, quantity, extensionSetings, priceJSON, minMaxPricePerDayVal, setSearchColor(pricesProfit), sessionId);
 
-    divItemBlock.firstElementChild.style.backgroundColor = setSearchSolor(pricesProfit);
+    divItemBlock.firstElementChild.style.backgroundColor = setSearchColor(pricesProfit);
     divItemBlock.firstElementChild.dataset.scanned = "true";
 }
 
@@ -779,7 +786,7 @@ function InterVal(priceJSON, coefficient = 0.35) {
     return ProfitableList;
 }
 
-function setSearchSolor(ProfitableList) {
+function setSearchColor(ProfitableList) {
     if (+ProfitableList.actualProfit > +ProfitableList.coefPrice) return "#09553c";
     if (+ProfitableList.actualProfit > 0.1 && +ProfitableList.actualProfit <= +ProfitableList.coefPrice) return "#61632b";
     if (+ProfitableList.actualProfit <= 0.1) return "#602F38";
@@ -851,7 +858,6 @@ async function createBuyOrder(thisVal, extensionSetings, sessionId, item_descrip
 
                     let priceHistory = await getItemHistory(appid, market_hash_name, extensionSetings.selectLang);
 
-                    steamItemBlock.firstElementChild.dataset.scanned = "update";
                     displayProfitable(steamItemBlock, priceJSON, priceHistory, item_description, myNextBuyPrice, itemCount, extensionSetings);
                 }
                 htmlResponce.textContent = (serverResponse.success === 29) ? serverResponse.message : "Eroor"; // message: "У вас уже есть заказ на этот предмет. Вы должны либо ." success: 29{buy_orderid: "4562009753" success: 1}
