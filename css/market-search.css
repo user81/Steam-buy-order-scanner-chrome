@@ -31,7 +31,9 @@ body {
 }
 
 .SearchButton {
-    top: 10px;
+    /* top: 10px; */
+    display: inline-flex;
+    margin: 10px 0 10px 0px;
     position: relative;
 }
 
@@ -96,15 +98,12 @@ body {
     top: 0px !important;
 }
 
-.market_search_sidebar_section_tip_small {
-    color: #fff !important;
-}
 
 /* выпадающий список чекбоков */
 
 .multiselect {
     color: #fff;
-    width: 400px;
+    width: 100%;
     background-color: rgb(79, 89, 70);
 }
 
@@ -132,8 +131,8 @@ body {
     overflow: auto;
     position: absolute;
     z-index: 1;
-    background-color: rgb(62, 70, 55);
-    width: 400px;
+    background-color: #2b3125;
+    width: 100%;
 }
 
 #checkboxes label {
@@ -181,8 +180,13 @@ body {
 
 
 .market_listing_item_name {
-    font-size: 15px;
+    margin-bottom: 8px;
+    display: inline-flex;
+    color: #fff;
+    font-weight: 300;
+    font-size: 12px;
     font-weight: bold;
+    
 }
 
 .market_page_left {

@@ -55,7 +55,7 @@ globalThis.httpErrorPause = async function(url, attempts = 8, scanIntervalSET = 
             });
     
         fetch(request).then((response) => {
-            if (response.status === 429) {
+            if (response.status === 429 || response.status === 2) {
                 delayRequestGet(url, attempts, scanIntervalSET, errorPauseSET)
             }
             if (!response.ok) {

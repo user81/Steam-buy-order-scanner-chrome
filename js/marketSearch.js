@@ -88,37 +88,43 @@ async function displaySearchRunScan(coefficient) {
     if (document.getElementById("runSearchScan") == null) {
         let scanerMarketSearchHTML = `
         <div>
-            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
+            <span class="market_listing_item_name">
                 Price From
                 <input type="number" id="priceFromVal" step="0.01">
             </span>
-            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
+            <span class="market_listing_item_name">
             Price To
             <input type="number" id="priceToVal" step="0.01">
         </span>
-            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
+            <span class="market_listing_item_name">
                 Min Count
                 <input type="number" id="minCountVal">
             </span>
-            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
+            <span class="market_listing_item_name">
                 Min Sell
                 <input type="number" id="minSellVal">
             </span>
-            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
+            <span class="market_listing_item_name">
                 Min Profit
                 <input type="number" id="minProfitVal" value ="">
             </span>
             <br>
             <br>
-            <span class="market_search_sidebar_section_tip_small market_listing_item_name">
+            <span class="market_listing_item_name">
                 only Profitable
-                <input type="checkbox" id="onlyProfitable">
+                <input type="checkbox" class="input-value-checkbox" id="onlyProfitable">
             </span>
-            <br>
+
+            <div class="SearchButton">
+            <button class="market_search_advanced_button" id="reloadScan" disabled>🗘</button>
+            <button class="market_search_advanced_button" id="runSearchScan" disabled>Run Scan</button>
+            <button class="market_search_advanced_button" id="runLoadOrder" disabled>Run Load</button>
+            </div>
+
             <div class="selectBlock">
             <div class="multiselect">
                 <div class="selectBox" id="selectPage">
-                    <select class="selectLang" id="selectOptionVal">
+                    <select class="selectLang" id="selectOptionVal" style="color: rgb(255, 255, 255);">
                         <option>Pages</option>
                     </select>
                     <div class="overSelect"></div>
@@ -131,21 +137,19 @@ async function displaySearchRunScan(coefficient) {
             </div>
 
             <div class="myProgressLine" id="myProgresLoading">
-                <div class ="myBarsLine">
-                </div>
+                <div class ="myBarsLine"></div>
+                <div class ="myBarsVal"></div>
                 <span class ="percentageOfCompletion" style="display: none">0</span>
             </div>
 
-            <div class="SearchButton">
-                <button class="market_search_advanced_button" id="reloadScan" disabled>🗘</button>
-                <button class="market_search_advanced_button" id="runSearchScan" disabled>Run Scan</button>
-                <button class="market_search_advanced_button" id="runLoadOrder" disabled>Run Load</button>
-            </div>
         </div>
         `;
         divRunScan.insertAdjacentHTML('afterbegin', DOMPurify.sanitize(scanerMarketSearchHTML));
         //линия загрузки lineBarRender
         lineBarRender();
+        let textActive = "#d9c859"
+        let textDefault = "#fff"
+        parentElementChaneColor(textActive, textDefault, document.getElementsByClassName("input-value-checkbox"));
     }
 }
 let StopScan = false;
@@ -171,14 +175,7 @@ function showCheckboxes() {
         expanded = true;
         let checkboxList = document.getElementsByClassName("select-input-value-checkbox");
         if (checkboxList.length !== 0) {
-
-            Array.prototype.map.call(checkboxList, (currentDom) => {
-                currentDom.addEventListener("click", (event) => { changeLabelColor(event.path[0], textDefault, textActive); });
-                if (currentDom.checked) {
-                    currentDom.parentElement.style.color = textActive;
-                }
-            });
-
+            parentElementChaneColor(textActive, textDefault, checkboxList);
         }
     } else {
         selectOptionVal.style.color = textDefault;
@@ -186,7 +183,6 @@ function showCheckboxes() {
         expanded = false;
     }
 }
-let changeLabelColor = (thisDom, textDefault, textActive) => thisDom.parentElement.style.color = thisDom.checked ? textActive : textDefault;
 
 async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId) {
     document.getElementById("reloadScan").addEventListener("click", () => { ordersReload(); });
@@ -369,12 +365,8 @@ async function marketSearch(CountRequesrs, quantity, coefficient, selectLang, sc
         }
 
         if (marketItems.length > 0) {
-            await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
-            let myListings = JSON.parse(await globalThis.httpErrorPause("https://steamcommunity.com/market/mylistings/?norender=1", CountRequesrs, scanIntervalSET, errorPauseSET));
-            await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
-            orderListArr = myListings.buy_orders; // массив значений товаров
+            orderListArr = await getMyBuyListing({ CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET }); // список моих ордеров на покупку
             orderListBuyArr = orderListArr; //чобы работали кнопки отменить разместить заказ иначе они обуляются при вызове
-
             // Общее количество запросов которые необходимо сделать
             let marketItemsAllCount = 0;
             let countRequest = 0;
@@ -430,6 +422,8 @@ async function marketSearch(CountRequesrs, quantity, coefficient, selectLang, sc
                     } else {
                         myNextBuyPrice = NextPrice(priceJSON.highest_buy_order, "higest");
                         /* myRealBuyPrice = NextPrice(priceJSON.highest_buy_order, "real"); */
+                        
+                        existMyBuyOrder({ item_id, asset_description }, marketItems[index], orderListArr);
                         await displayProfitable(marketItems[index], priceJSON, priceHistory, { item_id, asset_description }, myNextBuyPrice, quantity, { CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET });
                     }
                     // линия загрузки
@@ -450,6 +444,31 @@ async function marketSearch(CountRequesrs, quantity, coefficient, selectLang, sc
     }
     RereadTheAmountItems(numberOfRepetitions);
 
+}
+
+async function getMyBuyListing(extensionSetings) {
+    await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
+    let myListings = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/mylistings/?norender=1', 5, extensionSetings.scanIntervalSET, extensionSetings.errorPauseSET));
+    await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
+    return myListings.buy_orders;
+}
+
+function existMyBuyOrder(item_description, divItemBlock, orderListArr) {
+    let { item_id, asset_description } = item_description;
+    if (asset_description && item_id !== null && item_id !== undefined) {
+        if (Object.entries(asset_description).length > 0) {
+            let { appid, market_hash_name } = asset_description;
+
+            if (appid !== null && appid !== undefined && market_hash_name) {
+                let itemInfo = orderListArr.filter(item => item.hash_name === market_hash_name && item.appid === appid)[0];
+                if (itemInfo) {
+                    if (Object.entries(itemInfo).length === 8) {
+                        divItemBlock.firstElementChild.style.border = "10px solid green";
+                    }
+                }
+            }
+        }
+    }
 }
 
 async function displayProfitable(divItemBlock, priceJSON, priceHistory, item_description, myNextBuyPrice, quantity, extensionSetings) {
@@ -798,22 +817,24 @@ async function cancelBuyOrder(thisVal, extensionSetings, sessionId, item_descrip
     if (asset_description && item_id !== null && item_id !== undefined) {
         if (Object.entries(asset_description).length > 0) {
             let { appid, market_hash_name } = asset_description;
-            let myListings = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/mylistings/?norender=1', 5, extensionSetings.scanIntervalSET, extensionSetings.errorPauseSET));
-            await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
-            let orderListArr = myListings.buy_orders;
+            let orderListArr = await getMyBuyListing(extensionSetings);
             if (appid !== null && appid !== undefined && market_hash_name) {
                 let itemInfo = orderListArr.filter(item => item.hash_name === market_hash_name && item.appid === appid)[0];
                 let htmlResponce = document.getElementById(`responceServerRequestBuyOrder_${item_id}`);
-                if (Object.entries(itemInfo).length === 8) {
-                    let orderId = itemInfo.buy_orderid;
-                    if (orderId !== null && sessionId !== null) {
-                        let params = `sessionid=${sessionId}&buy_orderid=${orderId}`;
-                        let url = "https://steamcommunity.com/market/cancelbuyorder/";
-                        let serverResponse = await globalThis.httpPostErrorPause(url, params);
-                        htmlResponce.textContent = (serverResponse.success === 1) ? "Done cancel" : "Error cancel"; /* {success: 1} */
+                if (itemInfo) {
+                    if (Object.entries(itemInfo).length === 8) {
+                        let orderId = itemInfo.buy_orderid;
+                        if (orderId !== null && sessionId !== null) {
+                            let params = `sessionid=${sessionId}&buy_orderid=${orderId}`;
+                            let url = "https://steamcommunity.com/market/cancelbuyorder/";
+                            let serverResponse = await globalThis.httpPostErrorPause(url, params);
+                            let steamItemBlock = document.getElementsByClassName(`order_block_${item_id}`)[0].nextSibling;
+                            steamItemBlock.firstElementChild.style.border = (serverResponse.success === 1) ? "none" : "10px solid green";
+                            htmlResponce.textContent = (serverResponse.success === 1) ? "Done cancel" : "Error cancel"; /* {success: 1} */
+                        }
+                    } else {
+                        htmlResponce.textContent = "Buy Order does not exist";
                     }
-                } else {
-                    htmlResponce.textContent = "Buy Order does not exist";
                 }
             }
         }
@@ -848,8 +869,8 @@ async function createBuyOrder(thisVal, extensionSetings, sessionId, item_descrip
                 let htmlResponce = document.getElementById(`responceServerRequestBuyOrder_${item_id}`);
                 if (serverResponse.success === 1) {
                     htmlResponce.textContent = "Order created";
-
                     let steamItemBlock = document.getElementsByClassName(`order_block_${item_id}`)[0].nextSibling;
+                    steamItemBlock.firstElementChild.style.border = "10px solid green";
                     //<div class="market_listing_row market_recent_listing_row" id="mybuyorder_4157921926" style="background-color: rgb(96, 55, 62);"></div>
                     myNextBuyPrice = NextPrice((inputPrice * 100).toFixed(), "real");
                     await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
