@@ -1,6 +1,6 @@
 /**
  * Проверяем чтобы число не превышало 100%
- * @param {integer} data 
+ * @param {number} data 
  * @returns {integer} число которое не привысит 100
  */
 let widthLineBar = (data) => data < 100 ? data : 100;
@@ -9,7 +9,7 @@ let widthLineBar = (data) => data < 100 ? data : 100;
  * Выставляем длину линии загрузки
  * @param {object} bar Dom элемент
  * @param {string} lineCalssName имя класса div блока который мы хотим поменять
- * @param {integer} widthVal Процент на который мы хотим увеличить div блок
+ * @param {number} widthVal Процент на который мы хотим увеличить div блок
  */
 function moveLineBar(bar, lineCalssName, widthVal) {
   let lineCalssBlock = bar.getElementsByClassName(lineCalssName);
@@ -21,8 +21,8 @@ function moveLineBar(bar, lineCalssName, widthVal) {
 
 /**
  * Возвращает число, которе является процентом на которо надо увеличить div 
- * @param {integer} count номер итерации в данный момент
- * @param {integer} maxCount всего итераций
+ * @param {number} count номер итерации в данный момент
+ * @param {number} maxCount всего итераций
  * @returns {integer} возвращает число, которе является процентом на которо надо увеличить div
  */
 let lineBarWidth = (count, maxCount) => widthLineBar(Math.round((count / maxCount) * 100));
@@ -60,8 +60,8 @@ function lineBarRender(elemClassName = "myProgressLine", lineCalssName = "myBars
 /**
  * Обновляем состояние процеса и Длину линии загрузки
  * @param {text} idBarName Id конкретного Bar
- * @param {integer} loadinCount номер итерации в данный момент
- * @param {integer} allCount всего итераций
+ * @param {number} loadinCount номер итерации в данный момент
+ * @param {number} allCount всего итераций
  * @param {Text} tupeName название итерации 
  * @param {Text} percentage имя блока в котором меняется процент загрузки,
  * который прослушивается lineBarRender()

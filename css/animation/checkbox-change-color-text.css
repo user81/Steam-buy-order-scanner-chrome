@@ -19,7 +19,7 @@
   font-size: 12px;
 }
 
-input[type='checkbox'] {
+input[class ='input-value-checkbox'] {
   width: 14px !important;
   height: 14px !important;
   -webkit-appearance: none;
