@@ -259,6 +259,7 @@ market_listing_row {
 }
 
 .market_listing_row {
+    margin-top: 0px !important;
     height: 135px;
     margin: 0px 0px 10px 0px;
 }
@@ -283,18 +284,36 @@ market_listing_row {
 
 /* стиль блока создания ордера */
 .change_price_search {
-    display: flex;
+/*     display: flex;
     justify-content: center;
     align-items: center;
-    height: 50px;
+    height: 50px; */
+    height: 80px;
+    display: inline-block;
+
 }
 
 .change_price_input {
+    margin-top: 20px;
     height: 34px;
     margin: 8px 10px 10px 5px;
 }
 
 span [id^="myItemRealBuyPrice"],
 span [id^="myItemNextBuyPrice"] {
-    padding: 10px;
+    width: 60px;
+    padding: 0px;
+    display: inline-block;
+    color: #fff;
+}
+
+.orderMessageBlock{
+    display: inline-block;
+    width: 253px;;
+}
+
+div[id^="responceServerRequestBuyOrder"]{
+    height: 14px;
+    overflow: hidden;
+    overflow: hidden; /* Обрезаем всё за пределами блока */
 }

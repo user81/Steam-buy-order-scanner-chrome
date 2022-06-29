@@ -532,7 +532,7 @@ function existMyBuyOrder(item_description, divItemBlock, orderListArr) {
                 console.log(itemInfo);
                 if (itemInfo) {
                     if (Object.entries(itemInfo).length === 8) {
-                        divItemBlock.firstElementChild.style.border = "10px solid green";
+                        divItemBlock.style.borderLeft = "10px solid #136661";
                     }
                 }
             }
@@ -568,8 +568,8 @@ async function displayProfitable(divItemBlock, priceJSON, priceHistory, item_des
     DomRemove(document.getElementsByClassName(`order_block_${item_id}`)[0]);
     itemOrderChange(item_description, divItemBlock, myNextBuyPrice, quantity, extensionSetings, priceJSON, minMaxPricePerDayVal, setSearchColor(pricesProfit), sessionId);
 
-    divItemBlock.firstElementChild.style.backgroundColor = setSearchColor(pricesProfit);
-    divItemBlock.firstElementChild.dataset.scanned = "true";
+    divItemBlock.style.backgroundColor = setSearchColor(pricesProfit);
+    divItemBlock.dataset.scanned = "true";
 }
 
 function MarketSells(spanPriceBlock, priceHistory) {
@@ -632,7 +632,10 @@ function itemOrderChange(item_description, myListingBuyUpdateDom, myNextBuyPrice
         <button id="cancelBuyOrder_${item_id}" class = "market_searchedForTerm"> ⦸ </button>
         <button id="createBuyOrder_${item_id}" class = "market_searchedForTerm"> ⨭ </button>
         <button id="showHistory_${item_id}" class = "market_searchedForTerm"> show history </button>
+        <div class ="orderMessageBlock">
         <div id="responceServerRequestBuyOrder_${item_id}"></div>
+        </div>
+        
     </span>`;
     myListingBuyUpdateDom.insertAdjacentHTML('beforebegin', DOMPurify.sanitize(myListingBuyUpdateHTML));
     let buttonCancelBuy = document.getElementById(`cancelBuyOrder_${item_id}`);
@@ -898,7 +901,7 @@ async function cancelBuyOrder(thisVal, extensionSetings, sessionId, item_descrip
                             let url = "https://steamcommunity.com/market/cancelbuyorder/";
                             let serverResponse = await globalThis.httpPostErrorPause(url, params);
                             let steamItemBlock = document.getElementsByClassName(`order_block_${item_id}`)[0].nextSibling;
-                            steamItemBlock.firstElementChild.style.border = (serverResponse.success === 1) ? "none" : "10px solid green";
+                            steamItemBlock.style.borderLeft = (serverResponse.success === 1) ? "none" : "10px solid #136661";
                             htmlResponce.textContent = (serverResponse.success === 1) ? "Done cancel" : "Error cancel"; /* {success: 1} */
                         }
                     } else {
@@ -939,7 +942,7 @@ async function createBuyOrder(thisVal, extensionSetings, sessionId, item_descrip
                 if (serverResponse.success === 1) {
                     htmlResponce.textContent = "Order created";
                     let steamItemBlock = document.getElementsByClassName(`order_block_${item_id}`)[0].nextSibling;
-                    steamItemBlock.firstElementChild.style.border = "10px solid green";
+                    steamItemBlock.style.borderLeft = "10px solid #136661";
                     //<div class="market_listing_row market_recent_listing_row" id="mybuyorder_4157921926" style="background-color: rgb(96, 55, 62);"></div>
                     myNextBuyPrice = NextPrice((inputPrice * 100).toFixed(), "real");
                     await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
