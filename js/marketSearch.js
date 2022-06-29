@@ -8,9 +8,6 @@ var g_rgWalletInfo = {
     wallet_currency: 1
 };
 
-let sizePage;
-let orderListBuyArr;
-let orderListBuyJSONArr;
 let buyOrderHeader = document.getElementById("findItems");
 let html = `<div id="profitScaner" class="my_market_listing_table_header"></div> `;
 buyOrderHeader.insertAdjacentHTML('afterend', DOMPurify.sanitize(html));
@@ -79,7 +76,10 @@ chrome.storage.local.get([
 
         displaySearchRunScan(data.coefficient);
         getPageSizeInSearch(5, data.quantity, data.coefficient, data.selectLang, data.scanIntervalSET, data.errorPauseSET, SessionIdVal());
-        window.addEventListener('popstate', event => getPageSizeInSearch(5, data.quantity, data.coefficient, data.selectLang, data.scanIntervalSET, data.errorPauseSET, SessionIdVal()));
+        if (window.history && window.history.pushState) {
+            window.onpopstate = event => getPageSizeInSearch(5, data.quantity, data.coefficient, data.selectLang, data.scanIntervalSET, data.errorPauseSET, SessionIdVal());
+        }
+
     }
 });
 
@@ -129,7 +129,7 @@ async function displaySearchRunScan(coefficient) {
                     </select>
                     <div class="overSelect"></div>
                 </div>
-                <div id="checkboxes">
+                <div id="checkboxes" style="display: none;">
 
                 </div>
             </div>
@@ -164,13 +164,16 @@ function ordersReload() {
     changeSearchSize(pageSize);
     StopScan = true;
 }
-var expanded = false;
-function showCheckboxes() {
+
+function showCheckboxes(expanded) {
     let checkboxes = document.getElementById("checkboxes");
     let selectOptionVal = document.getElementById("selectOptionVal");
     let textActive = "#d9c859"
     let textDefault = "#fff"
+    console.log(expanded);
     if (!expanded) {
+        console.log(checkboxes);
+        console.log(selectOptionVal);
         checkboxes.style.display = "block";
         selectOptionVal.style.color = textActive;
         expanded = true;
@@ -183,11 +186,14 @@ function showCheckboxes() {
         checkboxes.style.display = "none";
         expanded = false;
     }
+    return expanded;
 }
 
 async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId) {
+    let orderListBuyJSONArr;
+    let expanded = false;
     document.getElementById("reloadScan").addEventListener("click", () => { ordersReload(); });
-    document.getElementById("selectPage").addEventListener("click", () => { showCheckboxes(); });
+    document.getElementById("selectPage").addEventListener("click", () => { expanded = showCheckboxes(expanded); });
     document.getElementById("runSearchScan").addEventListener("click", () => {
         marketSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId); StopScan = false;
     });
@@ -256,7 +262,7 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
                 await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
             }
         }
-        return { marketSeachInfoNorender};
+        return { marketSeachInfoNorender };
     }
 
     let queryItem = document.getElementById("findItemsSearchBox");
@@ -291,7 +297,7 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
             let { marketSeachInfoNorender } = await ServerRequestAddSearchResults(searchUrl, pagesArr[loadinProgres]);
 
             let myCustomMarketTableHTML = document.getElementById("searchResultsRows");
-            myCustomMarketTableHTML.insertAdjacentHTML('afterend', DOMPurify.sanitize(htmlItemList(marketSeachInfoNorender)));
+            myCustomMarketTableHTML.insertAdjacentHTML('beforeend', DOMPurify.sanitize(htmlItemList(marketSeachInfoNorender)));
             orderListBuyJSONArr = [...orderListBuyJSONArr, ...marketSeachInfoNorender.results];
 
             // линия загрузки
@@ -318,6 +324,110 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
     https://steamcommunity.com/market/search?q=%D0%A1%D1%83%D0%B2%D0%B5%D0%BD%D0%B8%D1%80%D0%BD%D1%8B%D0%B9+%D0%BD%D0%B0%D0%B1%D0%BE%D1%80#p1_default_desc
     https://steamcommunity.com/market/search?appid=730#p1_popular_desc&norender=1
     */
+
+    async function marketSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId) {
+        let numberOfRepetitions = 10;
+        let marketItems;
+        let RereadTheAmountItems = async function (numberOfRepetitions) {
+            document.getElementById("runSearchScan").disabled = true;
+            document.getElementById("runLoadOrder").disabled = true;
+            marketItems = Array.from(document.getElementsByClassName("market_recent_listing_row"));
+            if (numberOfRepetitions <= 0) {
+                await waitTime((+errorPauseSET + Math.floor(Math.random() * 5)) * 60000);
+                return RereadTheAmountItems(numberOfRepetitions = 10);
+            }
+    
+            if (marketItems.length > 0) {
+                orderListArr = await getMyBuyListing({ CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET }); // список моих ордеров на покупку
+
+                // Общее количество запросов которые необходимо сделать
+                let marketItemsAllCount = 0;
+                let countRequest = 0;
+                for (let index = 0; index < marketItems.length; index++) {
+                    if (marketItems[index].dataset.scanned === undefined) {
+                        marketItemsAllCount++;
+                    }
+                }
+    
+                for (let index = 0; index < marketItems.length; index++) {
+                    if (StopScan) return;
+    
+                    let assetJSON;
+                    console.log(orderListBuyJSONArr);
+                    console.log(marketItems[index].dataset.scanned);
+                    if (marketItems[index].dataset.scanned === undefined) {
+    
+    
+                        let blockNames = ["Buy_tab", "Sell_tab"];
+                        for (const key in blockNames) {
+                            countBlock = marketItems[index].getElementsByClassName(" market_listing_price_listings_block")[0];
+                            let myItemBlocksHTML = `<div class="market_listing_right_cell market_listing_my_price market_my_listing_${blockNames[key].toLowerCase()}"></div>`;
+                            countBlock.insertAdjacentHTML('afterend', DOMPurify.sanitize(myItemBlocksHTML));
+                        }
+    
+                        let orderHref = marketItems[index].getElementsByClassName("market_listing_row_link")[0].href;
+                        let orderPrice = +marketItems[index].getElementsByClassName('normal_price')[0].innerText.match(/([0-9]*\.[0-9]+|[0-9]+)/g);
+                        let orderCount = +marketItems[index].getElementsByClassName('market_listing_num_listings_qty')[0].innerText.replace(/[^+\d]/g, '');
+                        var appId = marketItems[index].dataset.appid;
+                        /* var aId = marketItems[index].firstElementChild.id; */
+                        var hashName = fixedEncodeURIComponent(marketItems[index].dataset.hashName);
+                        let priceFromVal = document.getElementById("priceFromVal").value || 0;
+                        let priceToVal = document.getElementById("priceToVal").value || Infinity;
+                        let minCountVal = document.getElementById("minCountVal").value || -1;
+                        let minProfitVal = document.getElementById("minProfitVal").value || -Infinity;
+                        let minSellVal = document.getElementById("minSellVal").value || 0;
+                        let onlyProfitable = document.getElementById("onlyProfitable").checked || false;
+    
+                        assetJSON = orderListBuyJSONArr.filter(item => item.asset_description.market_hash_name === marketItems[index].dataset.hashName && `${item.asset_description.appid}` === appId)[0];
+                        let {asset_description} =assetJSON;
+                        if (asset_description === undefined) return;
+                        if (Object.entries(asset_description).length === 0) return;
+                        
+                        let sourceCode = await globalThis.httpErrorPause(orderHref, CountRequesrs, scanIntervalSET, errorPauseSET);
+                        let item_id = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
+                        let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
+                        await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
+                        let priceHistory = await getItemHistory(appId, hashName, selectLang);
+    
+                        let pricesProfit = InterVal(priceJSON, coefficient);
+    
+                        if (priceFromVal > orderPrice || priceToVal < orderPrice || minCountVal > orderCount) {
+                            marketItems[index].style.display = "none";
+                        } else if (minProfitVal > pricesProfit.actualProfit || minSellVal > priceHistory.countSellSevenDays) {
+                            marketItems[index].style.display = "none";
+                        } else if (onlyProfitable && pricesProfit.coefPrice > pricesProfit.actualProfit) {
+                            marketItems[index].style.display = "none";
+                        } else {
+                            myNextBuyPrice = NextPrice(priceJSON.highest_buy_order, "higest");
+                            /* myRealBuyPrice = NextPrice(priceJSON.highest_buy_order, "real"); */
+    
+                            if (asset_description) {
+                                console.log(asset_description);
+                                existMyBuyOrder({ item_id, asset_description }, marketItems[index], orderListArr);
+                                await displayProfitable(marketItems[index], priceJSON, priceHistory, { item_id, asset_description }, myNextBuyPrice, quantity, { CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET });
+                            }
+    
+                        }
+                        // линия загрузки
+                        changeSizeLineBar("myProgresLoading", ++countRequest, marketItemsAllCount, 'req');
+                    }
+                }
+                document.getElementById("runSearchScan").disabled = false;
+                document.getElementById("runLoadOrder").disabled = false;
+                return;
+            }
+            ordersReload();
+            await waitTime(5000 + scanIntervalSET + Math.floor(Math.random() * 50));
+            marketItems = Array.from(document.getElementsByClassName("market_listing_row_link"));
+    
+            document.getElementById("runSearchScan").disabled = false;
+            document.getElementById("runLoadOrder").disabled = false;
+            return RereadTheAmountItems(numberOfRepetitions - 1);
+        }
+        RereadTheAmountItems(numberOfRepetitions);
+    
+    }    
+
 }
 
 function htmlItemList(marketSeachInfoNorender) {
@@ -326,7 +436,7 @@ function htmlItemList(marketSeachInfoNorender) {
     console.log(results);
     if (results && results.length > 0) {
         let FullBlockHtmlText = results.map(itemJson => {
-            if ( Object.entries(itemJson).length > 0) {
+            if (Object.entries(itemJson).length > 0) {
                 let blockHtmlText = `
                   <div data-hash-name="${itemJson.hash_name}" data-appid="${itemJson.asset_description.appid}" id="result_${itemJson.index}"
                   class="market_listing_row market_recent_listing_row market_listing_searchresult">
@@ -373,12 +483,11 @@ function htmlItemList(marketSeachInfoNorender) {
  * @param {text} marketSeachList HTML строка. Списрк всех товаров. 
  */
 function selectPageCheckbox(pageSize, marketSeachList) {
-    console.log(marketSeachList);
-    console.log(123);
+    DomRemove(document.getElementsByClassName("checkboxes_pages")[0]);
     let checkBoxBlock = document.getElementById("checkboxes");
     for (let index = 0; index < pageSize; index++) {
         checkBoxBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(`  
-        <label for="checkboxes_page_${+index + 1}">
+        <label class ="checkboxes_pages" for="checkboxes_page_${+index + 1}">
             <input type="checkbox" id="checkboxes_page_${+index + 1}" value="${(+index) * 100}" class="select-input-value-checkbox" />${+index + 1}
         </label>`));
     }
@@ -403,99 +512,6 @@ https://steamcommunity.com/market/search/render/?query=s&start=100&count=100&sea
     https://steamcommunity.com/market/search?q=&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2&appid=730#p2_popular_desc
     https://steamcommunity.com/market/search/render/?query=&start=10&count=10&search_descriptions=0&sort_column=popular&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2      */
 
-async function marketSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId) {
-    let numberOfRepetitions = 10;
-    let marketItems;
-    let RereadTheAmountItems = async function (numberOfRepetitions) {
-        document.getElementById("runSearchScan").disabled = true;
-        document.getElementById("runLoadOrder").disabled = true;
-        marketItems = Array.from(document.getElementsByClassName("market_recent_listing_row"));
-        if (numberOfRepetitions <= 0) {
-            await waitTime((+errorPauseSET + Math.floor(Math.random() * 5)) * 60000);
-            return RereadTheAmountItems(numberOfRepetitions = 10);
-        }
-
-        if (marketItems.length > 0) {
-            orderListArr = await getMyBuyListing({ CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET }); // список моих ордеров на покупку
-            orderListBuyArr = orderListArr; //чобы работали кнопки отменить разместить заказ иначе они обуляются при вызове
-            // Общее количество запросов которые необходимо сделать
-            let marketItemsAllCount = 0;
-            let countRequest = 0;
-            for (let index = 0; index < marketItems.length; index++) {
-                if (marketItems[index].dataset.scanned === undefined) {
-                    marketItemsAllCount++;
-                }
-            }
-
-            for (let index = 0; index < marketItems.length; index++) {
-                if (StopScan) return;
-
-                let asset_description = orderListBuyJSONArr[index].asset_description;
-                console.log(orderListBuyJSONArr);
-                console.log(marketItems[index].dataset.scanned);
-                if (marketItems[index].dataset.scanned === undefined) {
-
-                    //!! повторяется надо будет исправить
-                    let blockNames = ["Buy_tab", "Sell_tab"];
-                    for (const key in blockNames) {
-                        countBlock = marketItems[index].getElementsByClassName(" market_listing_price_listings_block")[0];
-                        let myItemBlocksHTML = `<div class="market_listing_right_cell market_listing_my_price market_my_listing_${blockNames[key].toLowerCase()}"></div>`;
-                        countBlock.insertAdjacentHTML('afterend', DOMPurify.sanitize(myItemBlocksHTML));
-                    }
-
-                    let orderHref = marketItems[index].getElementsByClassName("market_listing_row_link")[0].href;
-                    let orderPrice = +marketItems[index].getElementsByClassName('normal_price')[0].innerText.match(/([0-9]*\.[0-9]+|[0-9]+)/g);
-                    let orderCount = +marketItems[index].getElementsByClassName('market_listing_num_listings_qty')[0].innerText.replace(/[^+\d]/g, '');
-                    var appId = marketItems[index].dataset.appid;
-                    /* var aId = marketItems[index].firstElementChild.id; */
-                    var hashName = fixedEncodeURIComponent(marketItems[index].dataset.hashName);
-                    let priceFromVal = document.getElementById("priceFromVal").value || 0;
-                    let priceToVal = document.getElementById("priceToVal").value || Infinity;
-                    let minCountVal = document.getElementById("minCountVal").value || -1;
-                    let minProfitVal = document.getElementById("minProfitVal").value || -Infinity;
-                    let minSellVal = document.getElementById("minSellVal").value || 0;
-                    let onlyProfitable = document.getElementById("onlyProfitable").checked || false;
-
-                    let sourceCode = await globalThis.httpErrorPause(orderHref, CountRequesrs, scanIntervalSET, errorPauseSET);
-                    let item_id = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
-                    let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
-                    await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
-                    let priceHistory = await getItemHistory(appId, hashName, selectLang);
-
-                    let pricesProfit = InterVal(priceJSON, coefficient);
-
-                    if (priceFromVal > orderPrice || priceToVal < orderPrice || minCountVal > orderCount) {
-                        marketItems[index].style.display = "none";
-                    } else if (minProfitVal > pricesProfit.actualProfit || minSellVal > priceHistory.countSellSevenDays) {
-                        marketItems[index].style.display = "none";
-                    } else if (onlyProfitable && pricesProfit.coefPrice > pricesProfit.actualProfit) {
-                        marketItems[index].style.display = "none";
-                    } else {
-                        myNextBuyPrice = NextPrice(priceJSON.highest_buy_order, "higest");
-                        /* myRealBuyPrice = NextPrice(priceJSON.highest_buy_order, "real"); */
-
-                        existMyBuyOrder({ item_id, asset_description }, marketItems[index], orderListArr);
-                        await displayProfitable(marketItems[index], priceJSON, priceHistory, { item_id, asset_description }, myNextBuyPrice, quantity, { CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET });
-                    }
-                    // линия загрузки
-                    changeSizeLineBar("myProgresLoading", ++countRequest, marketItemsAllCount, 'req');
-                }
-            }
-            document.getElementById("runSearchScan").disabled = false;
-            document.getElementById("runLoadOrder").disabled = false;
-            return;
-        }
-        ordersReload();
-        await waitTime(5000 + scanIntervalSET + Math.floor(Math.random() * 50));
-        marketItems = Array.from(document.getElementsByClassName("market_listing_row_link"));
-
-        document.getElementById("runSearchScan").disabled = false;
-        document.getElementById("runLoadOrder").disabled = false;
-        return RereadTheAmountItems(numberOfRepetitions - 1);
-    }
-    RereadTheAmountItems(numberOfRepetitions);
-
-}
 
 async function getMyBuyListing(extensionSetings) {
     await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
