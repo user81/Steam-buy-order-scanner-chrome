@@ -48,7 +48,7 @@ function searchHeadersNames() {
             "classSorttype": "market_sortable_column market_listing_my_name",
         },
     };
-    //!! наптсать вывод заголовка
+
     let profitScaner = document.getElementById("profitScaner");
 
     for (const key in headersNames) {
@@ -165,44 +165,35 @@ function ordersReload() {
     StopScan = true;
 }
 
-function showCheckboxes(expanded) {
-    let checkboxes = document.getElementById("checkboxes");
-    let selectOptionVal = document.getElementById("selectOptionVal");
-    let textActive = "#d9c859"
-    let textDefault = "#fff"
-    console.log(expanded);
-    if (!expanded) {
-        console.log(checkboxes);
-        console.log(selectOptionVal);
-        checkboxes.style.display = "block";
-        selectOptionVal.style.color = textActive;
-        expanded = true;
-        let checkboxList = document.getElementsByClassName("select-input-value-checkbox");
-        if (checkboxList.length !== 0) {
-            parentElementChaneColor(textActive, textDefault, checkboxList);
-        }
-    } else {
-        selectOptionVal.style.color = textDefault;
-        checkboxes.style.display = "none";
-        expanded = false;
-    }
-    return expanded;
-}
+/**
+ * Ключевая функция куда передаются все данные из строреджа
+ * Ключевые функции:
+ * ServerRequestAddSearchResults() обрабатываем ссылу и на основе его создаём запрос к серверу
+ * selectPageCheckbox() выводим список чекбоксов и обновляем содержимое страницы текстом html 
+ * используя полученные JSON данные с помощью функции htmlItemList().
+ * Когда мы делаем один и тот же запрос к серверу значения могут меняться, поэтому я это сделал.
+ * 
+ * @param {number} CountRequesrs // количество запросов при ошибке
+ * @param {number} quantity // количество заказов
+ * @param {number} coefficient // процент от цены
+ * @param {text} selectLang // код языка
+ * @param {number} scanIntervalSET // пауза между запросами
+ * @param {number} errorPauseSET // пауза между ошибками
+ * @param {text} sessionId id сесии необходимо для запросов к серверу
+ */
 
 async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId) {
     let orderListBuyJSONArr;
     let expanded = false;
+    // перезагрузка списка
     document.getElementById("reloadScan").addEventListener("click", () => { ordersReload(); });
-    document.getElementById("selectPage").addEventListener("click", () => { expanded = showCheckboxes(expanded); });
+    //expanded состояние выпадающего списка чекбоксов
+    document.getElementById("selectPage").addEventListener("click", () => { expanded = showCheckboxes(expanded, document.getElementById("checkboxes"), document.getElementById("selectOptionVal")) ?? false; });
+    //фукция сканирования
     document.getElementById("runSearchScan").addEventListener("click", () => {
         marketSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId); StopScan = false;
     });
 
-    /**
-     * https://steamcommunity.com/market/search?select=value2&select=value2&select=value2&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=tag_weapon_knife_flip&appid=730&q=#p2_popular_desc
-     * https://steamcommunity.com/market/search?select=0&select=100&appid=730&q=Dreams#p1_default_desc
-     * https://steamcommunity.com/market/search?select=0&select=100&select=100&appid=730&q=#p1_popular_desc
-     */
 
     let searchUrl = window.location.href;
 
@@ -220,6 +211,13 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
         }
     }
 
+    /**
+     * Обрабатываем ссылки чтобы потом сделать запрос к серверу получить JSON данные списка товаров
+     * @param {text} searchUrl // ссыка страницы
+     * @param {number} start // с какой карточки начать выводить (используюмся в JSON запросе серверу)
+     * @param {number} count // сколько вывести ( используюмся в JSON запросе серверу)
+     * @returns {object} // marketSeachInfoNorender неотрендереный ответ сервера
+     */
     async function ServerRequestAddSearchResults(searchUrl, start = 0, count = 100) {
         let marketSeachInfoNorender;
         let ArraySortingAppidObject;
@@ -265,6 +263,7 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
         return { marketSeachInfoNorender };
     }
 
+    // получаем элемент поиска значение поиска queryItem мы используем в ServerRequestAddSearchResults() для создания запроса
     let queryItem = document.getElementById("findItemsSearchBox");
     if (queryItem !== null) {
         let { marketSeachInfoNorender } = await ServerRequestAddSearchResults(searchUrl);
@@ -277,6 +276,10 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
 
     let runLoadOrder = document.getElementById("runLoadOrder");
 
+    /**
+     * Загрузка страниц. Когда загружается страница отключаем кнопки
+     * Добавляю сгенерированные в стоку html запросы на страницу и добавляем массив всех запросов orderListBuyJSONArr
+     */
     runLoadOrder.onclick = async function () {
         document.getElementById("runSearchScan").disabled = true;
         document.getElementById("runLoadOrder").disabled = true;
@@ -312,19 +315,28 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
     document.getElementById("runSearchScan").disabled = false;
     document.getElementById("runLoadOrder").disabled = false;
 
-    /*    https://steamcommunity.com/market/search?appid=753&category_753_Game[]=tag_app_416450#p1_popular_desc
-    https://steamcommunity.com/market/search/render/?query=P90&start=0&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2
-    https://steamcommunity.com/market/search/render/?query=P90&start=0&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&query=usp&appid=730&query=usp
-    
-  
-  https://steamcommunity.com/market/search/render/?query=&start=0&count=100&search_descriptions=0&sort_column=popular&sort_dir=desc&appid=753&category_753_Game%5B%5D=tag_app_416450
-  https://steamcommunity.com/market/search/render/?query=&start=100&count=100&search_descriptions=0&sort_column=popular&sort_dir=desc&appid=753&category_753_Game[]=tag_app_416450
-  
-    !!!нумерация не работает
-    https://steamcommunity.com/market/search?q=%D0%A1%D1%83%D0%B2%D0%B5%D0%BD%D0%B8%D1%80%D0%BD%D1%8B%D0%B9+%D0%BD%D0%B0%D0%B1%D0%BE%D1%80#p1_default_desc
-    https://steamcommunity.com/market/search?appid=730#p1_popular_desc&norender=1
-    */
-
+    /**
+     * Функция сканирования списка товаров.
+     * RereadTheAmountItems() зацикленная функция повторяется с задержкой
+     * Отключаем кнопки. 
+     * Считаем общее количество запросов для линни загрузки changeSizeLineBar().
+     * Создаём div блок для таблиц покупок и продаж 
+     * Скрываем данные блоки если полученые значения из формы не удовлетворяют
+     * Получаем конкретные данные предмета для создания заказа createBuyOrder() и отмены заказа cancelBuyOrder() 
+     * priceJSON таблица цен
+     * getItemHistory() {countSell - количество продаж за д., countSellSevenDays - количество продаж за 7 д., historyPriceJSON - json данные}
+     * listProfitCalculation() {actualProfit: "...." - прибыль в данный момент, coefPrice: "...." - прибыль для коэфицента, realPrice: "...." цена без комисии}
+     * existMyBuyOrder() есть ли заказ на покупку
+     * displayProfitable() выводим содержимое на страницу
+     * 
+     * @param {number} CountRequesrs // количество запросов при ошибке
+     * @param {number} quantity // количество заказов
+     * @param {number} coefficient // процент от цены
+     * @param {text} selectLang // код языка
+     * @param {number} scanIntervalSET // пауза между запросами
+     * @param {number} errorPauseSET // пауза между ошибками
+     * @param {text} sessionId id сесии необходимо для запросов к серверу
+     */
     async function marketSearch(CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET, sessionId) {
         let numberOfRepetitions = 10;
         let marketItems;
@@ -336,7 +348,7 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
                 await waitTime((+errorPauseSET + Math.floor(Math.random() * 5)) * 60000);
                 return RereadTheAmountItems(numberOfRepetitions = 10);
             }
-    
+
             if (marketItems.length > 0) {
                 orderListArr = await getMyBuyListing({ CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET }); // список моих ордеров на покупку
 
@@ -348,23 +360,23 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
                         marketItemsAllCount++;
                     }
                 }
-    
+
                 for (let index = 0; index < marketItems.length; index++) {
                     if (StopScan) return;
-    
+
                     let assetJSON;
                     console.log(orderListBuyJSONArr);
                     console.log(marketItems[index].dataset.scanned);
                     if (marketItems[index].dataset.scanned === undefined) {
-    
-    
+
+
                         let blockNames = ["Buy_tab", "Sell_tab"];
                         for (const key in blockNames) {
                             countBlock = marketItems[index].getElementsByClassName(" market_listing_price_listings_block")[0];
                             let myItemBlocksHTML = `<div class="market_listing_right_cell market_listing_my_price market_my_listing_${blockNames[key].toLowerCase()}"></div>`;
                             countBlock.insertAdjacentHTML('afterend', DOMPurify.sanitize(myItemBlocksHTML));
                         }
-    
+
                         let orderHref = marketItems[index].getElementsByClassName("market_listing_row_link")[0].href;
                         let orderPrice = +marketItems[index].getElementsByClassName('normal_price')[0].innerText.match(/([0-9]*\.[0-9]+|[0-9]+)/g);
                         let orderCount = +marketItems[index].getElementsByClassName('market_listing_num_listings_qty')[0].innerText.replace(/[^+\d]/g, '');
@@ -377,20 +389,20 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
                         let minProfitVal = document.getElementById("minProfitVal").value || -Infinity;
                         let minSellVal = document.getElementById("minSellVal").value || 0;
                         let onlyProfitable = document.getElementById("onlyProfitable").checked || false;
-    
+
                         assetJSON = orderListBuyJSONArr.filter(item => item.asset_description.market_hash_name === marketItems[index].dataset.hashName && `${item.asset_description.appid}` === appId)[0];
-                        let {asset_description} =assetJSON;
+                        let { asset_description } = assetJSON;
                         if (asset_description === undefined) return;
                         if (Object.entries(asset_description).length === 0) return;
-                        
+
                         let sourceCode = await globalThis.httpErrorPause(orderHref, CountRequesrs, scanIntervalSET, errorPauseSET);
                         let item_id = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
                         let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
                         await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                         let priceHistory = await getItemHistory(appId, hashName, selectLang);
-    
-                        let pricesProfit = InterVal(priceJSON, coefficient);
-    
+
+                        let pricesProfit = listProfitCalculation(priceJSON, coefficient);
+
                         if (priceFromVal > orderPrice || priceToVal < orderPrice || minCountVal > orderCount) {
                             marketItems[index].style.display = "none";
                         } else if (minProfitVal > pricesProfit.actualProfit || minSellVal > priceHistory.countSellSevenDays) {
@@ -400,13 +412,13 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
                         } else {
                             myNextBuyPrice = NextPrice(priceJSON.highest_buy_order, "higest");
                             /* myRealBuyPrice = NextPrice(priceJSON.highest_buy_order, "real"); */
-    
+
                             if (asset_description) {
                                 console.log(asset_description);
                                 existMyBuyOrder({ item_id, asset_description }, marketItems[index], orderListArr);
                                 await displayProfitable(marketItems[index], priceJSON, priceHistory, { item_id, asset_description }, myNextBuyPrice, quantity, { CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET });
                             }
-    
+
                         }
                         // линия загрузки
                         changeSizeLineBar("myProgresLoading", ++countRequest, marketItemsAllCount, 'req');
@@ -419,17 +431,21 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
             ordersReload();
             await waitTime(5000 + scanIntervalSET + Math.floor(Math.random() * 50));
             marketItems = Array.from(document.getElementsByClassName("market_listing_row_link"));
-    
+
             document.getElementById("runSearchScan").disabled = false;
             document.getElementById("runLoadOrder").disabled = false;
             return RereadTheAmountItems(numberOfRepetitions - 1);
         }
         RereadTheAmountItems(numberOfRepetitions);
-    
-    }    
+
+    }
 
 }
-
+/**
+ * Возврашает строку HTML из json данных результатов поиска
+ * @param {object} marketSeachInfoNorender // json данных результатов поиска
+ * @returns {string} // строка HTML
+ */
 function htmlItemList(marketSeachInfoNorender) {
     console.log(marketSeachInfoNorender);
     let { results } = marketSeachInfoNorender;
@@ -497,22 +513,11 @@ function selectPageCheckbox(pageSize, marketSeachList) {
     myCustomMarketTableHTML.innerHTML = DOMPurify.sanitize(marketSeachList);
 }
 
-/* 
-https://steamcommunity.com/market/search/render/?query=q&start=0&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730
-
-https://steamcommunity.com/market/search/render/?query=s&start=100&count=100&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=tag_weapon_usp_silencer */
-
-
-/*  let searchUrl = window.location.href.match(/search\?(.*)/); */// 1: "appid=730#p2_popular_desc" https://steamcommunity.com/market/search?appid=730#p1_popular_desc
-// 1: "appid=730#p2_popular_desc" https://steamcommunity.com/market/search?appid=730#p1_popular_desc
-/*  
-    https://steamcommunity.com/market/search?select=value2&select=value2&select=value2&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=tag_weapon_knife_flip&appid=730&q=#p2_popular_desc
-
-    category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2
-    https://steamcommunity.com/market/search?q=&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2&appid=730#p2_popular_desc
-    https://steamcommunity.com/market/search/render/?query=&start=10&count=10&search_descriptions=0&sort_column=popular&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Exterior%5B%5D=tag_WearCategory2      */
-
-
+/**
+ * Возвращает список заказов на покупку
+ * @param {object} extensionSetings // обект настроек для запроса к серверу
+ * @returns {Array} // массив обектов ордеров на покупку
+ */
 async function getMyBuyListing(extensionSetings) {
     await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
     let myListings = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/mylistings/?norender=1', 5, extensionSetings.scanIntervalSET, extensionSetings.errorPauseSET));
@@ -520,6 +525,12 @@ async function getMyBuyListing(extensionSetings) {
     return myListings.buy_orders;
 }
 
+/**
+ * Изменяет стиль блока если существует ордер на покупку
+ * @param {object} item_description // данные предмета {item_id - уникальный идентификатор, asset_description - JSON данные предмета}
+ * @param {HTMLElement} divItemBlock  // Dom обект конкретного блока
+ * @param {Array} orderListArr // массив обектов ордеров на покупку
+ */
 function existMyBuyOrder(item_description, divItemBlock, orderListArr) {
     let { item_id, asset_description } = item_description;
     if (asset_description && item_id !== null && item_id !== undefined) {
@@ -540,9 +551,27 @@ function existMyBuyOrder(item_description, divItemBlock, orderListArr) {
     }
 }
 
+/**
+ * Выводит подробную информацию о предмете в конкретный элемент dom
+ * MarketSells() // продажи за 1 7 дней
+ * marketPrifit() // выводит прибыль
+ * realPrice() // цена без комиссии
+ * listingSellTab() // таблица продаж
+ * listingBuyTab() // таблица покупок
+ * historyChart() // блок где появится история если мы нажмём на кнопку show history
+ * itemOrderChange () поле для создания и отмены заказа и просмотра историии
+ * 
+ * @param {HTMLElement} divItemBlock // Dom элемент карточки предмета который мы будем изменять
+ * @param {Object} priceJSON // таблица цен
+ * @param {Object} priceHistory // история продаж и Json данные истории цен
+ * @param {Object} item_description // данные предмета {item_id - уникальный идентификатор, asset_description - JSON данные предмета}
+ * @param {Object} myNextBuyPrice // следующая цена и цена без комисии
+ * @param {Number} quantity количество (используется в поле создания заказа)
+ * @param {object} extensionSetings // обект настроек для запроса к серверу
+ */
 async function displayProfitable(divItemBlock, priceJSON, priceHistory, item_description, myNextBuyPrice, quantity, extensionSetings) {
     let { item_id } = item_description;
-    let pricesProfit = InterVal(priceJSON, extensionSetings.coefficient);
+    let pricesProfit = listProfitCalculation(priceJSON, extensionSetings.coefficient);
     let spanPriceBlock = divItemBlock.getElementsByClassName("normal_price")[0];
     let spanCountBlock = divItemBlock.getElementsByClassName("market_listing_num_listings_qty")[0];
 
@@ -572,6 +601,11 @@ async function displayProfitable(divItemBlock, priceJSON, priceHistory, item_des
     divItemBlock.dataset.scanned = "true";
 }
 
+/**
+ * История продаж за 1 и за 7 дней
+ * @param {HTMLElement} spanPriceBlock // Dom элемент карточки предмета который мы будем изменять
+ * @param {Object} priceHistory // история продаж и Json данные истории цен
+ */
 function MarketSells(spanPriceBlock, priceHistory) {
     let sellsHistoryHTML = `
     <div class ="market_sells">
@@ -582,6 +616,11 @@ function MarketSells(spanPriceBlock, priceHistory) {
     spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(sellsHistoryHTML));
 }
 
+/**
+ * Отображение прибыли
+ * @param {HTMLElement} spanCountBlock // Dom элемент карточки предмета который мы будем изменять
+ * @param {Object} pricesProfit // прибыль {actualProfit: "...." - прибыль в данный момент, coefPrice: "...." - прибыль для коэфицента, realPrice: "...." цена без комисии}
+ */
 function marketPrifit(spanCountBlock, pricesProfit) {
     let ProfitItemHTML = `
     <div class = "market_prifit">
@@ -591,22 +630,42 @@ function marketPrifit(spanCountBlock, pricesProfit) {
     spanCountBlock.insertAdjacentHTML('afterbegin', DOMPurify.sanitize(ProfitItemHTML));
 }
 
+/**
+ * Цена без комиссии
+ * @param {HTMLElement} spanCountBlock // Dom элемент карточки предмета который мы будем изменять
+ * @param {Object} pricesProfit // прибыль {actualProfit: "...." - прибыль в данный момент, coefPrice: "...." - прибыль для коэфицента, realPrice: "...." цена без комисии}
+ */
 function realPrice(spanPriceBlock, pricesProfit) {
     let realPriceHTML = `<span class="normal_price">(${pricesProfit.realPrice})</span>`;
     spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(realPriceHTML));
 }
 
+/**
+ * Таблица продаж
+* @param {HTMLElement} spanCountBlock // Dom элемент карточки предмета который мы будем изменять
+* @param {Object} priceJSON // таблица цен
+ */
 function listingSellTab(divItemBlock, priceJSON) {
     let myListingSellTabHTML = `<span class="market_table_value market_table_price_json_sell">${priceJSON.sell_order_table}</span>`;
     let listingSell = divItemBlock.getElementsByClassName("market_my_listing_sell_tab")[0];
     listingSell.insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingSellTabHTML));
 }
 
+/**
+ * Таблица покупок
+* @param {HTMLElement} spanCountBlock // Dom элемент карточки предмета который мы будем изменять
+* @param {Object} priceJSON // таблица цен
+ */
 function listingBuyTab(divItemBlock, priceJSON) {
     let myListingBuyTabHTML = `<span class="market_table_value market_table_price_json_buy">${priceJSON.buy_order_table}</span>`;
     divItemBlock.getElementsByClassName("market_my_listing_buy_tab")[0].insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyTabHTML));
 }
 
+/**
+ * Блок где будет выводиться история
+ * @param {HTMLElement} spanCountBlock // Dom элемент карточки предмета который мы будем изменять
+ * @param {String} item_id // уникальный идентификатор предмета
+ */
 function historyChart(divItemBlock, item_id) {
     let historyChartHTML = `   
     <div id="chart_${item_id}" class="chart">
@@ -617,7 +676,18 @@ function historyChart(divItemBlock, item_id) {
 }
 
 
-
+/**
+ * Изменение ордера и вывод историии
+ * @param {Object} item_description // данные предмета {item_id - уникальный идентификатор, asset_description - JSON данные предмета}
+ * @param {HTMLElement} myListingBuyUpdateDom // Dom элемент карточки предмета перед которы мы будем добавлять этот блок
+ * @param {Object} myNextBuyPrice // следующая цена и цена без комисии
+ * @param {Number} quantityWant // количество по умолчанию для создания ордера на покупку
+ * @param {object} extensionSetings // обект настроек для запроса к серверу
+ * @param {Object} priceJSON // таблица цен
+ * @param {Array} minMaxPricePerDayVal массив истории цен за год
+ * @param {Text} color цвет заливки блока
+ * @param {Text} sessionId текущая сесия страницы
+ */
 function itemOrderChange(item_description, myListingBuyUpdateDom, myNextBuyPrice, quantityWant, extensionSetings, priceJSON, minMaxPricePerDayVal, color, sessionId) {
 
     let { item_id } = item_description;
@@ -651,18 +721,24 @@ function itemOrderChange(item_description, myListingBuyUpdateDom, myNextBuyPrice
         myItemRealBuyPrice.textContent = myNextItemBuyPrice.value ? NextPrice((myNextItemBuyPrice.value * 100).toFixed(), "real").nextPriceWithoutFee : '';
         myItemNextBuyPrice.textContent = myNextItemBuyPrice.value ? NextPrice((myNextItemBuyPrice.value * 100).toFixed(), "real").myNextPrice : '';
     };
-    buttonCreateBuy.addEventListener("click", (event) => { createBuyOrder(event.path[0], extensionSetings, sessionId, item_description); });
+    buttonCreateBuy.addEventListener("click", (event) => { createBuyOrder(extensionSetings, sessionId, item_description); });
     buttonshowHistory.addEventListener("click", (event) => {
         if (minMaxPricePerDayVal !== undefined && minMaxPricePerDayVal.length > 1) {
             schemeHistory(minMaxPricePerDayVal, item_id);
         }
     });
 
-    buttonCancelBuy.addEventListener("click", (event) => { cancelBuyOrder(event.path[0], extensionSetings, sessionId, item_description); });
+    buttonCancelBuy.addEventListener("click", (event) => { cancelBuyOrder(extensionSetings, sessionId, item_description); });
     let orderBlockDom = document.getElementsByClassName(`order_block_${item_id}`);
     Array.prototype.map.call(orderBlockDom, (currentDom) => currentDom.style.backgroundColor = color);
 }
 
+/**
+ * 
+ * @param {Array} countArrYear // история цен за год
+ * @param {Text} item_id // уникальный идентификатор предмета
+ * @returns 
+ */
 async function schemeHistory(countArrYear, item_id) {
 
     if (countArrYear.length === 0 || countArrYear.length === 1) return;
@@ -805,6 +881,11 @@ async function schemeHistory(countArrYear, item_id) {
 
 }
 
+/**
+ * Возвращает минимальную цену за день и общее количество. Мы делаем выборку только на год.
+ * @param {Array} priceArr // масси цен который мы получили при запросе к серверу
+ * @returns {Array} // массив цен с выборкой 1 год
+ */
 async function minMaxPricePerDay(priceArr) {
 
     let nowTime = Date.parse(new Date);
@@ -855,12 +936,15 @@ async function minMaxPricePerDay(priceArr) {
     return chartsArr;
 }
 
-function InterVal(priceJSON, coefficient = 0.35) {
+/**
+ * Расчёт прибыли
+ * @param {Object} priceJSON // таблица цен
+ * @param {Number} coefficient // коэфицент прибыли
+ * @returns {Object}
+ */
+function listProfitCalculation(priceJSON, coefficient = 0.35) {
     let currentDiv = document.getElementById("largeiteminfo_item_descriptors");
-    ProfitableList = {};
-    ProfitableList.actualProfit = "Nan";
-    ProfitableList.coefPrice = "Nan";
-    ProfitableList.realPrice = "Nan";
+    ProfitableList = { actualProfit: "Nan", coefPrice: "Nan", realPrice: "Nan" };
     var priceWithoutFee = null;
     if (priceJSON.lowest_sell_order !== null && priceJSON.highest_buy_order !== null) {
         var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.lowest_sell_order / 100}`));
@@ -883,8 +967,13 @@ function setSearchColor(ProfitableList) {
     if (+ProfitableList.actualProfit <= 0.1) return "#602F38";
 }
 
-
-async function cancelBuyOrder(thisVal, extensionSetings, sessionId, item_description) {
+/**
+ * Отмена ордера на покупку
+ * @param {object} extensionSetings // обект настроек для запроса к серверу
+ * @param {Text} sessionId текущая сесия страницы
+ * @param {Object} item_description // данные предмета {item_id - уникальный идентификатор, asset_description - JSON данные предмета}
+ */
+async function cancelBuyOrder(extensionSetings, sessionId, item_description) {
     let { item_id, asset_description } = item_description;
     if (asset_description && item_id !== null && item_id !== undefined) {
         if (Object.entries(asset_description).length > 0) {
@@ -914,8 +1003,14 @@ async function cancelBuyOrder(thisVal, extensionSetings, sessionId, item_descrip
 
 }
 
-async function createBuyOrder(thisVal, extensionSetings, sessionId, item_description) {
-    /* let item_id = thisVal.id.split('_')[1]; */
+/**
+ * Создание ордера лоя покупки
+ * @param {object} extensionSetings // обект настроек для запроса к серверу
+ * @param {Text} sessionId текущая сесия страницы
+ * @param {Object} item_description // данные предмета {item_id - уникальный идентификатор, asset_description - JSON данные предмета}
+ * @returns 
+ */
+async function createBuyOrder(extensionSetings, sessionId, item_description) {
     let { item_id, asset_description } = item_description;
     if (asset_description && item_id !== null && item_id !== undefined) {
         if (Object.entries(asset_description).length > 0) {

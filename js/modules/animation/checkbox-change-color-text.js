@@ -22,3 +22,26 @@ function parentElementChaneColor(textActive, textDefault, checkboxList) {
   }
 
 }
+
+function showCheckboxes(expanded, checkboxes, selectOptionVal) {
+if (checkboxes === null || selectOptionVal === null) return;
+  let textActive = "#d9c859"
+  let textDefault = "#fff"
+  console.log(expanded);
+  if (!expanded) {
+      console.log(checkboxes);
+      console.log(selectOptionVal);
+      checkboxes.style.display = "block";
+      selectOptionVal.style.color = textActive;
+      expanded = true;
+      let checkboxList = document.getElementsByClassName("select-input-value-checkbox");
+      if (checkboxList.length !== 0) {
+          parentElementChaneColor(textActive, textDefault, checkboxList);
+      }
+  } else {
+      selectOptionVal.style.color = textDefault;
+      checkboxes.style.display = "none";
+      expanded = false;
+  }
+  return expanded;
+}
