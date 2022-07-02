@@ -39,7 +39,9 @@ chrome.storage.local.get([
 
 
 async function displayProfit(coefficient = 0.35, selectLang = "russian", CountRequesrs = 5, scanIntervalSET = 6000, errorPauseSET = 10000, quantity = 1) {
-    let item_id = document.documentElement.outerHTML.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
+    let itemIdMatch = document.documentElement.outerHTML.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/);
+    if (itemIdMatch === null) return;
+    let item_id = itemIdMatch["1"];
     console.log(item_id);
     let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
     InterVal(priceJSON, coefficient, quantity);

@@ -363,13 +363,8 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
 
                 for (let index = 0; index < marketItems.length; index++) {
                     if (StopScan) return;
-
                     let assetJSON;
-                    console.log(orderListBuyJSONArr);
-                    console.log(marketItems[index].dataset.scanned);
                     if (marketItems[index].dataset.scanned === undefined) {
-
-
                         let blockNames = ["Buy_tab", "Sell_tab"];
                         for (const key in blockNames) {
                             countBlock = marketItems[index].getElementsByClassName(" market_listing_price_listings_block")[0];
@@ -391,12 +386,15 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
                         let onlyProfitable = document.getElementById("onlyProfitable").checked || false;
 
                         assetJSON = orderListBuyJSONArr.filter(item => item.asset_description.market_hash_name === marketItems[index].dataset.hashName && `${item.asset_description.appid}` === appId)[0];
+                        if (assetJSON === undefined) continue;
                         let { asset_description } = assetJSON;
-                        if (asset_description === undefined) return;
-                        if (Object.entries(asset_description).length === 0) return;
+                        if (asset_description === undefined) continue;
+                        if (Object.entries(asset_description).length === 0) continue;
 
                         let sourceCode = await globalThis.httpErrorPause(orderHref, CountRequesrs, scanIntervalSET, errorPauseSET);
-                        let item_id = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/)["1"];
+                        let itemIdMatch = sourceCode.match(/Market_LoadOrderSpread\(\s*(\d+)\s*\);/);
+                        if (itemIdMatch === null) continue;
+                        let item_id = itemIdMatch["1"];
                         let priceJSON = JSON.parse(await globalThis.httpErrorPause('https://steamcommunity.com/market/itemordershistogram?country=RU&language=' + selectLang + '&currency=1&item_nameid=' + item_id + '&two_factor=0', CountRequesrs, scanIntervalSET, errorPauseSET));
                         await new Promise(done => timer = setTimeout(() => done(), +scanIntervalSET + Math.floor(Math.random() * 500)));
                         let priceHistory = await getItemHistory(appId, hashName, selectLang);
@@ -414,7 +412,6 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
                             /* myRealBuyPrice = NextPrice(priceJSON.highest_buy_order, "real"); */
 
                             if (asset_description) {
-                                console.log(asset_description);
                                 existMyBuyOrder({ item_id, asset_description }, marketItems[index], orderListArr);
                                 await displayProfitable(marketItems[index], priceJSON, priceHistory, { item_id, asset_description }, myNextBuyPrice, quantity, { CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET });
                             }
@@ -447,9 +444,7 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
  * @returns {string} // строка HTML
  */
 function htmlItemList(marketSeachInfoNorender) {
-    console.log(marketSeachInfoNorender);
     let { results } = marketSeachInfoNorender;
-    console.log(results);
     if (results && results.length > 0) {
         let FullBlockHtmlText = results.map(itemJson => {
             if (Object.entries(itemJson).length > 0) {
@@ -477,9 +472,9 @@ function htmlItemList(marketSeachInfoNorender) {
                         
                   <div class="market_listing_item_name_block" style="background-color: ${itemJson.background_color || 'none'};">
                     <a id="resultlink_0"
-                    href="https://steamcommunity.com/market/listings/${itemJson.asset_description.appid}/${fixedEncodeURIComponent(itemJson.asset_description.market_hash_name)}"
+                    href="https://steamcommunity.com/market/listings/${itemJson.asset_description.appid}/${fixedEncodeURIComponent(itemJson.asset_description.market_hash_name || itemJson.hash_name)}"
                     class="market_listing_row_link">
-                    <span style="color: ${itemJson.name_color || 'white'};" class="market_listing_item_name" id="result_0_name">${itemJson.name}</span>
+                    <span style="color: ${itemJson.name_color || 'white'};" class="market_listing_item_name" id="result_0_name">${itemJson.name || "Undefined"}</span>
                     </a>
                     <br>
                     <span class="market_listing_game_name">${itemJson.app_name}</span>
@@ -539,8 +534,7 @@ function existMyBuyOrder(item_description, divItemBlock, orderListArr) {
 
             if (appid !== null && appid !== undefined && market_hash_name) {
                 let itemInfo = orderListArr.filter(item => item.hash_name === market_hash_name && item.appid === appid)[0];
-                console.log(market_hash_name, appid);
-                console.log(itemInfo);
+
                 if (itemInfo) {
                     if (Object.entries(itemInfo).length === 8) {
                         divItemBlock.style.borderLeft = "10px solid #136661";
