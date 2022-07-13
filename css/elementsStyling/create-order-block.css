@@ -1,0 +1,36 @@
+
+/* стиль блока создания ордера */
+.change_price_search {
+  /*     display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 50px; */
+      height: 80px;
+      display: inline-block;
+  
+  }
+  
+  .change_price_input {
+      margin-top: 20px;
+      height: 34px;
+      margin: 8px 10px 10px 5px;
+  }
+  
+  span [id^="myItemRealBuyPrice"],
+  span [id^="myItemNextBuyPrice"] {
+      width: 60px;
+      padding: 0px;
+      display: inline-block;
+      color: #fff;
+  }
+  
+  .orderMessageBlock{
+      display: inline-block;
+      width: 253px;;
+  }
+  
+  div[id^="responceServerRequestBuyOrder"]{
+      height: 14px;
+      overflow: hidden;
+      overflow: hidden; /* Обрезаем всё за пределами блока */
+  }

@@ -12,8 +12,6 @@ let buyOrderHeader = document.getElementById("findItems");
 let html = `<div id="profitScaner" class="my_market_listing_table_header"></div> `;
 buyOrderHeader.insertAdjacentHTML('afterend', DOMPurify.sanitize(html));
 
-let DomRemove = (Dom) => { if (Dom !== undefined) Dom.remove() };
-
 function searchHeadersNames() {
     //headersNames массив элементов
     let headersNames = {
@@ -197,16 +195,20 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
 
     let searchUrl = window.location.href;
 
+    let getarraySortingVal = function (searchUrl) {
+        let AppidSortingValMatch = searchUrl.input.match(/(?<=\#).*/);
+        let AppidSortingVal = AppidSortingValMatch !== null ? AppidSortingValMatch[0] : null;
+        let arraySortingVal = AppidSortingVal !== null ? AppidSortingVal.split("_") : ['p1', 'default', 'desc'];
+        arraySortingVal[2] = arraySortingVal[2].includes('desc') ? 'desc' : 'asc';
+        return arraySortingVal;
+    }
+
     let getArraySortingAppid = function (searchUrl) {
         if (searchUrl !== null) {
 
             let appIdMatch = searchUrl.input.match(/(?<=appid\=)\d*/);
-            let AppidSortingValMatch = searchUrl.input.match(/(?<=\#).*/);
             let appId = appIdMatch !== null ? appIdMatch[0] : null;
-            let AppidSortingVal = AppidSortingValMatch !== null ? AppidSortingValMatch[0] : null;
-
-            let arraySortingVal = AppidSortingVal !== null ? AppidSortingVal.split("_") : ['p', 'default', 'desc'];
-            arraySortingVal[2] = arraySortingVal[2].includes('desc') ? 'desc' : 'asc';
+            let arraySortingVal = getarraySortingVal(searchUrl);
             return { appId, arraySortingVal };
         }
     }
@@ -266,9 +268,15 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
     // получаем элемент поиска значение поиска queryItem мы используем в ServerRequestAddSearchResults() для создания запроса
     let queryItem = document.getElementById("findItemsSearchBox");
     if (queryItem !== null) {
-        let { marketSeachInfoNorender } = await ServerRequestAddSearchResults(searchUrl);
+        let sortingValDefault = getarraySortingVal(searchUrl.match(/.*/))[0]; //p10
+        let starDefaultval = 0;
+        if (sortingValDefault.length !== 0) {
+            let pageVal = sortingValDefault.match(/\d+$/)[0];
+            starDefaultval = pageVal ? (pageVal * 100) - 100 : 0;
+        }
+        let startValMain = getarraySortingVal(searchUrl.match(/.*/))[0].match(/\d+$/)[0] * 100;
+        let { marketSeachInfoNorender } = await ServerRequestAddSearchResults(searchUrl, starDefaultval);
         const pageSize = Math.ceil(marketSeachInfoNorender.total_count / 100);
-
         selectPageCheckbox(pageSize, htmlItemList(marketSeachInfoNorender));
         orderListBuyJSONArr = marketSeachInfoNorender.results;
 
@@ -930,30 +938,6 @@ async function minMaxPricePerDay(priceArr) {
     return chartsArr;
 }
 
-/**
- * Расчёт прибыли
- * @param {Object} priceJSON // таблица цен
- * @param {Number} coefficient // коэфицент прибыли
- * @returns {Object}
- */
-function listProfitCalculation(priceJSON, coefficient = 0.35) {
-    let currentDiv = document.getElementById("largeiteminfo_item_descriptors");
-    ProfitableList = { actualProfit: "Nan", coefPrice: "Nan", realPrice: "Nan" };
-    var priceWithoutFee = null;
-    if (priceJSON.lowest_sell_order !== null && priceJSON.highest_buy_order !== null) {
-        var inputValue = GetPriceValueAsInt(getNumber(`${priceJSON.lowest_sell_order / 100}`));
-        var nAmount = inputValue;
-        if (inputValue > 0 && nAmount == parseInt(nAmount)) {
-            var feeInfo = CalculateFeeAmount(nAmount, g_rgWalletInfo['wallet_publisher_fee_percent_default']);
-            nAmount = nAmount - feeInfo.fees;
-            priceWithoutFee = v_currencyformat(nAmount, GetCurrencyCode(g_rgWalletInfo['wallet_currency']));
-        }
-        ProfitableList.realPrice = getNumber(priceWithoutFee);
-        ProfitableList.actualProfit = (ProfitableList.realPrice - (priceJSON.highest_buy_order / 100)).toFixed(2);
-        ProfitableList.coefPrice = ((priceJSON.highest_buy_order / 100) * coefficient).toFixed(2);
-    }
-    return ProfitableList;
-}
 
 function setSearchColor(ProfitableList) {
     if (+ProfitableList.actualProfit > +ProfitableList.coefPrice) return "#09553c";

@@ -272,7 +272,6 @@ function createHtmlBlock(blockNamesArr, marketItem, PastBeforeName) {
     }
 }
 
-let DomRemove = (Dom) => { if (Dom !== undefined) Dom.remove() };
 
 async function listingsTreatment(priceJSON, listingidArr, MySaleOrderPrice, coefficient = 0.35) {
     for (let index = 0; index < listingidArr.length; index++) {

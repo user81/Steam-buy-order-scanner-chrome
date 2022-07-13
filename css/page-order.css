@@ -1,3 +1,7 @@
+
+.pagecontent.in_client, .pagecontent.no_header {
+	background-color: rgb(62, 70, 55) !important;
+}
 img {
 	max-width: 100%!important;
 	padding: 0 5%;
@@ -34,8 +38,15 @@ div#global_header div.logo {
 }
 
 .market_listing_largeimage {
+	background: #646d56 !important;
+	padding: 0px !important;
 	width: 100px!important;
 	height: 100px!important;
+}
+
+#diagram_history{
+	margin-bottom: 30px;
+    padding: 4px;
 }
 
 .market_commodity_explanation {
@@ -61,6 +72,28 @@ ellipsis {
 	color: #b4b4b4;
 	font-size: 14px;
 	margin: left 18px;
+}
+
+.item_desc_descriptors{
+	overflow: auto;
+  height: 80px;
+}
+
+
+.item_desc_descriptors::-webkit-scrollbar {
+	width: 8px;
+	/* ширина для вертикального скролла */
+	background-color: rgb(89, 101, 79);
+
+}
+
+/* ползунок скроллбара */
+::-webkit-scrollbar-thumb {
+	background-color: rgb(45, 51, 40);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background-color: rgb(59, 68, 52);
 }
 
 .hover_item_name {

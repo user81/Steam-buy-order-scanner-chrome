@@ -17,6 +17,10 @@
   },
   "homepage": "https://github.com/user81/Steam-buy-order-scanner-chrome#readme",
   "dependencies": {
-    "dompurify": "^2.3.3"
+    "chart.js": "^3.8.0",
+    "chartjs-adapter-moment": "^1.0.0",
+    "chartjs-plugin-zoom": "^1.2.1",
+    "dompurify": "^2.3.3",
+    "moment": "^2.29.4"
   }
 }

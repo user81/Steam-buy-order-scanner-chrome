@@ -8,7 +8,7 @@ function injectionMyScript(scriptString, removeScript, injectid, someHtmlAttribu
     (document.head || document.documentElement).appendChild(injectScript);
 
     if (someHtmlAttribute !== null) {
-        const AttributeList = ['session_id'];
+        const AttributeList = ['session_id', 'market_hash_name'];
         let includeVal = (AttributeList.includes(someHtmlAttribute)) ? document.querySelector('body').getAttribute(someHtmlAttribute) : null;
         if (includeVal !== null) {
             document.querySelector('body').removeAttribute(someHtmlAttribute);
@@ -26,6 +26,24 @@ function injectionMyScript(scriptString, removeScript, injectid, someHtmlAttribu
 function SessionIdVal() {
     let injectionSessionIdScript = `document.querySelector('body').setAttribute('session_id', g_sessionID);`;
     return injectionMyScript(injectionSessionIdScript, true, 'mySessionId', 'session_id');
+}
+// appid и hach_name listings на странице пердмета
+function GetMarketHashNname() {
+    let injectionSessionIdScript = `
+
+    let hashName ='';
+    if ('market_hash_name' in Object.values(g_rgAssets)[0]) {
+        hashName =  Object.values(g_rgAssets)[0].market_hash_name;
+    }else if ('market_hash_name' in Object.values(Object.values(g_rgAssets)[0])[0] ) {
+        hashName =  Object.values(Object.values(g_rgAssets)[0])[0].market_hash_name;
+    }
+    else if ('market_hash_name' in Object.values(Object.values(Object.values(g_rgAssets)[0])[0])[0]) {
+        hashName =  Object.values(Object.values(Object.values(g_rgAssets)[0])[0])[0].market_hash_name;
+    }
+
+    document.querySelector('body').setAttribute('market_hash_name', hashName);
+    `;
+    return injectionMyScript(injectionSessionIdScript, false, 'myMarketHashNameId', 'market_hash_name');
 }
 // активация игры
 function gameActivation(inputAppIdArr) {
@@ -91,3 +109,4 @@ function showHistory(OrdersCount = 500) {
     return injectionMyScript(injectionSessionIdScript, false, 'changeSearchSize');
 }
 
+let DomRemove = (Dom) => { console.log(Dom); if (Dom !== undefined && Dom !== null) Dom.remove(); }
