@@ -560,7 +560,6 @@ function existMyBuyOrder(item_description, divItemBlock, orderListArr) {
  * realPrice() // цена без комиссии
  * listingSellTab() // таблица продаж
  * listingBuyTab() // таблица покупок
- * historyChart() // блок где появится история если мы нажмём на кнопку show history
  * itemOrderChange () поле для создания и отмены заказа и просмотра историии
  * 
  * @param {HTMLElement} divItemBlock // Dom элемент карточки предмета который мы будем изменять
@@ -595,9 +594,9 @@ async function displayProfitable(divItemBlock, priceJSON, priceHistory, item_des
     DomRemove(divItemBlock.getElementsByClassName("chart")[0]);
     historyChart(divItemBlock, item_id);
 
-    let minMaxPricePerDayVal = await minMaxPricePerDay(priceHistory.historyPriceJSON.prices);
+    let itemPriceHistory = priceHistory.historyPriceJSON.prices;
     DomRemove(document.getElementsByClassName(`order_block_${item_id}`)[0]);
-    itemOrderChange(item_description, divItemBlock, myNextBuyPrice, quantity, extensionSetings, priceJSON, minMaxPricePerDayVal, setSearchColor(pricesProfit), sessionId);
+    itemOrderChange(item_description, divItemBlock, myNextBuyPrice, quantity, extensionSetings, priceJSON, itemPriceHistory, setSearchColor(pricesProfit), sessionId);
 
     divItemBlock.style.backgroundColor = setSearchColor(pricesProfit);
     divItemBlock.dataset.scanned = "true";
@@ -664,21 +663,6 @@ function listingBuyTab(divItemBlock, priceJSON) {
 }
 
 /**
- * Блок где будет выводиться история
- * @param {HTMLElement} spanCountBlock // Dom элемент карточки предмета который мы будем изменять
- * @param {String} item_id // уникальный идентификатор предмета
- */
-function historyChart(divItemBlock, item_id) {
-    let historyChartHTML = `   
-    <div id="chart_${item_id}" class="chart">
-        <div id="chart-timeline_${item_id}"></div>
-        <div id="chart-map_${item_id}"></div>
-    </div>`;
-    divItemBlock.insertAdjacentHTML('afterend', DOMPurify.sanitize(historyChartHTML));
-}
-
-
-/**
  * Изменение ордера и вывод историии
  * @param {Object} item_description // данные предмета {item_id - уникальный идентификатор, asset_description - JSON данные предмета}
  * @param {HTMLElement} myListingBuyUpdateDom // Dom элемент карточки предмета перед которы мы будем добавлять этот блок
@@ -686,11 +670,11 @@ function historyChart(divItemBlock, item_id) {
  * @param {Number} quantityWant // количество по умолчанию для создания ордера на покупку
  * @param {object} extensionSetings // обект настроек для запроса к серверу
  * @param {Object} priceJSON // таблица цен
- * @param {Array} minMaxPricePerDayVal массив истории цен за год
+ * @param {Array} itemPriceHistory массив истории цен
  * @param {Text} color цвет заливки блока
  * @param {Text} sessionId текущая сесия страницы
  */
-function itemOrderChange(item_description, myListingBuyUpdateDom, myNextBuyPrice, quantityWant, extensionSetings, priceJSON, minMaxPricePerDayVal, color, sessionId) {
+function itemOrderChange(item_description, myListingBuyUpdateDom, myNextBuyPrice, quantityWant, extensionSetings, priceJSON, itemPriceHistory, color, sessionId) {
 
     let { item_id } = item_description;
     let myListingBuyUpdateHTML = `
@@ -725,217 +709,14 @@ function itemOrderChange(item_description, myListingBuyUpdateDom, myNextBuyPrice
     };
     buttonCreateBuy.addEventListener("click", (event) => { createBuyOrder(extensionSetings, sessionId, item_description); });
     buttonshowHistory.addEventListener("click", (event) => {
-        if (minMaxPricePerDayVal !== undefined && minMaxPricePerDayVal.length > 1) {
-            schemeHistory(minMaxPricePerDayVal, item_id);
+        if (itemPriceHistory !== undefined && itemPriceHistory.length > 1) {
+            showHistoryChart(itemPriceHistory, item_id);
         }
     });
 
     buttonCancelBuy.addEventListener("click", (event) => { cancelBuyOrder(extensionSetings, sessionId, item_description); });
     let orderBlockDom = document.getElementsByClassName(`order_block_${item_id}`);
     Array.prototype.map.call(orderBlockDom, (currentDom) => currentDom.style.backgroundColor = color);
-}
-
-/**
- * 
- * @param {Array} countArrYear // история цен за год
- * @param {Text} item_id // уникальный идентификатор предмета
- * @returns 
- */
-async function schemeHistory(countArrYear, item_id) {
-
-    if (countArrYear.length === 0 || countArrYear.length === 1) return;
-    let nowTime = Date.parse(new Date);
-    let lastThirtyDaysMs = nowTime - (1000 * 60 * 60 * 24 * 30);
-
-    let saleArr = countArrYear.map((item) => [Date.parse(item[0]), item[1]]);
-    let countArr = countArrYear.map((item) => [Date.parse(item[0]), item[2]]);
-
-    let firstData = countArrYear.shift()[0];
-    let lastData = countArrYear.pop()[0];
-
-    var options = {
-        series: [{
-            name: 'Sale Price',
-            type: 'area',
-            data: saleArr
-        },
-        {
-            name: 'Count Sale',
-            type: 'line',
-            data: countArr,
-        }],
-        chart: {
-            id: `chart-price-history${item_id}`,
-            height: 350,
-            type: 'line',
-            zoom: {
-                autoScaleYaxis: true
-            }
-        },
-        dataLabels: {
-            /* enabled: true,
-            enabledOnSeries: [1] */
-        },
-        markers: {
-            size: 0,
-            colors: ["#000524"],
-            strokeColor: "#ffe339",
-            strokeWidth: 3
-        },
-        grid: {
-            borderColor: "#555",
-            clipMarkers: false,
-        },
-        //ось x
-        xaxis: {
-            type: 'datetime',
-            min: firstData,
-            tickAmount: 6,
-        },
-        // ось y
-        yaxis: [
-            {
-                title: {
-                    text: "Price",
-                    style: {
-                        color: "#FF1654"
-                    }
-                }
-            },
-            {
-                opposite: true,
-                title: {
-                    text: "Count",
-                    style: {
-                        color: "#FF1654"
-                    }
-                }
-            },
-        ],
-        tooltip: {
-            x: {
-                format: 'dd MMM yyyy'
-            }
-        },
-        // стиль таблицы  fill
-        fill: {
-            type: 'solid',
-            opacity: [0.35, 1],
-        }
-    };
-
-    var chart = new ApexCharts(document.querySelector(`#chart-timeline_${item_id}`), options);
-    chart.render();
-
-    var optionsMap = {
-        chart: {
-            id: `map-price-history${item_id}`,
-            height: 130,
-            type: "bar",
-            foreColor: "#ccc",
-
-            brush: {
-                target: `chart-price-history${item_id}`,
-                enabled: true
-            },
-
-            selection: {
-                enabled: true,
-                fill: {
-                    color: "#fff",
-                    opacity: 0.4
-                },
-                xaxis: {
-                    min: lastThirtyDaysMs,
-                    max: lastData
-                }
-            }
-
-        },
-        colors: ["#FF0080"],
-        series: [
-            {
-                data: saleArr
-            }
-        ],
-        stroke: {
-            width: 2
-        },
-        grid: {
-            borderColor: "#444"
-        },
-        markers: {
-            size: 0
-        },
-        xaxis: {
-            type: "datetime",
-            tooltip: {
-                enabled: false
-            }
-        },
-        yaxis: {
-            tickAmount: 2
-        }
-    };
-
-    var chart = new ApexCharts(document.querySelector(`#chart-map_${item_id}`), optionsMap);
-    chart.render();
-
-}
-
-/**
- * Возвращает минимальную цену за день и общее количество. Мы делаем выборку только на год.
- * @param {Array} priceArr // масси цен который мы получили при запросе к серверу
- * @returns {Array} // массив цен с выборкой 1 год
- */
-async function minMaxPricePerDay(priceArr) {
-
-    let nowTime = Date.parse(new Date);
-    let lastYearMs = nowTime - (1000 * 60 * 60 * 24 * 30 * 12);
-    let countArrYear = priceArr.map((item) => Date.parse(item[0]) > lastYearMs ? item : undefined).filter(Boolean);
-
-    let chartsArr = [];
-    let dublicateArr = [];
-    let pastDate;
-    countArrYear.map((priceHistoryData) => {
-
-        const timeformat = new Date(priceHistoryData[0]).toLocaleDateString();
-
-        if (priceHistoryData.length === 0) return;
-
-        if (pastDate !== undefined && pastDate === timeformat) {
-            dublicateArr.push(priceHistoryData);
-        } else {
-            pastDate = timeformat;
-            let minVal;
-            let maxVal;
-            let countVal = 0;
-            if (dublicateArr.length > 0 && dublicateArr.length !== 1) {
-                dublicateArr.map((dublicateItem) => {
-                    if (dublicateItem[1] < minVal || minVal === undefined) {
-                        minVal = dublicateItem[1];
-                    }
-
-                    if (dublicateItem[1] > maxVal || maxVal === undefined) {
-                        maxVal = dublicateItem[1];
-                    }
-                    countVal += +dublicateItem[2];
-                });
-                if (minVal === maxVal) {
-                    chartsArr.push([priceHistoryData[0], minVal, countVal]);
-                } else {
-                    chartsArr.push([priceHistoryData[0], maxVal, countVal]);
-                }
-                dublicateArr = [];
-                return;
-            }
-            dublicateArr = [];
-            chartsArr.push(priceHistoryData);
-        }
-
-    });
-
-    return chartsArr;
 }
 
 

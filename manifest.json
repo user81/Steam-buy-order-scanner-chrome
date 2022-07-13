@@ -71,6 +71,7 @@
         "js/profitPage.js"
       ],
       "css": [
+        "css/charts/charts.css",
         "css/page-order.css",
         "css/elementsStyling/create-order-block.css"
       ],
@@ -100,6 +101,16 @@
       "js": [
         "js/modules/purify.min.js",
         "js/modules/apexcharts.min.js",
+
+
+        "js/modules/charts/hammer.min.js",
+        "js/modules/charts/moment-with-locales.min.js",
+        "js/modules/charts/chart.min.js",
+        "js/modules/charts/chartjs-adapter-moment.min.js",
+        "js/modules/charts/chartjs-plugin-zoom.min.js",
+        "js/modules/charts/use-chartjs.js",
+
+
         "js/modules/injectionScript.js",
         "js/modules/HttpRequest.js",
         "js/modules/global_last.js",
@@ -111,6 +122,7 @@
         "js/marketSearch.js"
       ],
       "css": [
+        "css/charts/charts.css",
         "css/market-search.css",
         "css/animation/progress-bar.css",
         "css/animation/checkbox-change-color-text.css",

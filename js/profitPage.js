@@ -69,9 +69,8 @@ function displayProfitable(priceJSON, priceHistory, item_description, myNextBuyP
     let itemProfit = listProfitCalculation(priceJSON, extensionSetings.coefficient);
     let { item_id } = item_description;
     let { countSell, countSellSevenDays, historyPriceJSON } = priceHistory;
-    let minMaxPricePerDayVal = historyPriceJSON.prices;
-    console.log(historyPriceJSON.prices);
-    console.log(minMaxPricePerDayVal);
+    let itemPriceHistory = historyPriceJSON.prices;
+
     let itemDescriptionDiv = document.getElementById("largeiteminfo_game_info");
     let itemInfoDiv = document.getElementById("largeiteminfo");
 
@@ -79,7 +78,7 @@ function displayProfitable(priceJSON, priceHistory, item_description, myNextBuyP
     historyChart(itemInfoDiv, item_id);
 
     DomRemove(document.getElementsByClassName(`order_block_${item_id}`)[0]);
-    itemOrderChange(itemDescriptionDiv, item_description, myNextBuyPrice, quantityWant, extensionSetings, minMaxPricePerDayVal, sessionId);
+    itemOrderChange(itemDescriptionDiv, item_description, myNextBuyPrice, quantityWant, extensionSetings, itemPriceHistory, sessionId);
 
     DomRemove(document.getElementsByClassName("displayProfitable")[0]);
     displayProfitableBlock(itemDescriptionDiv, itemProfit);
@@ -115,13 +114,12 @@ function diagramHistory(itemInfoDiv, item_description) {
     }
 }
 
-function itemOrderChange(myListingBuyUpdateDom, item_description, myNextBuyPrice, quantityWant, extensionSetings, minMaxPricePerDayVal, sessionId) {
+function itemOrderChange(myListingBuyUpdateDom, item_description, myNextBuyPrice, quantityWant, extensionSetings, itemPriceHistory, sessionId) {
 
     if (myListingBuyUpdateDom === undefined || myListingBuyUpdateDom === null) return;
     let { item_id } = item_description;
-            if (minMaxPricePerDayVal !== undefined && minMaxPricePerDayVal.length > 1) {
-                /* schemeHistory(minMaxPricePerDayVal, item_id); */
-                showHistoryChart(minMaxPricePerDayVal, item_id);
+            if (itemPriceHistory !== undefined && itemPriceHistory.length > 1) {
+                showHistoryChart(itemPriceHistory, item_id);
         }
     
     let myListingBuyUpdateHTML = `

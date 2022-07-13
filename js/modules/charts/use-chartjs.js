@@ -1,7 +1,3 @@
-
-
-
-
 /**
  * Блок где будет выводиться история
  * @param {HTMLElement} spanCountBlock // Dom элемент карточки предмета который мы будем изменять
@@ -10,16 +6,17 @@
 function historyChart(divItemBlock, item_id) {
   let historyChartHTML = `   
   <div id="chart_${item_id}" class="chart">
-  <canvas id="myChart_${item_id}"></canvas>
-  </div>
-  <button id="resetChart_${item_id}">reset</button>
-  <button id="forAllTime_${item_id}">All Time</button>
-  <button id="lastThirtyDays_${item_id}">30</button>
-  <button id="lastsevenDays_${item_id}">7</button>
-  <button id="lastDays_${item_id}">1</button>
-  <div>
-    <input name="tupeHistory_${item_id}" type="radio" value="forDay" >For Day
-    <input name="tupeHistory_${item_id}" type="radio" value="allTime" checked>All Time
+    <canvas id="myChart_${item_id}"></canvas>
+    
+    <button id="resetChart_${item_id}">reset</button>
+    <button id="forAllTime_${item_id}">All Time</button>
+    <button id="lastThirtyDays_${item_id}">30</button>
+    <button id="lastsevenDays_${item_id}">7</button>
+    <button id="lastDays_${item_id}">1</button>
+    <div>
+      <input name="tupeHistory_${item_id}" type="radio" value="forDay" >For Day
+      <input name="tupeHistory_${item_id}" type="radio" value="allTime" checked>All Time
+    </div>
   </div>
 
   `;
