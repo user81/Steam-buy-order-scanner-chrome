@@ -71,7 +71,9 @@ function displayProfitable(priceJSON, priceHistory, item_description, myNextBuyP
     let { countSell, countSellSevenDays, historyPriceJSON } = priceHistory;
     let itemPriceHistory = historyPriceJSON.prices;
 
+    let itemImageDiv = document.getElementsByClassName("market_listing_largeimage")[0];
     let itemDescriptionDiv = document.getElementById("largeiteminfo_game_info");
+
     let itemInfoDiv = document.getElementById("largeiteminfo");
 
     DomRemove(document.getElementById(`chart_${item_id}`));
@@ -81,36 +83,34 @@ function displayProfitable(priceJSON, priceHistory, item_description, myNextBuyP
     itemOrderChange(itemDescriptionDiv, item_description, myNextBuyPrice, quantityWant, extensionSetings, itemPriceHistory, sessionId);
 
     DomRemove(document.getElementsByClassName("displayProfitable")[0]);
-    displayProfitableBlock(itemDescriptionDiv, itemProfit);
-
-    DomRemove(document.getElementById("diagram_history"));
-    diagramHistory(itemInfoDiv, item_description);
+    displayProfitableBlock(itemImageDiv, itemProfit, countSell, countSellSevenDays);
 
 }
 
-function displayProfitableBlock(itemDescriptionDiv, itemProfit) {
+function displayProfitableBlock(itemDescriptionDiv, itemProfit, countSell, countSellSevenDays) {
     let { actualProfit, coefPrice, realPrice } = itemProfit;
     if (realPrice !== undefined && actualProfit !== undefined && coefPrice !== undefined && itemDescriptionDiv !== null) {
         let itemProfitInfo = `
         <div class="displayProfitable">
-        <span>${chrome.i18n.getMessage("priceWithoutCommissionDescription")} ${realPrice}</span>
-        <br>
-        <span>${chrome.i18n.getMessage("profitAtTheMomentDescription")} ${actualProfit}</span>
-        <br>
-        <span>${chrome.i18n.getMessage("coefficientPriceAtTheMomentDescription")}${coefPrice}</span>
-        <br>
+            <div class="profitableElement">
+                <label class="help" title="${chrome.i18n.getMessage("profitAtTheMomentDescription")}">⬆</label>
+                <span> ${actualProfit}</span>
+            </div>
+            <div class="profitableElement">
+                <label class="help" title="${chrome.i18n.getMessage("coefficientPriceAtTheMomentDescription")}">⬆%</label>
+                <span>${coefPrice}</span>
+            </div>
+            <div class="profitableElement">
+                <label class="help" title="${chrome.i18n.getMessage("coefficientPriceAtTheMomentDescription")}">🗓7</label>
+                <span>${countSellSevenDays}</span>
+            </div>
+            <div class="profitableElement">
+                <label class="help" title="${chrome.i18n.getMessage("coefficientPriceAtTheMomentDescription")}">🗓1</label>
+                <span>${countSell}</span>
+            </div>
         </div>
         `;
-        itemDescriptionDiv.insertAdjacentHTML('afterend', DOMPurify.sanitize(itemProfitInfo));
-    }
-}
-
-function diagramHistory(itemInfoDiv, item_description) {
-    let { appId, hashNameUrl } = item_description;
-    if (appId !== undefined && hashNameUrl !== undefined && itemInfoDiv !== null) {
-        let itemDiagramHistory = `<div id="diagram_history"></div>`;
-        itemInfoDiv.insertAdjacentHTML('afterend', DOMPurify.sanitize(itemDiagramHistory));
-        /* showHistory(appId, hashNameUrl); */
+        itemDescriptionDiv.insertAdjacentHTML('beforeend', DOMPurify.sanitize(itemProfitInfo));
     }
 }
 
@@ -123,9 +123,8 @@ function itemOrderChange(myListingBuyUpdateDom, item_description, myNextBuyPrice
         }
     
     let myListingBuyUpdateHTML = `
-    <span class="market_search_sidebar_contents change_price_search  market_table_value change_price_block order_block_${item_id}"
-    style ="box-shadow: rgb(62 70 55 / 59%) 0px 0px 32px 38px inset; width: 100%; display: inline-block; margin-bottom: 14px;">
-        <span id="myItemRealBuyPrice${item_id}">${myNextBuyPrice.nextPriceWithoutFee}</span>
+    <span class="change_price_search  market_table_value change_price_block order_block_${item_id} createByOrderBlock">
+        <span id="myItemRealBuyPrice${item_id}" title="${chrome.i18n.getMessage("priceWithoutCommissionDescription")}">${myNextBuyPrice.nextPriceWithoutFee}</span>
         <span id="myItemNextBuyPrice${item_id}">${myNextBuyPrice.myNextPrice}</span>
         <input type="number" step="0.01" id="myItemBuyPrice${item_id}" class="change_price_input">
         <input type="number" id="myItemQuality${item_id}" class="change_price_input">

@@ -1,36 +1,47 @@
-
 /* стиль блока создания ордера */
 .change_price_search {
-  /*     display: flex;
+    /*     display: flex;
       justify-content: center;
       align-items: center;
       height: 50px; */
-      height: 80px;
-      display: inline-block;
-  
-  }
-  
-  .change_price_input {
-      margin-top: 20px;
-      height: 34px;
-      margin: 8px 10px 10px 5px;
-  }
-  
-  span [id^="myItemRealBuyPrice"],
-  span [id^="myItemNextBuyPrice"] {
-      width: 60px;
-      padding: 0px;
-      display: inline-block;
-      color: #fff;
-  }
-  
-  .orderMessageBlock{
-      display: inline-block;
-      width: 253px;;
-  }
-  
-  div[id^="responceServerRequestBuyOrder"]{
-      height: 14px;
-      overflow: hidden;
-      overflow: hidden; /* Обрезаем всё за пределами блока */
-  }
+    height: 80px;
+    display: inline-block;
+
+}
+.help{
+background: rgb(103 95 41);
+border-radius: 55%;
+padding: 0px 3px;}
+
+.createByOrderBlock{
+    height: 54px;
+    width: 100% !important;
+    display: inline-block;
+}
+
+.change_price_input {
+    margin-top: 20px;
+    height: 34px;
+    margin: 8px 10px 10px 5px;
+}
+
+span [id^="myItemRealBuyPrice"],
+span [id^="myItemNextBuyPrice"] {
+    width: 60px;
+    padding: 0px;
+    display: inline-block;
+    color: #fff;
+}
+
+.orderMessageBlock {
+    float: right;
+    position: relative;
+    width: 185px;
+}
+
+div[id^="responceServerRequestBuyOrder"] {
+    height: 65px;
+    word-wrap: break-word;
+    overflow: hidden;
+    /* Обрезаем всё за пределами блока */
+}

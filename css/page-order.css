@@ -1,9 +1,10 @@
-
-.pagecontent.in_client, .pagecontent.no_header {
+.pagecontent.in_client,
+.pagecontent.no_header {
 	background-color: rgb(62, 70, 55) !important;
 }
+
 img {
-	max-width: 100%!important;
+	max-width: 100% !important;
 	padding: 0 5%;
 }
 
@@ -12,60 +13,75 @@ img {
 стиль таблиц при сканировании
 */
 
-div [id^="priceTable"] { 
-    float: right; 
+div [id^="priceTable"] {
+	float: right;
 	margin: 0px;
 	padding: 0px;
 }
 
 
-header_notification_envelope > img {
-	width:11px!important;
-	height: 8px!important;
+header_notification_envelope>img {
+	width: 11px !important;
+	height: 8px !important;
+
+}
+
+.header_notification_envelope{
+	margin: 0 0 0 -7px !important;
+	position: absolute !important;
+}
+
+.header_notification_btn.no_notifications .notification_count {
+	display: inline-block !important;
+}
+
+.notification_count{
+	margin-right: 10px;
+
 }
 
 .header_notification_btn.has_notifications {
-    height: 24px;
+	height: 24px;
 }
 
 div#global_header div.logo {
 	max-height: 50px;
-     padding-top: 0px!important; 
+	padding-top: 0px !important;
 }
 
 .market_listing_largeimage {
-	max-width: 18%!important;
+	max-width: 18% !important;
 }
 
 .market_listing_largeimage {
 	background: #646d56 !important;
 	padding: 0px !important;
-	width: 100px!important;
-	height: 100px!important;
+	width: 100px !important;
+	height: 100px !important;
 }
 
-#diagram_history{
+#diagram_history {
 	margin-bottom: 30px;
-    padding: 4px;
+	padding: 4px;
 }
 
 .market_commodity_explanation {
 	margin: 30px 18px;
-	display: none!important;
+	display: none !important;
 }
 
 .item_desc_content {
-	min-height: 0px!important;
+	min-height: 0px !important;
 }
 
 #mainContents {
 	padding: 0;
 	text-align: left;
-	display: inline!important;
+	display: inline !important;
 }
 
 ellipsis {
-	display: none!important;
+	display: none !important;
 }
 
 .item_desc_description {
@@ -74,9 +90,10 @@ ellipsis {
 	margin: left 18px;
 }
 
-.item_desc_descriptors{
+.item_desc_descriptors {
 	overflow: auto;
-  height: 80px;
+	height: 66px;
+	margin: 0 !important;
 }
 
 
@@ -85,6 +102,21 @@ ellipsis {
 	/* ширина для вертикального скролла */
 	background-color: rgb(89, 101, 79);
 
+}
+
+/*блок отображения прибыли*/
+.displayProfitable {
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	margin-top: 8px;
+	background: #646d56;
+	color: #fff;
+	box-shadow: inset rgb(43 49 39) 0px 6px 29px 1px;
+}
+
+.profitableElement {
+	padding: 2px;
 }
 
 /* ползунок скроллбара */
@@ -101,81 +133,83 @@ ellipsis {
 }
 
 .market_header_bg {
-	display: none!important;
+	display: none !important;
 }
 
 #market_activity_block {
-	display: none!important;
+	display: none !important;
 }
 
 div#global_header .content {
-	height: 49px!important;
+	height: 49px !important;
 }
 
 #global_header .supernav_container {
-	margin: -31px!important;
+	margin: -31px !important;
 }
 
 .market_listing_nav {
-	padding-top: 6px!important;
+	padding-top: 6px !important;
 }
 
 #largeiteminfo_game_icon {
-	display: none!important;
+	display: none !important;
 }
 
 .ellipsis {
-	display: none!important;
+	display: none !important;
 }
 
 .item_desc_game_info {
-	position: absolute!important;
-	padding-left: 78px!important;
+	position: absolute !important;
+	padding-left: 78px !important;
 }
 
 .market_commodity_orders_block {
-    display: inline-table!important;
+	display: inline-table !important;
 }
 
-#market_commodity_order_spread{
-    margin-top: -37px!important;
+#market_commodity_order_spread {
+	margin-top: -37px !important;
 }
 
 
 #largeiteminfo {
-    overflow: visible;
-    max-width: 100%!important; 
+	overflow: visible;
+	max-width: 100% !important;
 }
 
-#largeiteminfo_item_type{
+#largeiteminfo_item_type {
 	margin-left: 120px;
 }
 
 #market_commodity_order_spread {
-    display: contents;
+	display: contents;
 }
 
 .market_commodity_order_block {
-    display: flex;
+	display: flex;
 }
 
 .responsive_header .responsive_header_logo img {
-    width: 50px!important;
-	height: 20px!important;
+	width: 50px !important;
+	height: 20px !important;
 }
 
 span .market_listing_price.market_listing_price_with_fee {
 	color: #E10505;
-	}
-	span .market_listing_price.market_listing_price_without_fee {
+}
+
+span .market_listing_price.market_listing_price_without_fee {
 	display: block;
 	color: #08B032;
-	}
-	div #market_buyorder_info_details {
-		display: block !important;
-	}
+}
 
-	.market_commodity_orders_table {
-		margin: 10px auto;
-		display: inline-flex !important;
-	}
+div #market_buyorder_info_details {
+	display: block !important;
+}
+
+.market_commodity_orders_table {
+	margin: 10px auto;
+	display: inline-flex !important;
+}
