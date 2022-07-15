@@ -3,9 +3,9 @@
  * @param {HTMLElement} spanCountBlock // Dom элемент карточки предмета который мы будем изменять
  * @param {String} item_id // уникальный идентификатор предмета
  */
-function historyChart(divItemBlock, item_id) {
+function historyChart(divItemBlock, item_id, className = "") {
   let historyChartHTML = `   
-  <div id="chart_${item_id}" class ="chart">
+  <div id="chart_${item_id}" class ="chart ${className}">
     <canvas id="myChart_${item_id}"></canvas>
   </div>
 

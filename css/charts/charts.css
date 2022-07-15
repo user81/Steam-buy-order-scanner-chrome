@@ -3,8 +3,17 @@
   box-shadow: rgb(69 69 69) 0px 3px 8px -1px;
   transition: 0.3s;
   width: 790px;
-  margin: 0px 11px 10px auto;
   text-align: right;
+}
+
+.chart-item-page {
+  margin: 0px 11px 10px auto;
+}
+
+.chart-search {
+  margin: 0px auto;
+  display: grid;
+  margin-bottom: 12px;
 }
 
 .navigation-chart {

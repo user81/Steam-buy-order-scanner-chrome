@@ -77,7 +77,7 @@ function displayProfitable(priceJSON, priceHistory, item_description, myNextBuyP
     let itemInfoDiv = document.getElementById("largeiteminfo");
 
     DomRemove(document.getElementById(`chart_${item_id}`));
-    historyChart(itemInfoDiv, item_id);
+    historyChart(itemInfoDiv, item_id, "chart-item-page");
 
     DomRemove(document.getElementsByClassName(`order_block_${item_id}`)[0]);
     itemOrderChange(itemDescriptionDiv, item_description, myNextBuyPrice, quantityWant, extensionSetings, itemPriceHistory, sessionId);

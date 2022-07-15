@@ -458,7 +458,7 @@ function htmlItemList(marketSeachInfoNorender) {
             if (Object.entries(itemJson).length > 0) {
                 let blockHtmlText = `
                   <div data-hash-name="${itemJson.hash_name}" data-appid="${itemJson.asset_description.appid}" id="result_${itemJson.index}"
-                  class="market_listing_row market_recent_listing_row market_listing_searchresult">
+                  class="market_listing_row market_recent_listing_row market_listing_searchresult" style="height: auto;">
                   <img alt="" class="market_listing_item_img" style="border-color:  ${itemJson.name_color || 'white'};"
                     srcset="https://community.cloudflare.steamstatic.com/economy/image/${itemJson.asset_description.icon_url}/62fx62f 1x, https://community.cloudflare.steamstatic.com/economy/image/${itemJson.asset_description.icon_url}/62fx62fdpx2x 2x"
                     src="https://community.cloudflare.steamstatic.com/economy/image/${itemJson.asset_description.icon_url}/62fx62f"
@@ -591,9 +591,6 @@ async function displayProfitable(divItemBlock, priceJSON, priceHistory, item_des
     DomRemove(divItemBlock.getElementsByClassName("market_table_price_json_buy")[0]);
     listingBuyTab(divItemBlock, priceJSON);
 
-    DomRemove(divItemBlock.getElementsByClassName("chart")[0]);
-    historyChart(divItemBlock, item_id);
-
     let itemPriceHistory = priceHistory.historyPriceJSON.prices;
     DomRemove(document.getElementsByClassName(`order_block_${item_id}`)[0]);
     itemOrderChange(item_description, divItemBlock, myNextBuyPrice, quantity, extensionSetings, priceJSON, itemPriceHistory, setSearchColor(pricesProfit), sessionId);
@@ -679,7 +676,7 @@ function itemOrderChange(item_description, myListingBuyUpdateDom, myNextBuyPrice
     let { item_id } = item_description;
     let myListingBuyUpdateHTML = `
     <span class="market_search_sidebar_contents change_price_search  market_table_value change_price_block order_block_${item_id}"
-    style ="box-shadow: rgb(62 70 55 / 59%) 0px 0px 32px 38px inset;"
+    style ="display: block"
     >
         <span id="myItemRealBuyPrice${item_id}">${myNextBuyPrice.nextPriceWithoutFee}</span>
         <span id="myItemNextBuyPrice${item_id}">${myNextBuyPrice.myNextPrice}</span>
@@ -710,6 +707,8 @@ function itemOrderChange(item_description, myListingBuyUpdateDom, myNextBuyPrice
     buttonCreateBuy.addEventListener("click", (event) => { createBuyOrder(extensionSetings, sessionId, item_description); });
     buttonshowHistory.addEventListener("click", (event) => {
         if (itemPriceHistory !== undefined && itemPriceHistory.length > 1) {
+            DomRemove(document.getElementById(`chart_${item_id}`));
+            historyChart(myListingBuyUpdateDom.getElementsByClassName("market_listing_item_name_block")[0], item_id, "chart-search");
             showHistoryChart(itemPriceHistory, item_id);
         }
     });

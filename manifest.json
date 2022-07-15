@@ -52,7 +52,7 @@
     {
       "js": [
         "js/modules/purify.min.js",
-        "js/modules/apexcharts.min.js",
+
 
         "js/modules/charts/hammer.min.js",
         "js/modules/charts/moment-with-locales.min.js",
@@ -100,7 +100,6 @@
     {
       "js": [
         "js/modules/purify.min.js",
-        "js/modules/apexcharts.min.js",
 
 
         "js/modules/charts/hammer.min.js",
