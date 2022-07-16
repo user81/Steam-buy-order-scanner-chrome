@@ -46,3 +46,7 @@ select:focus {
   color: #fff;
   width: 57px;
 }
+
+.selectLang:focus {
+  background-color: rgb(62, 70, 55);
+}

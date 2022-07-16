@@ -17,30 +17,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function localizeHtmlPage()
-{
+(function () {
     let data = document.querySelectorAll('[data-localize]');
-    let elementDom;
-    let dataLocalizeValue;
-    for (let index = 0; index < data.length; index++) {
-        elementDom = data[index];
-        dataLocalizeValue = data[index].getAttribute('data-localize').toString();
+    Array.prototype.map.call(data, (elementDom) => {
+        let dataLocalizeValue = elementDom.getAttribute('data-localize').toString();
         let filterValue = replace_i18n(elementDom, dataLocalizeValue).toString();
-        
         if (filterValue != '' && chrome.i18n.getMessage(filterValue) != '') {
             elementDom.innerText = chrome.i18n.getMessage(filterValue);
         }
-    }  
-}
+    });
+}());
 
 function replace_i18n(elementDom, dataLocalizeValue) {
-    let msg = dataLocalizeValue.replace(/__MSG_(\w+)__/g, function(value, filterValue) {
+    let msg = dataLocalizeValue.replace(/__MSG_(\w+)__/g, function (value, filterValue) {
         if (value != filterValue) {
             return (filterValue) ? filterValue : '';
         }
         return '';
     });
-    return (dataLocalizeValue!=msg) ? msg : '';
+    return (dataLocalizeValue != msg) ? msg : '';
 }
-
-localizeHtmlPage();

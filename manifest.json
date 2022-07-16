@@ -68,7 +68,8 @@
         "js/modules/itemPriceHistory.js",
         "js/modules/profitCalculation.js",
 
-        "js/profitPage.js"
+        "js/profitPage.js",
+        "js/localize/localize.js"
       ],
       "css": [
         "css/charts/charts.css",

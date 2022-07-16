@@ -63,17 +63,20 @@ chrome.storage.local.get([
 		checkboxrunSaleOrders.checked = setings.runSaleOrders;
 		checkboxRunSearch.checked = setings.runSearch;
 		checkboxDisplayHistory.checked = setings.displayHistory;
-		quantityItemsInHistory.value = ( setings.quantityItemsInHistory > 500 || setings.quantityItemsInHistory <= 0) ? 500 : setings.quantityItemsInHistory;
+		quantityItemsInHistory.value = (setings.quantityItemsInHistory > 500 || setings.quantityItemsInHistory <= 0) ? 500 : setings.quantityItemsInHistory;
 
 		for (let index = 0; index < selectLang.length; index++) {
 			if (selectLang.options[index].value == setings.selectLang) {
 				selectLang.options[index].selected = true;
 			}
 		}
+		let textActive = "#d9c859"
+		let textDefault = "#fff"
+		parentElementChaneColor(textActive, textDefault, document.getElementsByClassName("input-value-checkbox"));
 	});
 
 save.addEventListener("click", function () {
-	quantityItemsInHistory.value = ( quantityItemsInHistory.value > 500 || quantityItemsInHistory.value <= 0) ? 500 : quantityItemsInHistory.value;
+	quantityItemsInHistory.value = (quantityItemsInHistory.value > 500 || quantityItemsInHistory.value <= 0) ? 500 : quantityItemsInHistory.value;
 	chrome.storage.local.set({
 		scanIntervalSET: scanInterval.value,
 		errorPauseSET: errorPause.value,

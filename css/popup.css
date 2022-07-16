@@ -40,16 +40,6 @@ button {
   float: right;
 }
 
-.selectLang {
-  background-color: rgb(62, 70, 55);
-  color: #fff;
-  width: 57px;
-}
-
-.selectLang:focus {
-  background-color: rgb(62, 70, 55);
-}
-
 .input-value {
   width: 50px;
   height: 15px;
@@ -58,47 +48,6 @@ button {
   background-color: rgb(62, 70, 55);
   color: white;
 }
-
-.select-input-value-checkbox:after {
-  content: " ";
-  background-color: rgb(62, 70, 55);
-  display: inline-block;
-  visibility: visible;
-}
-
-.select-input-value-checkbox:checked:after {
-  content: "\2714";
-  box-shadow: 0px 2px 4px rgba(155, 155, 155, 0.15);
-  height: 14px;
-  display: block;
-  width: 13px;
-  text-align: center;
-  color: rgb(195, 180, 79);
-  font-size: 12px;
-}
-
-input[type='checkbox'] {
-  width: 14px !important;
-  height: 14px !important;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  -o-appearance: none;
-  appearance: none;
-  line-height: 1em;
-  background: rgb(62, 70, 55);
-}
-
-input[type="checkbox"]:focus {
-  outline-offset: none;
-}
-
-input[type="checkbox"]:focus,
-input[type="number"]:focus,
-input[type="text"]:focus,
-select:focus {
-  outline: 0;
-}
-
 
 .line::before {
   content: '';
