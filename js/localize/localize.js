@@ -21,14 +21,14 @@
     let data = document.querySelectorAll('[data-localize]');
     Array.prototype.map.call(data, (elementDom) => {
         let dataLocalizeValue = elementDom.getAttribute('data-localize').toString();
-        let filterValue = replace_i18n(elementDom, dataLocalizeValue).toString();
+        let filterValue = replace_i18n(dataLocalizeValue).toString();
         if (filterValue != '' && chrome.i18n.getMessage(filterValue) != '') {
             elementDom.innerText = chrome.i18n.getMessage(filterValue);
         }
     });
 }());
 
-function replace_i18n(elementDom, dataLocalizeValue) {
+function replace_i18n(dataLocalizeValue) {
     let msg = dataLocalizeValue.replace(/__MSG_(\w+)__/g, function (value, filterValue) {
         if (value != filterValue) {
             return (filterValue) ? filterValue : '';
@@ -37,3 +37,5 @@ function replace_i18n(elementDom, dataLocalizeValue) {
     });
     return (dataLocalizeValue != msg) ? msg : '';
 }
+
+let getLocalizeText = (filterValue, defaultText = '') => (chrome.i18n.getMessage(filterValue) != '') ? chrome.i18n.getMessage(filterValue) : defaultText;

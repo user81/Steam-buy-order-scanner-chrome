@@ -115,6 +115,10 @@
         "message": "Price without commission:",
         "description": "Description prices without commission of the order displayed when scanning."
     },
+    "NextBuyOrderPricenDescription": {
+        "message": "The following price of the request to buy:",
+        "description": "The next buy request price that is higher than the current price."
+    },
     "profitAtTheMomentDescription": {
         "message": "Profit now:",
         "description": "Description of the profit currently displayed when scanning an order."
@@ -123,6 +127,14 @@
         "message": "Required profit:",
         "description": "Description of the minimum profit currently displayed when scanning an order."
     },
+    "salesInOneDay": {
+        "message": "Sold out in 1 days:",
+        "description": "Description of the number of sales in 1 days."
+    },
+    "salesInSevenDays": {
+        "message": "Sold out in 7 days:",
+        "description": "Description of the number of sales in 7 days."
+    },
     "myProfitDescription": {
         "message": "My profit:",
         "description": "Description of the my profit when scanning an order."
@@ -130,5 +142,94 @@
     "myCoefficientPriceDescription": {
         "message": "My required profit:",
         "description": "Description of the my minimum profit when scanning an order."
+    },
+
+    "ItemListTablePrice": {
+        "message": "Price",
+        "description": "Header of item list tables."
+    },
+    "ItemListTableCount": {
+        "message": "Count",
+        "description": "Header of item list tables."
+    },
+    "ItemListTableBuy_tab": {
+        "message": "Buy tab",
+        "description": "Header of item list tables."
+    },
+    "ItemListTableSell_tab": {
+        "message": "Sell tab",
+        "description": "Header of item list tables."
+    },
+    "ItemListTableName": {
+        "message": "Name",
+        "description": "Header of item list tables."
+    },
+
+    "resetChartsHistoryButton": {
+        "message": "Reset",
+        "description": "Button to update history."
+    },
+    "allTimeHistoryButton": {
+        "message": "All time",
+        "description": "A button that displays the full history of the product for all time."
+    },
+    "countOfSalesPerDay": {
+        "message": "Per day",
+        "description": "History switcher text that displays the maximum cost and number of sales per day."
+    },
+    "countOfSalesPerDayDescription": {
+        "message": "Max value, total sold:",
+        "description": "Tooltip for history switcher text that displays the maximum cost and number of sales per day."
+    },
+    "detailedSalesHistory": {
+        "message": "Detailed history",
+        "description": "Displays detailed product history."
+    },
+    "detailedSalesHistoryDescription": {
+        "message": "Hourly history:",
+        "description": "Detailed history description."
+    },
+    "showHistoryButton": {
+        "message": "Show history",
+        "description": "Displays a history chart."
+    },
+
+    "listSortingPriceFrom": {
+        "message": "Price from",
+        "description": "Description of the window for entering the lower price limit."
+    },
+    "listSortingPriceTo": {
+        "message": "Price to",
+        "description": "Description of the window for entering the upper price limit."
+    },
+    "listSortingMinCount": {
+        "message": "Min count",
+        "description": "Description of the window for entering the minimum quantity of goods in stock."
+    },
+    "listSortingMinSell": {
+        "message": "Minimum sales in 7 days",
+        "description": "Description of the window for entering the minimum number of sales in 7 days."
+    },
+    "listSortingMinProfit": {
+        "message": "Minimum percentage of profit",
+        "description": "Description of the window for entering the minimum percentage of profit."
+    },
+    "listSortingOnlyProfitable": {
+        "message": "Only profitable (percentage of profit by default)",
+        "description": "We take into account the percentage of profit by default, which is specified in the extension settings."
+    },
+    "runScanInSearchListButton": {
+        "message": "Scan",
+        "description": "Button to start scanning the list of products."
+    },
+    "runLoadOrderInSearchListButton": {
+        "message": "Loading",
+        "description": "Button for loading pages."
+    },
+    "selectPageCheckboxes": {
+        "message": "Pages",
+        "description": "Page selection window."
     }
+
+
 }

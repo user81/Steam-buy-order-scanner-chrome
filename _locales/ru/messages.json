@@ -115,6 +115,10 @@
         "message": "Цена без комиссии:",
         "description": "Описание цены без комиссии отображаемого при сканировании ордера."
     },
+    "NextBuyOrderPricenDescription": {
+        "message": "Следующая цена запроса на покупку:",
+        "description": "Следующая цена запроса на покупку, которая превышает нынешнюю цену."
+    },
     "profitAtTheMomentDescription": {
         "message": "Прибыль сейчас:",
         "description": "Описание прибыли, отображаемой на данный момент при сканировании ордера."
@@ -123,6 +127,14 @@
         "message": "Необходимая прибыль:",
         "description": "Описание минимальной прибыли, отображаемой на данный момент при сканировании ордера."
     },
+    "salesInOneDay": {
+        "message": "Продано за 1 дней:",
+        "description": "Описание количества продаж за 1 дней."
+    },
+    "salesInSevenDays": {
+        "message": "Продано за 7 дней:",
+        "description": "Описание количества продаж за 7 дней."
+    },
     "myProfitDescription": {
         "message": "Моя прибыль:",
         "description": "Описание моей прибыли при сканировании ордера."
@@ -130,5 +142,94 @@
     "myCoefficientPriceDescription": {
         "message": "Моя необходимая прибыль:",
         "description": "Описание минимальной прибыли при сканировании ордера."
+    },
+
+    "ItemListTablePrice": {
+        "message": "Цена",
+        "description": "Заголовок таблиц списка предметов."
+    },
+    "ItemListTableCount": {
+        "message": "Количество",
+        "description": "Заголовок таблиц списка предметов."
+    },
+    "ItemListTableBuy_tab": {
+        "message": "Таблица покупок",
+        "description": "Заголовок таблиц списка предметов."
+    },
+    "ItemListTableSell_tab": {
+        "message": "Таблица продаж",
+        "description": "Заголовок таблиц списка предметов."
+    },
+    "ItemListTableName": {
+        "message": "Имя",
+        "description": "Заголовок таблиц списка предметов."
+    },
+
+    "resetChartsHistoryButton": {
+        "message": "Обновить",
+        "description": "Кнопка для обновления истории."
+    },
+    "allTimeHistoryButton": {
+        "message": "За всё время",
+        "description": "Кнопка, которая отображает полную историю товара за всё время."
+    },
+    "countOfSalesPerDay": {
+        "message": "За день",
+        "description": "Текст переключателя истории, который выводит максимальную стоимость и количество продаж за день."
+    },
+    "countOfSalesPerDayDescription": {
+        "message": "Максимальная стоимость, всего продано:",
+        "description": "Подсказка для текста переключателя истории, который выводит максимальную стоимость и количество продаж за день."
+    },
+    "detailedSalesHistory": {
+        "message": "Подробная история",
+        "description": "Выводит подробную историю товара."
+    },
+    "detailedSalesHistoryDescription": {
+        "message": "Почасовая история:",
+        "description": "Описание подробной историии."
+    },
+    "showHistoryButton": {
+        "message": "Показать историю",
+        "description": "Отображает диаграмму истории."
+    },
+
+    "listSortingPriceFrom": {
+        "message": "Цена от",
+        "description": "Описание окна для ввода нижней границы цены."
+    },
+    "listSortingPriceTo": {
+        "message": "Цена до",
+        "description": "Описание окна для ввода верхней границы цены."
+    },
+    "listSortingMinCount": {
+        "message": "Минимальное количество",
+        "description": "Описание окна для ввода минимального количества товара в наличии."
+    },
+    "listSortingMinSell": {
+        "message": "Минимальные продажи за 7 дней",
+        "description": "Описание окна для ввода минимального количества продаж за 7 дней."
+    },
+    "listSortingMinProfit": {
+        "message": "Минимальный процент от прибыли",
+        "description": "Описание окна для ввода минимального процента прибыли."
+    },
+    "listSortingOnlyProfitable": {
+        "message": "Только прибыльные(процент от прибыли по умолчанию)",
+        "description": "Учитывам процент от прибыли по умолчанию который указан в настройках расширения."
+    },
+    "runScanInSearchListButton": {
+        "message": "Cканирование",
+        "description": "Кнопка для запуска сканирования списка товаров."
+    },
+    "runLoadOrderInSearchListButton": {
+        "message": "Загрузить",
+        "description": "Кнопка для подгрузки страниц."
+    },
+    "selectPageCheckboxes": {
+        "message": "Страницы",
+        "description": "Окно выбора страниц."
     }
+
+
 }

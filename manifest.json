@@ -52,7 +52,7 @@
     {
       "js": [
         "js/modules/purify.min.js",
-
+        "js/localize/localize.js",
 
         "js/modules/charts/hammer.min.js",
         "js/modules/charts/moment-with-locales.min.js",
@@ -68,8 +68,8 @@
         "js/modules/itemPriceHistory.js",
         "js/modules/profitCalculation.js",
 
-        "js/profitPage.js",
-        "js/localize/localize.js"
+        "js/profitPage.js"
+
       ],
       "css": [
         "css/charts/charts.css",
@@ -101,7 +101,7 @@
     {
       "js": [
         "js/modules/purify.min.js",
-
+        "js/localize/localize.js",
 
         "js/modules/charts/hammer.min.js",
         "js/modules/charts/moment-with-locales.min.js",

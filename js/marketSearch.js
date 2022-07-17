@@ -29,13 +29,13 @@ function searchHeadersNames() {
         },
         "Buy_tab":
         {
-            "name": "Buy_tab",
+            "name": "Buy tab",
             "dataSorttype": "",
             "classSorttype": "market_listing_right_cell market_listing_my_orders",
         },
         "Sell_tab":
         {
-            "name": "Sell_tab",
+            "name": "Sell tab",
             "dataSorttype": "",
             "classSorttype": "market_listing_right_cell market_listing_my_orders",
         },
@@ -52,7 +52,7 @@ function searchHeadersNames() {
     for (const key in headersNames) {
         let hederNamesHtml = `
     <div class="${headersNames[key].classSorttype} market_my_listing_${headersNames[key].name.toLowerCase()}" data-sorttype="${headersNames[key].dataSorttype}">
-    ${headersNames[key].name}
+    ${getLocalizeText("ItemListTable" + key,headersNames[key].name)}
     </div>
     `;
         profitScaner.insertAdjacentHTML('beforeend', DOMPurify.sanitize(hederNamesHtml));
@@ -87,43 +87,41 @@ async function displaySearchRunScan(coefficient) {
         let scanerMarketSearchHTML = `
         <div>
             <span class="market_listing_item_name">
-                Price From
+            ${getLocalizeText("listSortingPriceFrom","Price from")}
                 <input type="number" id="priceFromVal" step="0.01">
             </span>
             <span class="market_listing_item_name">
-            Price To
-            <input type="number" id="priceToVal" step="0.01">
-        </span>
+                ${getLocalizeText("listSortingPriceTo","Price to")}
+                <input type="number" id="priceToVal" step="0.01">
+            </span>
             <span class="market_listing_item_name">
-                Min Count
+                ${getLocalizeText("listSortingMinCount","Min count")}
                 <input type="number" id="minCountVal">
             </span>
             <span class="market_listing_item_name">
-                Min Sell
+                ${getLocalizeText("listSortingMinSell","Minimum sales in 7 days")}
                 <input type="number" id="minSellVal">
             </span>
             <span class="market_listing_item_name">
-                Min Profit
+            ${getLocalizeText("listSortingMinProfit","Minimum percentage of profit")}
                 <input type="number" id="minProfitVal" value ="">
             </span>
-            <br>
-            <br>
             <span class="market_listing_item_name">
-                only Profitable
+            ${getLocalizeText("listSortingOnlyProfitable","Only profitable (percentage of profit by default)")}
                 <input type="checkbox" class="input-value-checkbox" id="onlyProfitable">
             </span>
-
+            <br>
             <div class="SearchButton">
             <button class="market_search_advanced_button" id="reloadScan" disabled>🗘</button>
-            <button class="market_search_advanced_button" id="runSearchScan" disabled>Run Scan</button>
-            <button class="market_search_advanced_button" id="runLoadOrder" disabled>Run Load</button>
+            <button class="market_search_advanced_button" id="runSearchScan" disabled>${getLocalizeText("runScanInSearchListButton","Scan")}</button>
+            <button class="market_search_advanced_button" id="runLoadOrder" disabled>${getLocalizeText("runLoadOrderInSearchListButton","Loading")}</button>
             </div>
 
             <div class="selectBlock">
             <div class="multiselect">
                 <div class="selectBox" id="selectPage">
                     <select class="selectLang" id="selectOptionVal" style="color: rgb(255, 255, 255);">
-                        <option>Pages</option>
+                        <option>${getLocalizeText("selectPageCheckboxes","Pages")}</option>
                     </select>
                     <div class="overSelect"></div>
                 </div>
@@ -676,7 +674,7 @@ function itemOrderChange(item_description, myListingBuyUpdateDom, myNextBuyPrice
     let { item_id } = item_description;
     let myListingBuyUpdateHTML = `
     <span class="market_search_sidebar_contents change_price_search  market_table_value change_price_block order_block_${item_id}"
-    style ="display: block"
+    style ="display: block; height: 50px;"
     >
         <span id="myItemRealBuyPrice${item_id}">${myNextBuyPrice.nextPriceWithoutFee}</span>
         <span id="myItemNextBuyPrice${item_id}">${myNextBuyPrice.myNextPrice}</span>
@@ -684,7 +682,7 @@ function itemOrderChange(item_description, myListingBuyUpdateDom, myNextBuyPrice
         <input type="number" id="myItemQuality${item_id}" class="change_price_input">
         <button id="cancelBuyOrder_${item_id}" class = "market_searchedForTerm"> ⦸ </button>
         <button id="createBuyOrder_${item_id}" class = "market_searchedForTerm"> ⨭ </button>
-        <button id="showHistory_${item_id}" class = "market_searchedForTerm"> show history </button>
+        <button id="showHistory_${item_id}" class = "market_searchedForTerm"> ${getLocalizeText("showHistoryButton", "Show history")} </button>
         <div class ="orderMessageBlock">
         <div id="responceServerRequestBuyOrder_${item_id}"></div>
         </div>

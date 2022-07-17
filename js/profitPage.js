@@ -93,20 +93,20 @@ function displayProfitableBlock(itemDescriptionDiv, itemProfit, countSell, count
         let itemProfitInfo = `
         <div class="displayProfitable">
             <div class="profitableElement">
-                <label class="help" title="${chrome.i18n.getMessage("profitAtTheMomentDescription")}">⬆</label>
+                <label class="help" title="${getLocalizeText("profitAtTheMomentDescription", "Profit now:")}">⬆</label>
                 <span> ${actualProfit}</span>
             </div>
             <div class="profitableElement">
-                <label class="help" title="${chrome.i18n.getMessage("coefficientPriceAtTheMomentDescription")}">⬆%</label>
+                <label class="help" title="${getLocalizeText("coefficientPriceAtTheMomentDescription","Required profit:")}">⬆%</label>
                 <span>${coefPrice}</span>
             </div>
             <div class="profitableElement">
-                <label class="help" title="${chrome.i18n.getMessage("coefficientPriceAtTheMomentDescription")}">🗓7</label>
-                <span>${countSellSevenDays}</span>
+                <label class="help" title="${getLocalizeText("salesInOneDay","Sold out in 1 days:")}">🗓1</label>
+                <span>${countSell}</span>
             </div>
             <div class="profitableElement">
-                <label class="help" title="${chrome.i18n.getMessage("coefficientPriceAtTheMomentDescription")}">🗓1</label>
-                <span>${countSell}</span>
+                <label class="help" title="${getLocalizeText("salesInSevenDays", "Sold out in 7 days:")}">🗓7</label>
+                <span>${countSellSevenDays}</span>
             </div>
         </div>
         `;
@@ -124,8 +124,8 @@ function itemOrderChange(myListingBuyUpdateDom, item_description, myNextBuyPrice
     
     let myListingBuyUpdateHTML = `
     <span class="change_price_search  market_table_value change_price_block order_block_${item_id} createByOrderBlock">
-        <span id="myItemRealBuyPrice${item_id}" title="${chrome.i18n.getMessage("priceWithoutCommissionDescription")}">${myNextBuyPrice.nextPriceWithoutFee}</span>
-        <span id="myItemNextBuyPrice${item_id}">${myNextBuyPrice.myNextPrice}</span>
+        <span id="myItemRealBuyPrice${item_id}" title="${getLocalizeText("priceWithoutCommissionDescription","Price without commission:")}">${myNextBuyPrice.nextPriceWithoutFee}</span>
+        <span id="myItemNextBuyPrice${item_id}" title="${getLocalizeText("NextBuyOrderPricenDescription","The following price of the request to buy:")}">${myNextBuyPrice.myNextPrice}</span>
         <input type="number" step="0.01" id="myItemBuyPrice${item_id}" class="change_price_input">
         <input type="number" id="myItemQuality${item_id}" class="change_price_input">
         <button id="cancelBuyOrder_${item_id}" class = "market_searchedForTerm"> ⦸ </button>

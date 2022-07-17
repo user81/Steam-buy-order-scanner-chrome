@@ -37,8 +37,9 @@ body {
     position: relative;
 }
 
-.market_listing_my_orders {
-    width: 150px;
+.market_listing_my_orders,
+.market_listing_their_price {
+    width: 150px !important;
     text-align: center;
 }
 
@@ -61,7 +62,7 @@ body {
 
 #runSearchScan,
 #runLoadOrder {
-    width: 80px;
+    width: 150px;
 }
 
 #reloadScan {

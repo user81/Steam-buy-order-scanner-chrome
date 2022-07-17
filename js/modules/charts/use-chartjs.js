@@ -16,16 +16,16 @@ function historyChart(divItemBlock, item_id, className = "") {
 function historyChartNavigation(divItemBlock, item_id) {
   let historyChartHTML = `   
     <div class="navigation-chart">
-      <button class="market_searchedForTerm" id="resetChart_${item_id}">reset</button>
-      <button class="market_searchedForTerm" id="forAllTime_${item_id}">All Time</button>
+      <button class="market_searchedForTerm" id="resetChart_${item_id}">${getLocalizeText("resetChartsHistoryButton","Reset")}</button>
+      <button class="market_searchedForTerm" id="forAllTime_${item_id}">${getLocalizeText("allTimeHistoryButton","All time")}</button>
       <button class="market_searchedForTerm" id="lastThirtyDays_${item_id}">30</button>
       <button class="market_searchedForTerm" id="lastsevenDays_${item_id}">7</button>
       <button class="market_searchedForTerm" id="lastDays_${item_id}">1</button>
     </div>
 
     <div class="navigation-chart">
-      <input name="tupeHistory_${item_id}" type="radio" value="forDay" >For Day
-      <input name="tupeHistory_${item_id}" type="radio" value="allTime" checked>All Time
+      <input name="tupeHistory_${item_id}" type="radio" value="forDay" title="${getLocalizeText("countOfSalesPerDayDescription","Max value, total sold:")}">${getLocalizeText("countOfSalesPerDay","Per day")}
+      <input name="tupeHistory_${item_id}" type="radio" value="allTime" title="${getLocalizeText("detailedSalesHistoryDescription","Hourly history:")}" checked> ${getLocalizeText("detailedSalesHistory","Detailed history")}
     </div>`;
   divItemBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(historyChartHTML));
 }
