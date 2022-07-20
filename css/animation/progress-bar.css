@@ -15,7 +15,14 @@
   position: absolute;
   width: 0%;
   height: 20px;
-  background-color: rgb(55 61 48 / 72%);
+
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(195, 180, 80, 0.4),
+    rgba(195, 180, 80, 0.4) 10px,
+    rgba(55, 61, 48, 0.4) 10px,
+    rgba(55, 61, 48, 0.4) 20px
+  );
 }
 
 .myBarsContent {

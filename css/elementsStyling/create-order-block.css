@@ -20,6 +20,7 @@ padding: 0px 3px;}
 }
 
 .change_price_input {
+    width: 60px;
     margin-top: 20px;
     height: 34px;
     margin: 8px 10px 10px 5px;

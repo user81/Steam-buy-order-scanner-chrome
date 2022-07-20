@@ -51,7 +51,7 @@ function searchHeadersNames() {
 
     for (const key in headersNames) {
         let hederNamesHtml = `
-    <div class="${headersNames[key].classSorttype} market_my_listing_${headersNames[key].name.toLowerCase()}" data-sorttype="${headersNames[key].dataSorttype}">
+    <div class="${headersNames[key].classSorttype} market_my_listing_${key.toLowerCase()}" data-sorttype="${headersNames[key].dataSorttype}">
     ${getLocalizeText("ItemListTable" + key,headersNames[key].name)}
     </div>
     `;
@@ -71,13 +71,12 @@ chrome.storage.local.get([
 
     if (data.runSearch) {
         sessionId = SessionIdVal();
-
         displaySearchRunScan(data.coefficient);
-        getPageSizeInSearch(5, data.quantity, data.coefficient, data.selectLang, data.scanIntervalSET, data.errorPauseSET, SessionIdVal());
+        let showAlertOnPopState = () => window.history.state == null ? undefined : getPageSizeInSearch(5, data.quantity, data.coefficient, data.selectLang, data.scanIntervalSET, data.errorPauseSET, SessionIdVal());
         if (window.history && window.history.pushState) {
-            window.onpopstate = event => getPageSizeInSearch(5, data.quantity, data.coefficient, data.selectLang, data.scanIntervalSET, data.errorPauseSET, SessionIdVal());
+            window.onpopstate = () => showAlertOnPopState();
+            window.onload = getPageSizeInSearch(5, data.quantity, data.coefficient, data.selectLang, data.scanIntervalSET, data.errorPauseSET, SessionIdVal());
         }
-
     }
 });
 
@@ -374,7 +373,7 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
                         let blockNames = ["Buy_tab", "Sell_tab"];
                         for (const key in blockNames) {
                             countBlock = marketItems[index].getElementsByClassName(" market_listing_price_listings_block")[0];
-                            let myItemBlocksHTML = `<div class="market_listing_right_cell market_listing_my_price market_my_listing_${blockNames[key].toLowerCase()}"></div>`;
+                            let myItemBlocksHTML = `<div class="market_listing_right_cell market_listing_my_price market_my_listing_${blockNames[key].toLowerCase()}  market_my_card"></div>`;
                             countBlock.insertAdjacentHTML('afterend', DOMPurify.sanitize(myItemBlocksHTML));
                         }
 
@@ -418,8 +417,8 @@ async function getPageSizeInSearch(CountRequesrs, quantity, coefficient, selectL
                             /* myRealBuyPrice = NextPrice(priceJSON.highest_buy_order, "real"); */
 
                             if (asset_description) {
-                                existMyBuyOrder({ item_id, asset_description }, marketItems[index], orderListArr);
                                 await displayProfitable(marketItems[index], priceJSON, priceHistory, { item_id, asset_description }, myNextBuyPrice, quantity, { CountRequesrs, quantity, coefficient, selectLang, scanIntervalSET, errorPauseSET });
+                                existMyBuyOrder({ item_id, asset_description }, marketItems[index], orderListArr);
                             }
 
                         }
@@ -463,13 +462,13 @@ function htmlItemList(marketSeachInfoNorender) {
                     id="result_0_image">
                   <div class="market_listing_price_listings_block">
                     <div class="market_listing_right_cell market_listing_num_listings">
-                      <span class="market_table_value">
-                        <span data-qty="${itemJson.sell_listings}" class="market_listing_num_listings_qty">${itemJson.sell_listings}</span>
+                      <span class="market_table_value market_listing_display_profitable">
+                        
                       </span>
                     </div>
                     <div class="market_listing_right_cell market_listing_their_price">
                       <span class="market_table_value normal_price">
-                        От<br>
+                      <span data-qty="${itemJson.sell_listings}" class="market_listing_num_listings_qty">${itemJson.sell_listings}</span>
                         <span data-currency="1" data-price="${itemJson.sell_price}" class="normal_price">${itemJson.sale_price_text}</span>
                       </span>
                         
@@ -540,10 +539,12 @@ function existMyBuyOrder(item_description, divItemBlock, orderListArr) {
 
             if (appid !== null && appid !== undefined && market_hash_name) {
                 let itemInfo = orderListArr.filter(item => item.hash_name === market_hash_name && item.appid === appid)[0];
-
+                let buyOrderCountArr=[0, 0];
                 if (itemInfo) {
                     if (Object.entries(itemInfo).length === 8) {
-                        divItemBlock.style.borderLeft = "10px solid #136661";
+                        let buyOrderCount = document.getElementsByClassName(`market_my_buy_order${item_id}`)[0];
+                        buyOrderCountArr = [itemInfo.quantity, itemInfo.quantity_remaining];
+                        buyOrderCount.textContent =`${buyOrderCountArr[0]} / ${buyOrderCountArr[1]}`;
                     }
                 }
             }
@@ -553,8 +554,6 @@ function existMyBuyOrder(item_description, divItemBlock, orderListArr) {
 
 /**
  * Выводит подробную информацию о предмете в конкретный элемент dom
- * MarketSells() // продажи за 1 7 дней
- * marketPrifit() // выводит прибыль
  * realPrice() // цена без комиссии
  * listingSellTab() // таблица продаж
  * listingBuyTab() // таблица покупок
@@ -572,18 +571,14 @@ async function displayProfitable(divItemBlock, priceJSON, priceHistory, item_des
     let { item_id } = item_description;
     let pricesProfit = listProfitCalculation(priceJSON, extensionSetings.coefficient);
     let spanPriceBlock = divItemBlock.getElementsByClassName("normal_price")[0];
-    let spanCountBlock = divItemBlock.getElementsByClassName("market_listing_num_listings_qty")[0];
+    let displayProfitable = divItemBlock.getElementsByClassName("market_listing_display_profitable")[0];
+    let imgIcon = divItemBlock.getElementsByClassName("market_listing_item_img")[0];
 
-    DomRemove(spanPriceBlock.getElementsByClassName("market_sells")[0]);
-    MarketSells(spanPriceBlock, priceHistory);
-
-    DomRemove(spanCountBlock.getElementsByClassName("market_prifit")[0]);
-    marketPrifit(spanCountBlock, pricesProfit);
-
-    DomRemove(spanPriceBlock.getElementsByClassName("normal_price")[0]);
+    DomRemove(spanPriceBlock.getElementsByClassName("real_price")[0]);
     realPrice(spanPriceBlock, pricesProfit);
 
     DomRemove(divItemBlock.getElementsByClassName("market_table_price_json_sell")[0]);
+    console.log(divItemBlock.getElementsByClassName("market_table_price_json_sell")[0]);
     listingSellTab(divItemBlock, priceJSON);
 
     DomRemove(divItemBlock.getElementsByClassName("market_table_price_json_buy")[0]);
@@ -591,131 +586,20 @@ async function displayProfitable(divItemBlock, priceJSON, priceHistory, item_des
 
     let itemPriceHistory = priceHistory.historyPriceJSON.prices;
     DomRemove(document.getElementsByClassName(`order_block_${item_id}`)[0]);
-    itemOrderChange(item_description, divItemBlock, myNextBuyPrice, quantity, extensionSetings, priceJSON, itemPriceHistory, setSearchColor(pricesProfit), sessionId);
+    itemOrderChange(item_description, divItemBlock, myNextBuyPrice, quantity, extensionSetings, priceJSON, itemPriceHistory, sessionId);
+    
+    DomRemove(document.getElementsByClassName(`market_my_card_${item_id}`)[0]);
+    displayProfitableBlock(displayProfitable, pricesProfit, priceHistory, item_id);
+
+    DomRemove(document.getElementsByClassName(`market_my_buy_order${item_id}`)[0]);
+    displayDuyOrderBlock(imgIcon, item_id);
+
+    let orderBlockDom = document.getElementsByClassName(`order_block_${item_id}`);
+    Array.prototype.map.call(orderBlockDom, (currentDom) => currentDom.style.backgroundColor = setSearchColor(pricesProfit));
 
     divItemBlock.style.backgroundColor = setSearchColor(pricesProfit);
     divItemBlock.dataset.scanned = "true";
 }
-
-/**
- * История продаж за 1 и за 7 дней
- * @param {HTMLElement} spanPriceBlock // Dom элемент карточки предмета который мы будем изменять
- * @param {Object} priceHistory // история продаж и Json данные истории цен
- */
-function MarketSells(spanPriceBlock, priceHistory) {
-    let sellsHistoryHTML = `
-    <div class ="market_sells">
-        <span class="market_listing_num_listings_qty">1d sell: ${priceHistory.countSell.toLocaleString()}</span>
-        <span class="market_listing_num_listings_qty">7d sell: ${priceHistory.countSellSevenDays.toLocaleString()}</span>
-    </div>`;
-
-    spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(sellsHistoryHTML));
-}
-
-/**
- * Отображение прибыли
- * @param {HTMLElement} spanCountBlock // Dom элемент карточки предмета который мы будем изменять
- * @param {Object} pricesProfit // прибыль {actualProfit: "...." - прибыль в данный момент, coefPrice: "...." - прибыль для коэфицента, realPrice: "...." цена без комисии}
- */
-function marketPrifit(spanCountBlock, pricesProfit) {
-    let ProfitItemHTML = `
-    <div class = "market_prifit">
-        <span class="market_listing_num_listings_qty">K. Profit: ${pricesProfit.coefPrice}</span>
-        <span class="market_listing_num_listings_qty">Profit: ${pricesProfit.actualProfit}</span>
-    </div>`;
-    spanCountBlock.insertAdjacentHTML('afterbegin', DOMPurify.sanitize(ProfitItemHTML));
-}
-
-/**
- * Цена без комиссии
- * @param {HTMLElement} spanCountBlock // Dom элемент карточки предмета который мы будем изменять
- * @param {Object} pricesProfit // прибыль {actualProfit: "...." - прибыль в данный момент, coefPrice: "...." - прибыль для коэфицента, realPrice: "...." цена без комисии}
- */
-function realPrice(spanPriceBlock, pricesProfit) {
-    let realPriceHTML = `<span class="normal_price">(${pricesProfit.realPrice})</span>`;
-    spanPriceBlock.insertAdjacentHTML('beforeend', DOMPurify.sanitize(realPriceHTML));
-}
-
-/**
- * Таблица продаж
-* @param {HTMLElement} spanCountBlock // Dom элемент карточки предмета который мы будем изменять
-* @param {Object} priceJSON // таблица цен
- */
-function listingSellTab(divItemBlock, priceJSON) {
-    let myListingSellTabHTML = `<span class="market_table_value market_table_price_json_sell">${priceJSON.sell_order_table}</span>`;
-    let listingSell = divItemBlock.getElementsByClassName("market_my_listing_sell_tab")[0];
-    listingSell.insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingSellTabHTML));
-}
-
-/**
- * Таблица покупок
-* @param {HTMLElement} spanCountBlock // Dom элемент карточки предмета который мы будем изменять
-* @param {Object} priceJSON // таблица цен
- */
-function listingBuyTab(divItemBlock, priceJSON) {
-    let myListingBuyTabHTML = `<span class="market_table_value market_table_price_json_buy">${priceJSON.buy_order_table}</span>`;
-    divItemBlock.getElementsByClassName("market_my_listing_buy_tab")[0].insertAdjacentHTML('beforeend', DOMPurify.sanitize(myListingBuyTabHTML));
-}
-
-/**
- * Изменение ордера и вывод историии
- * @param {Object} item_description // данные предмета {item_id - уникальный идентификатор, asset_description - JSON данные предмета}
- * @param {HTMLElement} myListingBuyUpdateDom // Dom элемент карточки предмета перед которы мы будем добавлять этот блок
- * @param {Object} myNextBuyPrice // следующая цена и цена без комисии
- * @param {Number} quantityWant // количество по умолчанию для создания ордера на покупку
- * @param {object} extensionSetings // обект настроек для запроса к серверу
- * @param {Object} priceJSON // таблица цен
- * @param {Array} itemPriceHistory массив истории цен
- * @param {Text} color цвет заливки блока
- * @param {Text} sessionId текущая сесия страницы
- */
-function itemOrderChange(item_description, myListingBuyUpdateDom, myNextBuyPrice, quantityWant, extensionSetings, priceJSON, itemPriceHistory, color, sessionId) {
-
-    let { item_id } = item_description;
-    let myListingBuyUpdateHTML = `
-    <span class="market_search_sidebar_contents change_price_search  market_table_value change_price_block order_block_${item_id}"
-    style ="display: block; height: 50px;"
-    >
-        <span id="myItemRealBuyPrice${item_id}">${myNextBuyPrice.nextPriceWithoutFee}</span>
-        <span id="myItemNextBuyPrice${item_id}">${myNextBuyPrice.myNextPrice}</span>
-        <input type="number" step="0.01" id="myItemBuyPrice${item_id}" class="change_price_input">
-        <input type="number" id="myItemQuality${item_id}" class="change_price_input">
-        <button id="cancelBuyOrder_${item_id}" class = "market_searchedForTerm"> ⦸ </button>
-        <button id="createBuyOrder_${item_id}" class = "market_searchedForTerm"> ⨭ </button>
-        <button id="showHistory_${item_id}" class = "market_searchedForTerm"> ${getLocalizeText("showHistoryButton", "Show history")} </button>
-        <div class ="orderMessageBlock">
-        <div id="responceServerRequestBuyOrder_${item_id}"></div>
-        </div>
-        
-    </span>`;
-    myListingBuyUpdateDom.insertAdjacentHTML('beforebegin', DOMPurify.sanitize(myListingBuyUpdateHTML));
-    let buttonCancelBuy = document.getElementById(`cancelBuyOrder_${item_id}`);
-    let buttonCreateBuy = document.getElementById(`createBuyOrder_${item_id}`);
-    let buttonshowHistory = document.getElementById(`showHistory_${item_id}`);
-    let myNextItemBuyPrice = document.getElementById(`myItemBuyPrice${item_id}`);
-    let myItemQuality = document.getElementById(`myItemQuality${item_id}`);
-    let myItemRealBuyPrice = document.getElementById(`myItemRealBuyPrice${item_id}`);
-    let myItemNextBuyPrice = document.getElementById(`myItemNextBuyPrice${item_id}`);
-    myNextItemBuyPrice.value = myNextBuyPrice.myNextPrice;
-    myItemQuality.value = quantityWant;
-    myNextItemBuyPrice.onchange = () => {
-        myItemRealBuyPrice.textContent = myNextItemBuyPrice.value ? NextPrice((myNextItemBuyPrice.value * 100).toFixed(), "real").nextPriceWithoutFee : '';
-        myItemNextBuyPrice.textContent = myNextItemBuyPrice.value ? NextPrice((myNextItemBuyPrice.value * 100).toFixed(), "real").myNextPrice : '';
-    };
-    buttonCreateBuy.addEventListener("click", (event) => { createBuyOrder(extensionSetings, sessionId, item_description); });
-    buttonshowHistory.addEventListener("click", (event) => {
-        if (itemPriceHistory !== undefined && itemPriceHistory.length > 1) {
-            DomRemove(document.getElementById(`chart_${item_id}`));
-            historyChart(myListingBuyUpdateDom.getElementsByClassName("market_listing_item_name_block")[0], item_id, "chart-search");
-            showHistoryChart(itemPriceHistory, item_id);
-        }
-    });
-
-    buttonCancelBuy.addEventListener("click", (event) => { cancelBuyOrder(extensionSetings, sessionId, item_description); });
-    let orderBlockDom = document.getElementsByClassName(`order_block_${item_id}`);
-    Array.prototype.map.call(orderBlockDom, (currentDom) => currentDom.style.backgroundColor = color);
-}
-
 
 function setSearchColor(ProfitableList) {
     if (+ProfitableList.actualProfit > +ProfitableList.coefPrice) return "#09553c";
@@ -745,8 +629,8 @@ async function cancelBuyOrder(extensionSetings, sessionId, item_description) {
                             let params = `sessionid=${sessionId}&buy_orderid=${orderId}`;
                             let url = "https://steamcommunity.com/market/cancelbuyorder/";
                             let serverResponse = await globalThis.httpPostErrorPause(url, params);
-                            let steamItemBlock = document.getElementsByClassName(`order_block_${item_id}`)[0].nextSibling;
-                            steamItemBlock.style.borderLeft = (serverResponse.success === 1) ? "none" : "10px solid #136661";
+                            let buyOrderCount = document.getElementsByClassName(`market_my_buy_order${item_id}`)[0];
+                            buyOrderCount.textContent =`0 / 0`;
                             htmlResponce.textContent = (serverResponse.success === 1) ? "Done cancel" : "Error cancel"; /* {success: 1} */
                         }
                     } else {
@@ -793,7 +677,6 @@ async function createBuyOrder(extensionSetings, sessionId, item_description) {
                 if (serverResponse.success === 1) {
                     htmlResponce.textContent = "Order created";
                     let steamItemBlock = document.getElementsByClassName(`order_block_${item_id}`)[0].nextSibling;
-                    steamItemBlock.style.borderLeft = "10px solid #136661";
                     //<div class="market_listing_row market_recent_listing_row" id="mybuyorder_4157921926" style="background-color: rgb(96, 55, 62);"></div>
                     myNextBuyPrice = NextPrice((inputPrice * 100).toFixed(), "real");
                     await new Promise(done => timer = setTimeout(() => done(), +extensionSetings.scanIntervalSET + Math.floor(Math.random() * 500)));
@@ -803,6 +686,8 @@ async function createBuyOrder(extensionSetings, sessionId, item_description) {
                     let priceHistory = await getItemHistory(appid, market_hash_name, extensionSetings.selectLang);
 
                     displayProfitable(steamItemBlock, priceJSON, priceHistory, item_description, myNextBuyPrice, itemCount, extensionSetings);
+                    let buyOrderCount = document.getElementsByClassName(`market_my_buy_order${item_id}`)[0];
+                    buyOrderCount.textContent =`${itemCount} / ${itemCount}`;
                 }
                 htmlResponce.textContent = (serverResponse.success === 29) ? serverResponse.message : "Eroor"; // message: "У вас уже есть заказ на этот предмет. Вы должны либо ." success: 29{buy_orderid: "4562009753" success: 1}
             }

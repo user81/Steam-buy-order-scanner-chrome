@@ -1,0 +1,26 @@
+.market_my_listing_buy_tab,
+.market_my_listing_sell_tab {
+  width: 170px;
+  margin: 0px 8px;
+}
+
+/* таблица цен */
+.market_commodity_orders_table {
+  display: inline-flex !important;
+  font-size: 12px;
+}
+
+.market_commodity_orders_table th {
+  margin: 0;
+  text-align: center;
+  min-width: none !important;
+  font-size: 12px !important;
+  font-weight: normal;
+}
+
+.market_commodity_orders_table td {
+  min-width: min-content !important;
+  text-align: center;
+}
+
+

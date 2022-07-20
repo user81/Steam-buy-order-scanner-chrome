@@ -119,10 +119,13 @@
         "js/modules/animation/progress-bar.js",
         "js/modules/animation/checkbox-change-color-text.js",
         "js/modules/profitCalculation.js",
+        "js/modules/DomBlocks/changeDomFunctions.js",
         "js/marketSearch.js"
       ],
       "css": [
         "css/charts/charts.css",
+        "css/global/global-stule.css",
+        "css/elementsStyling/mini-history-block.css",
         "css/market-search.css",
         "css/animation/progress-bar.css",
         "css/animation/checkbox-change-color-text.css",

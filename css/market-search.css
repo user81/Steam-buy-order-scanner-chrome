@@ -210,29 +210,8 @@ th:first-child+th {
     text-align: center !important;
 }
 
-/* таблица цен */
-.market_commodity_orders_table {
-    display: inline-flex !important;
-    font-size: 12px;
-}
-
-.market_commodity_orders_table th {
-    margin: 0;
-    text-align: center;
-    min-width: none !important;
-    font-size: 12px !important;
-    font-weight: normal;
-}
-
-.market_commodity_orders_table td {
-    min-width: min-content !important;
-    text-align: center;
-}
-
-.market_listing_their_price>.market_table_value .normal_price,
-.market_listing_their_price>.market_table_value {
-    color: white;
-    display: block !important;
+.market_my_card{
+    margin: 10px 8px;
 }
 
 /* блок товара размер */

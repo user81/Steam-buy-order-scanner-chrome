@@ -1,0 +1,25 @@
+.market_my_card,
+div [class^="market_my_card"] {
+  padding: 5px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  background: #646d56;
+  color: #fff;
+  box-shadow: inset rgb(43 49 39) 0px 6px 29px 1px;
+}
+
+.profitableElement {
+  padding: 2px;
+}
+
+ div [class^="market_my_buy_order"]{
+  width: auto;
+  display: inline;
+  left: 1px;
+  background-color: #716d3f;
+  padding: 5px;
+  color: #fff;
+  position: absolute;
+
+} 
